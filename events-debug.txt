@@ -1,0 +1,61 @@
+Events robot debug, 2026-11-15
+page bytes: 200920
+section markers: ['id="upcoming-adult-event"', 'id="upcoming-special-event"']
+event links: 22
+events kept: 6
+--- parsed ---
+{"title": "Grown Up Field Trip: Clue", "url": "https://www.mdsci.org/events/grown-up-field-trip-clue/", "type": "Special", "dates": "Nov. 20 , 7", "times": "10pm", "first": "2026-11-07", "last": "2026-11-20"}
+{"title": "Glass Art: Sea Glass Tree", "url": "https://www.mdsci.org/events/glass-art-sea-glass-tree/", "type": "Special", "dates": "Dec. 13 , 1", "times": "4pm", "first": "2026-12-01", "last": "2026-12-13"}
+{"title": "Music Under the Dome: Pink Floyd", "url": "https://www.mdsci.org/events/music-under-the-dome-pink-floyd/", "type": "Special", "dates": "Dec. 11 , 7", "times": "10pm", "first": "2026-12-07", "last": "2026-12-11"}
+{"title": "Toddler & Me: Cleaning Helpers", "url": "https://www.mdsci.org/events/toddlerandme-cleaning-helpers/", "type": "Special", "dates": "Dec. 13 , 10", "times": "15am-12:15pm", "first": "2026-12-10", "last": "2026-12-13"}
+{"title": "Snow Days", "url": "https://www.mdsci.org/events/snow-days/", "type": "Special", "dates": "Dec. 24, Dec. 26, Dec. 27, Dec. 28", "times": "", "first": "2026-12-24", "last": "2026-12-28"}
+{"title": "Liquid Nitrogen Frozen Cocoa", "url": "https://www.mdsci.org/events/frozen-cocoa/", "type": "Special", "dates": "Dec. 27, Dec. 28", "times": "12pm and 1pm", "first": "2026-12-27", "last": "2026-12-28"}
+--- what the robot read (page text order, first 120 pieces from the first event link) ---
+ev | grown-up-field-trip-clue | Grown Up Field Trip: Clue
+txt | Nov. 20 , 7-10pm Join Us For A Special Event
+ev | music-under-the-dome-pink-floyd | Music Under the Dome: Pink Floyd
+txt | Dec. 11 , 7-10pm Join Us For A Special Event
+ev | toddlerandme-cleaning-helpers | Toddler & Me: Cleaning Helpers
+txt | Dec. 13 , 10:15am-12:15pm Join Us For A Special Event
+ev | glass-art-sea-glass-tree | Glass Art: Sea Glass Tree
+txt | Dec. 13 , 1-4pm Join Us For A Special Event
+ev | snow-days | Snow Days
+txt | Dec. 24 Join Us For A Special Event
+ev | snow-days | Snow Days
+txt | Dec. 26 Join Us For A Special Event
+ev | snow-days | Snow Days
+txt | Dec. 27 Join Us For A Special Event
+ev | frozen-cocoa | Liquid Nitrogen Frozen Cocoa
+txt | Dec. 27 , 12pm Next Previous Daily Programming Loading No Daily Programming Found Planetarium Showings Loading No Planetarium Showings Found IMAX Showings Addit
+sec | Adult
+txt | id="upcoming-adult-event" class="event-carousel-section event-carousel-section--adult-event alignwide"> Adult Events Cheers To Staying Curious Next Event Previo
+ev | grown-up-field-trip-clue | Grown Up Field Trip: Clue
+txt | Nov. 20 , 7-10pm
+ev | music-under-the-dome-pink-floyd | Music Under the Dome: Pink Floyd
+txt | Dec. 11 , 7-10pm <section
+sec | Special
+txt | id="upcoming-special-event" class="event-carousel-section event-carousel-section--special-event alignwide" style="--carousel-bkgd:#FF9C27; --carousel-shadow:#E7
+ev | grown-up-field-trip-clue | Grown Up Field Trip: Clue
+txt | Nov. 20 , 7-10pm
+ev | music-under-the-dome-pink-floyd | Music Under the Dome: Pink Floyd
+txt | Dec. 11 , 7-10pm
+ev | toddlerandme-cleaning-helpers | Toddler & Me: Cleaning Helpers
+txt | Dec. 13 , 10:15am-12:15pm
+ev | glass-art-sea-glass-tree | Glass Art: Sea Glass Tree
+txt | Dec. 13 , 1-4pm
+ev | snow-days | Snow Days
+txt | Dec. 24
+ev | snow-days | Snow Days
+txt | Dec. 26
+ev | snow-days | Snow Days
+txt | Dec. 27
+ev | frozen-cocoa | Liquid Nitrogen Frozen Cocoa
+txt | Dec. 27 , 12pm
+ev | frozen-cocoa | Liquid Nitrogen Frozen Cocoa
+txt | Dec. 27 , 1pm
+ev | snow-days | Snow Days
+txt | Dec. 28
+ev | frozen-cocoa | Liquid Nitrogen Frozen Cocoa
+txt | Dec. 28 , 12pm
+ev | frozen-cocoa | Liquid Nitrogen Frozen Cocoa
+txt | Dec. 28 , 1pm Stay Connected & Up To Date Signup For Our Emails Follow Us Facebook YouTube Instagram TikTok Maryland Science Center Conveniently located at Balt
