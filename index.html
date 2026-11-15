@@ -268,7 +268,7 @@ input[type=file]{max-width:100%;min-width:0;width:100%}
 main{padding-bottom:7.5rem}
 nav.tabs{display:flex;align-items:center;gap:.7rem;max-width:none;padding:.45rem .8rem}
 .menu-btn{display:inline-flex;align-items:center;gap:.45rem;min-height:44px;padding:0 1rem;border-radius:99px;font-weight:800;font-size:.9rem;font-family:inherit;color:#fff;background:var(--grad);border:0;box-shadow:0 4px 12px -2px rgba(0,0,0,.3)}
-.menu-btn .mb-ico{font-size:1.2rem;line-height:1}
+.menu-btn .mb-ico{font-size:.95rem;line-height:1}
 .menu-cur{font-weight:800;font-size:.95rem;color:var(--ink);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #menuBack{position:fixed;inset:0;z-index:300;background:rgba(15,8,35,.62);backdrop-filter:blur(6px);opacity:0;visibility:hidden;transition:opacity .3s ease,visibility 0s linear .3s}
 #menuPanel{position:fixed;top:0;bottom:0;right:0;z-index:310;width:min(88vw,380px);display:flex;flex-direction:column;background:#fff;color:var(--ink);border-left:2px solid var(--p);border-radius:26px 0 0 26px;box-shadow:-16px 0 50px color-mix(in srgb,var(--p) 40%,transparent);transform:translateX(104%);visibility:hidden;transition:transform .38s cubic-bezier(.22,.9,.3,1),visibility 0s linear .38s}
@@ -301,11 +301,12 @@ body.glass .btn.alt,body.glass .btn.red,body.glass .qh{background-color:var(--so
 .btn.gold{background:linear-gradient(180deg,rgba(255,255,255,.45),rgba(255,255,255,0) 50%,rgba(0,0,0,.12)),var(--gold);text-shadow:none}
 .btn.alt,.btn.red{background:linear-gradient(180deg,rgba(255,255,255,.75),rgba(255,255,255,.08) 55%,rgba(0,0,0,.06)),var(--surface);box-shadow:inset 0 1.5px 0 rgba(255,255,255,.9),inset 0 -3px 6px rgba(0,0,0,.08),0 6px 12px -6px rgba(0,0,0,.35);text-shadow:none}
 /* menu tab on the right edge, same side the panel slides from */
-.menu-btn{position:fixed;right:0;top:38%;z-index:120;flex-direction:column;justify-content:center;gap:.4rem;width:34px;min-height:104px;padding:.5rem 0;border-radius:14px 0 0 14px;border-right:0;font-size:.8rem;letter-spacing:.06em}
+.menu-btn{position:fixed;right:0;top:46%;z-index:120;flex-direction:column;justify-content:center;gap:.3rem;width:26px;min-height:76px;padding:.4rem 0;border-radius:12px 0 0 12px;border-right:0;font-size:.7rem;letter-spacing:.05em}
 .menu-btn span:last-child{writing-mode:vertical-rl;text-orientation:mixed}
 body.menu-open .menu-btn{visibility:hidden}
 nav.tabs{min-height:0;padding:.25rem .8rem}
-.aplus{margin-left:auto;margin-right:44px;flex:none;min-width:60px;min-height:48px;padding:0 .9rem;border-radius:99px;font-family:inherit;font-weight:900;font-size:1.35rem;line-height:1;color:#fff;background:var(--grad);border:0}
+body:not(.ev-adv) .evadv{display:none!important}
+.aplus{margin:0 34px 0 auto;flex:none;min-width:60px;min-height:48px;padding:0 .9rem;border-radius:99px;font-family:inherit;font-weight:900;font-size:1.35rem;line-height:1;color:#fff;background:var(--grad);border:0}
 .mp-mode{display:flex;align-items:center;flex-wrap:wrap;gap:.4rem;padding:.7rem .9rem 0}
 .mp-mode .pill{min-height:44px;padding:0 1.1rem;font-size:.95rem}
 .mp-mode .small{flex:1 1 100%;color:var(--soft)}
@@ -384,6 +385,7 @@ body[data-edge=era] .card::after,body[data-edge=era] #menuPanel::after{content:"
 <!-- TODAY -->
 <section class="pane on" id="p-today">
  <div class="card c4" id="tourBanner" style="display:none"></div>
+ <div class="card c4" id="todayEv" style="display:none;border-left:5px solid var(--gold)"></div>
  <div class="card c4"><div class="hd"><h2>&#129517; Right now</h2><span class="small" id="nowDay"></span></div><div id="nowBox"></div></div>
 <div class="card mgr" id="setupHint" style="display:none;border-left:5px solid var(--gold)"><b>This app still shows example info.</b> <span class="small">Put in the real team, hours and cash in a few taps.</span> <button class="btn sm" data-a="openSetup" style="margin-left:.4rem">Set up my store</button></div>
 <div class="card" id="mscHrs" style="display:none;border-left:5px solid var(--gold)"><div id="mscHrsMain"></div><div class="small" id="mscHrsSub" style="margin-top:.2rem"></div><div class="row mgr" id="mscHrsBtns" style="margin-top:.4rem"></div></div>
@@ -535,10 +537,12 @@ body[data-edge=era] .card::after,body[data-edge=era] #menuPanel::after{content:"
 <!-- EVENTS -->
 <section class="pane" id="p-events">
  <div class="card c4" id="mscEv" style="display:none;border-left:5px solid var(--gold)"><div class="hd"><h2>&#127963; Coming up at the museum</h2></div><div id="mscEvList"></div><div class="small" id="mscEvSub" style="margin-top:.35rem"></div></div>
- <div class="card c2"><div class="hd"><h2>&#127881; Active Event Profile</h2></div>
+ <div class="card c4" id="evEmpty" style="display:none"><div class="small">No museum events are listed right now. This fills in by itself when the museum posts new ones.</div></div>
+ <div class="row mgr" style="margin:.2rem 0 .9rem"><button class="btn sm alt" type="button" data-a="evAdv" id="evAdvBtn">Show event planning cards</button></div>
+ <div class="card c2 evadv"><div class="hd"><h2>&#127881; Active Event Profile</h2></div>
   <input type="text" id="evTitle" style="font-weight:800;margin-bottom:.5rem" placeholder="Event name">
   <div class="grid" style="grid-template-columns:1fr 1fr;gap:.5rem"><div><label class="l">Hours</label><input type="text" id="evHours"></div><div><label class="l">Floor / zone</label><input type="text" id="evZone"></div></div></div>
- <div class="grid g2">
+ <div class="grid g2 evadv">
   <div class="card"><div class="hd"><h2>&#128336; Event Schedule</h2></div>
    <form class="form f2 mgr" data-f="mile"><div><label class="l">Time</label><input type="time" id="mlTime" required></div><div><label class="l">What</label><input type="text" id="mlText" required></div><div style="grid-column:1/-1"><button class="btn" style="width:100%" type="submit">+ Add</button></div></form>
    <div id="mileList"></div></div>
@@ -956,6 +960,7 @@ function renderHint(){const h=$('setupHint');if(h)h.style.display=hasEx()?'block
 function renderQuick(){$('qPlaces').innerHTML=QP.map(x=>`<button class="pill ${S.mod.place===x?'on':''}" data-a="qPlace" data-v="${x}">${x}</button>`).join('');$('qTypes').innerHTML=QT.map(x=>`<button class="btn sm" data-a="qLog" data-v="${x[0]}">${x[1]} ${x[0]}</button>`).join('')}
 function renderLog(){const l=S.mod.log;if($('hoPreview'))$('hoPreview').textContent=handover();$('logList').innerHTML=l.length?l.slice().reverse().map(g=>`<div class="item ${g.status==='Resolved'?'done':''}"><div class="tt"><span class="tag">${esc(g.type)}</span> <span class="small">${esc(g.time)}${g.place?' • '+esc(g.place):''}</span><br><input type="text" data-lt="${g.id}" value="${esc(g.text)}" placeholder="Add a note (optional)" style="width:100%;margin:.2rem 0"><div style="margin-top:.3rem"><button class="pill ${g.status==='Resolved'?'on':''}" data-a="lgS" data-id="${g.id}">${g.status==='Resolved'?'Resolved ✓':'Open - tap to resolve'}</button></div></div><button class="x" data-a="lgD" data-id="${g.id}">✕</button></div>`).join(''):'<div class="empty">Nothing logged yet.</div>'}
 function renderEvents(){
+ document.body.classList.toggle('ev-adv',!!S.evAdv);{const b=$('evAdvBtn');if(b)b.textContent=S.evAdv?'Hide event planning cards':'Show event planning cards'}
  $('evTitle').value=S.ev.title;$('evHours').value=S.ev.hours;$('evZone').value=S.ev.zone;
  const m=S.ev.miles.slice().sort((a,b)=>t2m(a.time)-t2m(b.time));
  $('mileList').innerHTML=m.length?m.map(x=>`<div class="tl"><div><b>${m12(t2m(x.time))}</b> &nbsp;${tx(x.text)}</div><button class="x mgr" data-a="miD" data-id="${x.id}">✕</button></div>`).join(''):'<div class="empty">No milestones yet.</div>'
@@ -1331,6 +1336,7 @@ function act(a,el){const id=el.dataset.id,v=el.dataset.v,k=el.dataset.k;
  switch(a){
  case'tab':S.tab=v;renderTabs();menuSet(false);scrollTo(0,0);tourBanner();break;
  case'menuOpen':menuSet(true);break;
+ case'evAdv':S.evAdv=!S.evAdv;save();renderEvents();renderMscEv();break;
  case'aplus':{const i=SIZES.indexOf(S.size||'cozy');S.size=SIZES[(i+1)%SIZES.length];renderLook();toast(S.size==='cozy'?'Normal text':'Bigger text');break}
  case'easy':S.easy=(v==='1');if(S.easy&&!EASY.includes(S.tab))S.tab='today';renderTabs();toast(S.easy?'Easy menu is on':'Full menu is on');break;
  case'menuClose':menuSet(false);break;
@@ -1584,7 +1590,7 @@ const TOUR=/*TOUR*/[
 {t:'music',since:6,w:'#trackList',h:"Play Spotify songs",x:"Songs that came from a Spotify file have a play button. Tap it to play. The Spotify Player card has buttons to skip, go back and rewind.",},
 {t:'today',since:7,w:'#aPlus',h:"Bigger text",x:"Tap the big A+ button to make the words bigger. Tap it again for even bigger. At the biggest size it turns into A−, and one tap puts the text back to normal."},
 {t:'today',since:7,w:'#menuBtn',h:"Easy menu",x:"Open the Menu and tap Easy to see only the daily sections. Tap Full any time to see everything again."},
-{t:'events',since:8,w:'#mscEv',h:"Coming up at the museum",x:"Shows the museum's own list of coming events, with dates and times. Tap Use this event to fill in the name and hours of your Active Event Profile. Always check the museum's page before you rely on a date."},
+{t:'events',since:8,w:'#mscEv',h:"Coming up at the museum",x:"Shows the museum's own list of coming events, with dates and times. Tap Details to open the museum's page for that event. When an event is happening today, a line shows on the Today page. Always check the museum's page before you rely on a date."},
 {t:'docs',since:1,h:"Docs",x:"Handover notes and the policy vault. You can also import a Word, Excel, PDF or text file and the app sorts it for you."},
 {t:'dials',since:1,h:"Dials",x:"One-tap phone numbers. Tap a number to call it."},
 {t:'today',k:'e',since:1,h:"That is it!",x:"Tap the Help button any time to replay this tour, hear about one tab, or see what is new. A small ? next to a card title tells you what that card is for."}
@@ -1592,7 +1598,7 @@ const TOUR=/*TOUR*/[
 const HINTS=/*HINTS*/[
 ['Rush Radar',"Shows when IMAX, Planetarium and school groups let out toward the store, so you can see a rush coming."],
 ['Manager Notes',"Write notes for yourself or the team. They are saved on this device."],
-['Coming up',"Events the museum has listed for the next few weeks. Tap Use this event to fill in the name and hours below. Check the museum's page before relying on it."],
+['Coming up',"Events the museum has listed for the next few weeks. Tap Details to open the museum's page. Check the museum's page before relying on a date."],
 ['Menu',"Slide-out list of the sections. Tap a section to go there. Easy shows only the daily ones. Full shows all of them."],
 ['Break Check',"Tells you if now is a good time for a 30-minute break. It watches the exit rushes from the showtimes."],
 ['Team Update',"Builds one message for your team from what is in the app. Add your own line, then copy it or text it. Texting the whole team uses the cell numbers on the Staff tab."],
@@ -1966,7 +1972,7 @@ function renderMscShows(){
   const tips={};S.shows.forEach(x=>{if(x.tip)tips[x.title.replace(EX,'').toLowerCase()]=x.tip});
   S.shows=mscsRows().map(r=>({id:uid(),title:r.title,venue:r.venue,start:r.start,dur:r.dur,tip:tips[r.title.toLowerCase()]||''}));
   save();renderShows();renderDyn();renderMscShows();toast('Show list replaced ('+S.shows.length+' shows)')}}
-function mscShowsTick(){if(mscsKey!==todayISO()+'|'+(MSCS&&MSCS.updated))renderMscShows()}
+function mscShowsTick(){if(mscsKey!==todayISO()+'|'+(MSCS&&MSCS.updated))renderMscShows();if(typeof renderTodayEv==='function')renderTodayEv()}
 async function loadMscShows(){
  try{const r=await fetch('showtimes.json?'+Date.now(),{cache:'no-store'});if(!r.ok)throw 0;const d=await r.json();if(d&&d.days&&d.updated){MSCS=d;try{localStorage.setItem(KEY+'_mscs',JSON.stringify(d))}catch(e){}}}
  catch(e){try{const c=localStorage.getItem(KEY+'_mscs');if(c)MSCS=JSON.parse(c)}catch(x){}}
@@ -1974,15 +1980,23 @@ async function loadMscShows(){
 loadMscShows();
 /* ===== Coming-up events (daily robot -> events.json). Same pattern as the showtimes card. ===== */
 var MSCE=null;
-function renderMscEv(){
- const box=$('mscEv');if(!box)return;
- const iso=todayISO(),ev=((MSCE&&MSCE.events)||[]).filter(e=>e.last>=iso).slice(0,8);
+function renderTodayEv(){
+ const box=$('todayEv');if(!box)return;
+ const iso=todayISO(),ev=((MSCE&&MSCE.events)||[]).filter(e=>e.days?e.days.includes(iso):(e.first<=iso&&iso<=e.last));
  if(!ev.length){box.style.display='none';return}
  box.style.display='block';
- $('mscEvList').innerHTML=ev.map((e,i)=>'<div class="item"><div class="tt"><b>'+esc(e.title)+'</b><div class="small">'+esc(e.dates)+(e.times?' &bull; '+esc(e.times):'')+' &bull; '+esc(e.type)+'</div></div><button class="btn sm mgr" type="button" data-evi="'+i+'">Use this event</button></div>').join('');
+ box.innerHTML='\u{1F389} <b>Today at the museum:</b> '+ev.map(e=>esc(e.title)+(e.times?' ('+esc(e.times)+')':'')).join('; ')+'<div class="small" style="margin-top:.2rem">From mdsci.org. Check before relying.</div>'}
+function renderMscEv(){
+ renderTodayEv();
+ const box=$('mscEv');if(!box)return;
+ const iso=todayISO(),ev=((MSCE&&MSCE.events)||[]).filter(e=>e.last>=iso).slice(0,10);
+ const em=$('evEmpty');if(em)em.style.display=ev.length?'none':'block';
+ if(!ev.length){box.style.display='none';return}
+ box.style.display='block';
+ $('mscEvList').innerHTML=ev.map((e,i)=>'<div class="item"><div class="tt"><b>'+esc(e.title)+'</b><div class="small">'+esc(e.dates)+(e.times?' &bull; '+esc(e.times):'')+' &bull; '+esc(e.type)+'</div></div><div class="row" style="gap:.4rem;flex:none">'+(e.url?'<a class="btn sm alt" style="text-decoration:none" href="'+esc(e.url)+'" target="_blank" rel="noopener" aria-label="Details for '+esc(e.title)+' on the museum website">Details</a>':'')+(S.evAdv?'<button class="btn sm mgr" type="button" data-evi="'+i+'">Use this event</button>':'')+'</div></div>').join('');
  const age=Math.round((new Date(iso)-new Date(MSCE.updated))/864e5);
  const d1=new Date(MSCE.updated+'T12:00:00').toLocaleDateString([],{month:'short',day:'numeric'});
- $('mscEvSub').textContent='Tap Use this event to copy its name and time into the Active Event Profile below. From mdsci.org, updated '+d1+'. Check before relying.'+(age>3?' \u26A0 This is '+age+' days old.':'');
+ $('mscEvSub').textContent=(S.evAdv?'Tap Use this event to copy its name and time into the Active Event Profile below. ':'')+'From mdsci.org, updated '+d1+'. Check before relying.'+(age>3?' \u26A0 This is '+age+' days old.':'');
  box.querySelectorAll('[data-evi]').forEach(b=>b.onclick=()=>{
   if(!b.dataset.arm){b.dataset.arm='1';b.textContent='Tap again to fill in';setTimeout(()=>{if(b.isConnected){b.dataset.arm='';b.textContent='Use this event'}},3500);return}
   const e=ev[+b.dataset.evi];S.ev.title=e.title;S.ev.hours=e.dates+(e.times?' \u00B7 '+e.times:'');save();renderEvents();renderMscEv();try{$('evTitle').scrollIntoView({block:'center',behavior:'smooth'})}catch(x){}toast('Filled in below: '+e.title)})}

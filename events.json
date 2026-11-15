@@ -10,7 +10,10 @@
    "dates": "Nov. 20",
    "times": "7-10pm",
    "first": "2026-11-20",
-   "last": "2026-11-20"
+   "last": "2026-11-20",
+   "days": [
+    "2026-11-20"
+   ]
   },
   {
    "title": "Music Under the Dome: Pink Floyd",
@@ -19,7 +22,10 @@
    "dates": "Dec. 11",
    "times": "7-10pm",
    "first": "2026-12-11",
-   "last": "2026-12-11"
+   "last": "2026-12-11",
+   "days": [
+    "2026-12-11"
+   ]
   },
   {
    "title": "Glass Art: Sea Glass Tree",
@@ -28,7 +34,10 @@
    "dates": "Dec. 13",
    "times": "1-4pm",
    "first": "2026-12-13",
-   "last": "2026-12-13"
+   "last": "2026-12-13",
+   "days": [
+    "2026-12-13"
+   ]
   },
   {
    "title": "Toddler & Me: Cleaning Helpers",
@@ -37,7 +46,10 @@
    "dates": "Dec. 13",
    "times": "10:15am-12:15pm",
    "first": "2026-12-13",
-   "last": "2026-12-13"
+   "last": "2026-12-13",
+   "days": [
+    "2026-12-13"
+   ]
   },
   {
    "title": "Snow Days",
@@ -46,7 +58,13 @@
    "dates": "Dec. 24, 26, 27, 28",
    "times": "",
    "first": "2026-12-24",
-   "last": "2026-12-28"
+   "last": "2026-12-28",
+   "days": [
+    "2026-12-24",
+    "2026-12-26",
+    "2026-12-27",
+    "2026-12-28"
+   ]
   },
   {
    "title": "Liquid Nitrogen Frozen Cocoa",
@@ -55,7 +73,11 @@
    "dates": "Dec. 27, 28",
    "times": "12pm and 1pm",
    "first": "2026-12-27",
-   "last": "2026-12-28"
+   "last": "2026-12-28",
+   "days": [
+    "2026-12-27",
+    "2026-12-28"
+   ]
   }
  ]
 }

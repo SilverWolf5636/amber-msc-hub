@@ -126,7 +126,8 @@ def parse(body, today):
                 seen.add(k); times.append(x)
         rows.append({"title": title, "url": "https://www.mdsci.org/events/%s/" % slug, "type": e["type"],
                      "dates": "; ".join(dates), "times": " and ".join(times[:3]),
-                     "first": dts[0].isoformat(), "last": dts[-1].isoformat()})
+                     "first": dts[0].isoformat(), "last": dts[-1].isoformat(),
+                     "days": [d.isoformat() for d in dts]})
     rows.sort(key=lambda r: (r["first"], r["title"]))
     return rows, problems, toks
 
