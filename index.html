@@ -345,7 +345,7 @@ body[data-edge=era] .card::after,body[data-edge=era] #menuPanel::after{content:"
    <div class="hclock" id="clock">--:--</div>
    <button class="gear mgr" data-a="openSetup">&#128221; Setup</button>
    <button class="gear" data-a="help">&#10067; Help</button>
-   <button class="gear" data-a="openLook">&#9881; My Look</button>
+   <button class="gear" data-a="openLook">&#127912; My Look</button>
    <button class="gear" data-a="mode" id="modeBtn">&#9728;&#65039; Light</button>
   </div>
   <div class="hrow">
@@ -379,6 +379,7 @@ body[data-edge=era] .card::after,body[data-edge=era] #menuPanel::after{content:"
  <div class="mp-head"><div><h2 id="menuTtl">Menu</h2><p>Pick where to go</p></div><button class="mp-close" data-a="menuClose">✕ Close</button></div>
  <div class="mp-mode" role="group" aria-label="How many sections to show"><button class="pill" type="button" id="mEasy" data-a="easy" data-v="1" aria-pressed="false">Easy</button><button class="pill" type="button" id="mFull" data-a="easy" data-v="0" aria-pressed="true">Full</button><span class="small" id="mpNote">Easy shows only the daily sections.</span></div>
  <div class="mp-list" id="tabs" role="group" aria-label="Sections"></div>
+ <div class="mp-list" style="flex:none;padding-top:0"><button class="tab" type="button" data-a="openSettings"><span class="mr-ico" aria-hidden="true">&#9881;</span><span class="mr-t">Settings</span></button></div>
 </div>
 
 <main>
@@ -710,7 +711,7 @@ body[data-edge=era] .card::after,body[data-edge=era] #menuPanel::after{content:"
  <div class="small" style="margin-top:.9rem;color:var(--soft)">Tip: tap the small ? next to a card title to see what that card is for.</div>
 </div></div>
 <div class="modal" id="look"><div class="sheet">
- <div class="hd"><h2>&#9881; My Look &amp; Settings</h2><button class="btn sm alt" data-a="closeLook">Done</button></div>
+ <div class="hd"><h2>&#127912; My Look</h2><button class="btn sm alt" data-a="closeLook">Done</button></div>
  <label class="l">Color look</label>
  <div class="looks" id="lookGrid"></div>
  <form class="form f2" data-f="mylook" style="margin-bottom:.9rem">
@@ -738,6 +739,10 @@ body[data-edge=era] .card::after,body[data-edge=era] #menuPanel::after{content:"
  <div class="sub" style="margin-bottom:.9rem">Higher = you see more of your photo through the cards. Works when a photo is chosen.</div>
  <label class="l">Edge border</label><div class="pills" id="edgePills"></div>
  <div class="sub" style="margin-bottom:.9rem">Era pattern follows your look: snakes for reputation, pines for folklore, stars and moons for Midnights, and more.</div>
+</div></div>
+
+<div class="modal" id="settings"><div class="sheet">
+ <div class="hd"><h2>&#9881; Settings</h2><button class="btn sm alt" data-a="closeSettings">Done</button></div>
  <div class="card" style="margin-bottom:.8rem"><div class="hd"><h2 style="font-size:.95rem">&#129517; App tour</h2></div><div class="sub">Replay the guided tour any time.</div><div class="row"><button class="btn sm" data-a="tourGo" data-v="all">Replay the tour</button></div></div>
  <div class="card" style="margin-bottom:.8rem"><div class="hd"><h2 style="font-size:.95rem">&#128190; Backup</h2></div>
   <div class="sub">Everything is saved on this device only. Copy a backup now and then and keep it somewhere safe.</div>
@@ -757,7 +762,7 @@ body[data-edge=era] .card::after,body[data-edge=era] #menuPanel::after{content:"
    <p><b>Small header on phones:</b> the "Store info" button shows or hides the phone chips and hours so your screen has more room.</p>
    <p><b>Museum showtimes:</b> a helper reads the public IMAX and Planetarium schedule once a day. On the Showtimes tab, pick a day and tap "Use these shows for my day". Your own shows are replaced, so the app asks you to tap twice.</p>
    <p><b>Museum hours:</b> a helper refreshes them once a day. The card shows when it last updated.</p></div></div>
-</div></div>
+ </div></div>
 
 <div class="modal" id="copyModal"><div class="sheet"><div class="hd"><h2>Copy this text</h2><button class="btn sm alt" data-a="closeCopy">Done</button></div>
  <div class="sub">Your phone would not copy it automatically. Press and hold, Select All, Copy.</div><textarea id="copyBox" rows="10"></textarea></div></div>
@@ -1363,6 +1368,8 @@ function act(a,el){const id=el.dataset.id,v=el.dataset.v,k=el.dataset.k;
  case'hmore':{const h=document.querySelector('header');const o=h.classList.toggle('hopen');el.setAttribute('aria-expanded',o);el.innerHTML=o?'&#10005; Hide info':'&#9776; Store info';break}
  case'mode':S.mode=S.mode==='dark'?'light':'dark';applyMode();renderLook();toast('Mode: '+S.mode);break;
  case'closeLook':$('look').classList.remove('show');break;
+ case'openSettings':menuSet(false);$('settings').classList.add('show');break;
+ case'closeSettings':$('settings').classList.remove('show');break;
  case'closeCopy':$('copyModal').classList.remove('show');break;
  case'look':S.look=v;renderLook();break;
  case'size':S.size=v;renderLook();break;
@@ -1393,7 +1400,7 @@ function act(a,el){const id=el.dataset.id,v=el.dataset.v,k=el.dataset.k;
  case'tillClear':Object.keys(S.till).forEach(x=>S.till[x]=x==='start'?S.till.start:'');buildTill();break;
  case'help':helpFill();$('help').classList.add('show');break;
  case'helpClose':$('help').classList.remove('show');break;
- case'tourGo':$('help').classList.remove('show');$('look').classList.remove('show');tourOpen(tourList(v==='new'?'new':'all'),true);break;
+ case'tourGo':$('help').classList.remove('show');$('look').classList.remove('show');$('settings').classList.remove('show');tourOpen(tourList(v==='new'?'new':'all'),true);break;
  case'tourTab':$('help').classList.remove('show');tourOpen(tourList('all',v),false);break;
  case'tourNext':if(tr.i<tr.list.length-1){tr.i++;tourShow()}else tourClose(tr.mark);break;
  case'tourBack':if(tr.i>0){tr.i--;tourShow()}break;
@@ -1630,7 +1637,7 @@ const HINTS=/*HINTS*/[
 ['Operating Procedures',"Your written store procedures."],
 ['Build a Procedure',"Add your own procedure here, step by step."]
 ]/*ENDHINTS*/;
-const TOUR_IGNORE=/*IGNORE*/['Right now','Active Event Profile','Event Schedule','Setup & Breakdown','Vetted Clean Tracks','QR code','Copy this text','Quick Guide','Backup','My Look','Set up my store','App tour','Help','New here?','What is new']/*ENDIGNORE*/;
+const TOUR_IGNORE=/*IGNORE*/['Right now','Active Event Profile','Event Schedule','Setup & Breakdown','Vetted Clean Tracks','QR code','Copy this text','Quick Guide','Backup','My Look','Settings','Set up my store','App tour','Help','New here?','What is new']/*ENDIGNORE*/;
 let tr={list:[],i:0,mark:false};
 const TV=()=>TOUR.reduce((m,s)=>Math.max(m,s.since),1);
 function tourList(m,t){return tourList0(m,t).filter(s=>!s.m||!document.body.classList.contains('floor'))}
