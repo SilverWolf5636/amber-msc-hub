@@ -544,7 +544,7 @@ body[data-edge=era] .card::after,body[data-edge=era] #menuPanel::after{content:"
   <div id="player" style="background:#111;border-radius:14px;overflow:hidden;min-height:9rem;display:flex;align-items:center;justify-content:center;color:#bbb;font-size:.85rem;text-align:center;padding:.5rem">Paste a link above</div>
   <div id="musicOpen" style="margin-top:.6rem"></div>
   <div class="row" id="plSaveRow" style="margin-top:.6rem;display:none"><input type="text" id="plName" placeholder="Name it (example: Quiet morning)" aria-label="Playlist name" style="flex:1"><button class="btn alt" data-a="plSave">Save playlist</button></div>
-  <div class="row" id="pkRow" style="margin-top:.6rem"><button class="btn alt" data-a="pkOpen">&#9989; Pick songs from this playlist</button></div></div>
+  <div id="pkRow" style="margin-top:.6rem"><button class="btn" style="width:100%" data-a="pkOpen">&#9989; Pick songs from this playlist</button><div class="small" style="margin-top:.3rem">Tap this to see every song with a tick box.</div></div></div>
  <div class="card c2" id="pkCard" style="display:none"><div class="hd"><h2>&#9989; Pick Songs</h2><button class="btn sm alt" data-a="pkClose">Close</button></div>
   <div class="small" id="pkMsg" aria-live="polite"></div>
   <div id="pkBox"></div>
@@ -1311,7 +1311,7 @@ function act(a,el){const id=el.dataset.id,v=el.dataset.v,k=el.dataset.k;
  case'tmAll':{const nums=(S.staff[actDay()]||[]).filter(p=>p.phone&&p.status!=='Off Shift').map(p=>p.phone.replace(/[^0-9+]/g,'')).join(',');if(!nums){toast('No cell numbers on today\'s staff yet');break}smsTo(nums,teamUpdate());break}
  case'copyHandover':copyText(handover(),'Handover copied');break;
  case'miD':del(S.ev.miles,id);renderEvents();break;
- case'music':{const u=$('musicUrl').value.trim();if(!u)return;S.musicUrl=u;buildPlayer(u);renderPlaylists();break}
+ case'music':{const u=$('musicUrl').value.trim();if(!u)return;S.musicUrl=u;buildPlayer(u);renderPlaylists();if(YT_KEY&&/youtu/.test(u)&&/[?&]list=/.test(u))pkOpen();break}
  case'updGo':location.reload();break
  case'updLater':$('updBar').classList.remove('show');break
  case'pkOpen':pkOpen();break
