@@ -410,7 +410,8 @@ body[data-mode=dark] header,body[data-mode=dark] .logo{color-scheme:light}
   <div class="small" id="impStatus" style="margin:.3rem 0"></div>
   <label class="l">Text found (you can edit it)</label>
   <textarea id="impText" rows="7" placeholder="The text from your file shows here. You can also paste text here."></textarea>
-  <div class="small" style="margin:.4rem 0 .2rem"><b>Send it to:</b></div>
+  <div style="margin:.4rem 0"><button class="btn" type="button" id="impAuto">&#10024; Auto-sort it for me</button></div>
+  <div class="small" style="margin:.4rem 0 .2rem"><b>Or choose where it goes:</b></div>
   <div class="row" style="flex-wrap:wrap;gap:.4rem">
    <button class="btn sm" type="button" id="impToVault">Policy Vault</button>
    <button class="btn sm" type="button" id="impToSop">Procedure</button>
@@ -1160,11 +1161,17 @@ async function readDocx(file){
   else walk(c)})};
  walk(doc.body);return out.join('\n')
 }
+function xlDate(d){
+ const p=n=>String(n).padStart(2,'0'),y=d.getUTCFullYear(),hh=d.getUTCHours(),mm=d.getUTCMinutes();
+ const t=((hh%12)||12)+':'+p(mm)+' '+(hh>=12?'PM':'AM');
+ if(y<1950)return t;
+ const iso=y+'-'+p(d.getUTCMonth()+1)+'-'+p(d.getUTCDate());
+ return (hh||mm)?iso+' '+t:iso}
 async function readXlsx(file){
  await loadLib('readxlsx');
  let r=await readXlsxFile(file);const out=[];
  const sheets=(r&&r.length&&r[0]&&!Array.isArray(r[0])&&r[0].data)?r:[{sheet:'',data:r}];
- sheets.forEach(sh=>{if(sheets.length>1&&sh.sheet)out.push('== '+sh.sheet+' ==');(sh.data||[]).forEach(row=>{const cells=row.map(c=>c==null?'':(c instanceof Date?c.toLocaleDateString():String(c).replace(/\s+/g,' ').trim()));while(cells.length&&!cells[cells.length-1])cells.pop();if(cells.length)out.push(cells.join('\t'))})});
+ sheets.forEach(sh=>{if(sheets.length>1&&sh.sheet)out.push('== '+sh.sheet+' ==');(sh.data||[]).forEach(row=>{const cells=row.map(c=>c==null?'':(c instanceof Date?xlDate(c):String(c).replace(/\s+/g,' ').trim()));while(cells.length&&!cells[cells.length-1])cells.pop();if(cells.length)out.push(cells.join('\t'))})});
  return out.join('\n')
 }
 async function readPdf(file){
@@ -1211,6 +1218,108 @@ function impToList(kind){const t=impNeed();if(t==null)return;const st=parseSteps
 $('impToClose').addEventListener('click',()=>impToList('close'));
 $('impToWalk').addEventListener('click',()=>impToList('walk'));
 /* ===== end document import ===== */
+/* ===== Smart auto-sort for imports (rule-based, free, offline) ===== */
+const TIME_RE=/\b(?:[01]?\d|2[0-3]):[0-5]\d\s*(?:[ap]\.?m\.?)?|\b(?:1[0-2]|0?[1-9])\s*[ap]\.?m\.?(?![a-z])/i;
+function impRows(text){
+ const L=impLines(text).map(l=>l.replace(/"/g,''));
+ const tabs=L.filter(l=>l.includes('\t')).length,com=L.filter(l=>l.split(',').length>=3).length;
+ const sp=tabs>=L.length*0.6?'\t':(com>=L.length*0.6?',':null);
+ return L.map(l=>sp?l.split(sp).map(c=>c.trim()):[l.trim()])
+}
+function timeTo24(s){
+ const m=String(s||'').match(/(\d{1,2})(?::(\d{2}))?\s*([ap])?\.?m?\.?/i);if(!m)return '';
+ let h=+m[1],mi=+(m[2]||0);if(h>23||mi>59)return '';
+ const ap=(m[3]||'').toLowerCase();
+ if(ap==='p'&&h<12)h+=12;else if(ap==='a'&&h===12)h=0;else if(!ap&&h>=1&&h<=8)h+=12;
+ return String(h).padStart(2,'0')+':'+String(mi).padStart(2,'0')
+}
+const MON_I={jan:1,feb:2,mar:3,apr:4,may:5,jun:6,jul:7,aug:8,sep:9,oct:10,nov:11,dec:12};
+function dateToISO(s){
+ s=String(s||'').trim();let m;
+ if(m=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/))return m[1]+'-'+m[2].padStart(2,'0')+'-'+m[3].padStart(2,'0');
+ const yr=new Date().getFullYear();
+ if(m=s.match(/^(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?/)){let y=m[3]?(+m[3]<100?2000+ +m[3]:+m[3]):yr;return y+'-'+m[1].padStart(2,'0')+'-'+m[2].padStart(2,'0')}
+ if(m=s.match(/([A-Za-z]{3})[a-z]*\.?\s+(\d{1,2})(?:,?\s+(\d{4}))?/)){const mo=MON_I[m[1].toLowerCase()];if(mo)return (m[3]||yr)+'-'+String(mo).padStart(2,'0')+'-'+m[2].padStart(2,'0')}
+ return ''
+}
+function hdrMap(row){
+ const map={};row.forEach((c,i)=>{const t=c.toLowerCase();
+  if(/^(show|title|film|movie|program|name|group|school|organization|party|event)\b/.test(t)&&map.name==null)map.name=i;
+  if(/(start|time|showtime|arriv)/.test(t)&&map.time==null)map.time=i;
+  if(/(venue|where|location|theat|room|screen)/.test(t)&&map.venue==null)map.venue=i;
+  if(/(date|day)/.test(t)&&map.date==null)map.date=i;
+  if(/(count|people|students|guests|size|number|#|kids|attend)/.test(t)&&map.count==null)map.count=i;
+  if(/(band|wrist)/.test(t)&&map.band==null)map.band=i;
+  if(/(length|duration|runtime|min)/.test(t)&&map.dur==null)map.dur=i;
+  if(/(note|tip|comment|detail)/.test(t)&&map.note==null)map.note=i;
+ });return map
+}
+function isHeader(row){const m=hdrMap(row);return Object.keys(m).length>=2&&!PHONE_RE.test(row.join(' '))&&!row.some(c=>TIME_RE.test(c)&&/\d/.test(c)&&c.length<9)}
+function impDetect(text){
+ const rows=impRows(text),n=rows.length;if(!n)return {kind:'none'};
+ const hasHdr=n>1&&isHeader(rows[0]),H=hasHdr?hdrMap(rows[0]):null,body=hasHdr?rows.slice(1):rows;
+ const joined=r=>r.join(' ');
+ const ph=body.filter(r=>PHONE_RE.test(joined(r))).length;
+ const tm=body.filter(r=>r.some(c=>TIME_RE.test(c))).length;
+ if(hasHdr&&H.name!=null&&H.date!=null&&(H.count!=null||H.band!=null))return {kind:'groups',why:'column titles (name, date, count)'};
+ if(hasHdr&&H.name!=null&&H.time!=null&&H.date==null&&ph<body.length*0.5)return {kind:'shows',why:'column titles (title, start time)'};
+ if(body.length&&ph>=body.length*0.6)return {kind:'contacts',why:'most lines have a phone number'};
+ if(body.length>=2&&tm>=body.length*0.7&&body.some(r=>/imax|planetarium|show|film|3d/i.test(joined(r))))return {kind:'shows',why:'lines with times and show words'};
+ const t=text.toLowerCase();
+ if(body.length>=3&&body.every(r=>joined(r).length<160)){
+  if(/\bclos(e|ing)\b|night|lock up|shut/.test(t.slice(0,300)))return {kind:'close',why:'wording about closing'};
+  if(/walk\s*-?through|walk the floor|sweep/.test(t.slice(0,300)))return {kind:'walk',why:'wording about a walkthrough'};
+  return {kind:'sop',why:'a list of short steps'}
+ }
+ return {kind:'vault',why:'it reads like a document'}
+}
+function parseShows(text){
+ let rows=impRows(text),H=null;if(rows.length>1&&isHeader(rows[0])){H=hdrMap(rows[0]);rows=rows.slice(1)}
+ const out=[];let noVenue=0,skipped=0;
+ rows.forEach(r=>{
+  let ti=H&&H.time!=null?H.time:r.findIndex(c=>TIME_RE.test(c));if(ti<0){skipped++;return}
+  const start=timeTo24((r[ti].match(TIME_RE)||[r[ti]])[0]);if(!start){skipped++;return}
+  let vi=H&&H.venue!=null?H.venue:r.findIndex(c=>/imax|planetarium|group|event/i.test(c));
+  let ni=H&&H.name!=null?H.name:r.findIndex((c,i)=>i!==ti&&i!==vi&&c&&!/^\d+\s*(min)?$/i.test(c));
+  let title=(r[ni]||'').replace(TIME_RE,'').replace(/\s+/g,' ').trim();if(!title&&r.length===1)title=r[0].replace(TIME_RE,'').replace(/[-–:|]+/g,' ').replace(/\s+/g,' ').trim();
+  if(!title){skipped++;return}
+  let vtxt=vi>=0?(r[vi]||''):r.join(' '),venue=/planet/i.test(vtxt)?'Planetarium':/imax/i.test(vtxt)?'IMAX':/group|event|school/i.test(vtxt)?'Group / Event':'';
+  if(!venue){venue='IMAX';noVenue++}
+  const dm=r.join(' ').match(/(\d{2,3})\s*min/i),dur=dm?+dm[1]:40;
+  const tip=H&&H.note!=null?(r[H.note]||''):'';
+  out.push({id:uid(),title:title.slice(0,90),venue,start,dur,tip:tip.slice(0,120)})
+ });
+ return {items:out,skipped,noVenue}
+}
+function parseGroups(text){
+ let rows=impRows(text),H=hdrMap(rows[0]);rows=rows.slice(1);const out=[];let skipped=0,noTime=0;
+ rows.forEach(r=>{
+  const name=(r[H.name]||'').trim(),date=dateToISO(r[H.date]);if(!name||!date){skipped++;return}
+  let time=H.time!=null?timeTo24(r[H.time]):'';if(!time){time='10:00';noTime++}
+  const cnt=H.count!=null?(String(r[H.count]).match(/\d+/)||[''])[0]:'';
+  let band='';if(H.band!=null){const b=WBC.find(c=>new RegExp('\\b'+c[0]+'\\b','i').test(r[H.band]||''));if(b)band=b[0]}
+  out.push({id:uid(),name:name.slice(0,80),date,time,count:cnt,band,note:H.note!=null?(r[H.note]||'').slice(0,160):''})
+ });
+ return {items:out,skipped,noTime}
+}
+const KIND_NAME={shows:'Showtimes',groups:'Group schedule',contacts:'Call numbers',close:'Closing checklist',walk:'Walkthrough steps',sop:'Procedure',vault:'Policy Vault document',none:'nothing'};
+$('impAuto').addEventListener('click',()=>{
+ const t=impNeed();if(t==null)return;const d=impDetect(t);
+ const head='<div class="small"><b>This looks like: '+KIND_NAME[d.kind]+'.</b> I decided from '+esc(d.why||'')+'. If that is wrong, pick a place yourself below.</div>';
+ if(d.kind==='shows'){const r=parseShows(t);
+  if(!r.items.length){impOpts(head+'<div class="small">But I could not find any rows with a show and a time.</div>');return}
+  impOpts(head+'<div class="small"><b>'+r.items.length+' showtimes found</b>'+(r.skipped?' ('+r.skipped+' lines skipped)':'')+(r.noVenue?' ('+r.noVenue+' had no venue, set to IMAX)':'')+':</div><div style="max-height:180px;overflow:auto;margin:.3rem 0">'+r.items.map(s=>'<div class="small">'+m12(t2m(s.start))+' • '+esc(s.venue)+' • '+esc(s.title)+' • '+s.dur+' min</div>').join('')+'</div><div class="row" style="flex-wrap:wrap;gap:.4rem"><button class="btn sm" type="button" id="impSAdd">Add these '+r.items.length+'</button><button class="btn sm alt" type="button" id="impSRep">Replace all current shows with these</button></div>');
+  $('impSAdd').onclick=()=>{S.shows.push(...r.items);save();renderShows();renderDyn();impOpts('');toast(r.items.length+' showtimes added')};
+  $('impSRep').onclick=()=>{S.shows=r.items.slice();save();renderShows();renderDyn();impOpts('');toast('Showtimes replaced')};return}
+ if(d.kind==='groups'){const r=parseGroups(t);
+  if(!r.items.length){impOpts(head+'<div class="small">But no rows had both a name and a date.</div>');return}
+  impOpts(head+'<div class="small"><b>'+r.items.length+' groups found</b>'+(r.skipped?' ('+r.skipped+' rows skipped: no name or date)':'')+(r.noTime?' ('+r.noTime+' had no arrival time, set to 10:00 AM)':'')+':</div><div style="max-height:180px;overflow:auto;margin:.3rem 0">'+r.items.map(g=>'<div class="small">'+esc(g.date)+' '+m12(t2m(g.time))+' • '+esc(g.name)+(g.count?' • '+esc(g.count)+' people':'')+(g.band?' • '+esc(g.band)+' band':'')+'</div>').join('')+'</div><button class="btn sm" type="button" id="impGAdd">Add these '+r.items.length+'</button>');
+  $('impGAdd').onclick=()=>{S.groups.push(...r.items);save();renderGroups();impOpts('');toast(r.items.length+' groups added')};return}
+ const go={contacts:'impToCt',close:'impToClose',walk:'impToWalk',sop:'impToSop',vault:'impToVault'}[d.kind];
+ if(go){$(go).click();const o=$('impOpts');o.insertAdjacentHTML('afterbegin',head)}
+});
+/* ===== end smart auto-sort ===== */
+
 /* ===== MSC hours robot display (Batch 2) ===== */
 var MSCH=null;
 function mscToday(){
