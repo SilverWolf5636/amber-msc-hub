@@ -974,7 +974,7 @@ function mpPreview(r){MP=r;const e=$('mpPrev');$('mpPick').innerHTML='';if(r&&r.
  if(!$('mpName').value.trim()&&r.name)$('mpName').value=r.name;
  e.textContent='Found '+r.songs.length+' song'+(r.songs.length===1?'':'s')+'. Untick any you do not want, name the playlist, then tap Add to the approved list.';$('mpPick').innerHTML=pkList(r,'m')}
 function mpPack(){return JSON.stringify({app:'msc-hub-music',v:1,playlists:(S.playlists||[]).map(p=>({name:p.name,url:p.url})),tracks:S.tracks.filter(t=>!String(t.title).startsWith(EX)).map(t=>({title:t.title,note:t.note||'',pl:t.pl||''}))})}
-const YT_KEY='';/*YTKEY*/
+const YT_KEY='AIzaSyDvE3JOb8l1q2irtAqurPMBiAwsjspU6nI';/*YTKEY*/
 let PK=null;
 function pkList(P,pre){return '<div class="row" style="gap:.4rem;margin:.3rem 0;align-items:center"><button class="btn sm alt" data-a="pkAll" data-k="'+pre+'" data-v="1">Tick all</button><button class="btn sm alt" data-a="pkAll" data-k="'+pre+'" data-v="0">Clear all</button><span class="small" id="pkCnt_'+pre+'" style="margin-left:auto">'+P.items.filter(x=>x.on).length+' of '+P.items.length+' ticked</span></div><div class="pkList" role="group" aria-label="Songs to tick">'+P.items.map((x,i)=>`<div class="item"><input type="checkbox" id="${pre}pk${i}" data-a="pkT" data-k="${pre}" data-id="${i}" ${x.on?'checked':''}><label for="${pre}pk${i}">${esc(x.t)}</label></div>`).join('')+'</div>'}
 function pkGet(k){return k==='y'?PK:MP}
@@ -1450,7 +1450,7 @@ const TOUR=/*TOUR*/[
 {t:'mod',since:1,h:"Manager on Duty",x:"Building sweeps, radio channels, and a shift log for your Manager on Duty shift."},
 {t:'events',since:1,h:"Events",x:"Event details, the event schedule, and setup and breakdown."},
 {t:'music',since:1,h:"Music",x:"A family-friendly store player. Save your playlists as buttons so one tap loads them. Import a playlist file to fill the approved list, and send your music to another phone."},
-{t:'music',since:5,w:'#mpCard',h:"Pick Songs",x:"When you import a song list, every song gets a tick box. Untick the ones you do not want, name the playlist, then tap Add."},
+{t:'music',since:5,w:'#mpCard',h:"Pick Songs",x:"Load a YouTube playlist and tap Pick songs, or import a song list. Every song gets a tick box. Untick the ones you do not want, name the playlist, then save it."},
 {t:'docs',since:1,h:"Docs",x:"Handover notes and the policy vault. You can also import a Word, Excel, PDF or text file and the app sorts it for you."},
 {t:'dials',since:1,h:"Dials",x:"One-tap phone numbers. Tap a number to call it."},
 {t:'today',k:'e',since:1,h:"That is it!",x:"Tap the Help button any time to replay this tour, hear about one tab, or see what is new. A small ? next to a card title tells you what that card is for."}
