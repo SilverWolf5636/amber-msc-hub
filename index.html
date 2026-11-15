@@ -135,6 +135,8 @@ label.l{display:block;font-size:.68rem;font-weight:800;text-transform:uppercase;
 .item.done{opacity:.55}.item.done .tt{text-decoration:line-through}
 .item .tt{flex:1;font-size:.88rem;font-weight:600}
 .item input[type=checkbox]{width:1.15rem;height:1.15rem;margin-top:.15rem;accent-color:var(--p);flex:0 0 auto}
+.pkList{max-height:20rem;overflow:auto;border-radius:12px}
+.pkList .item label{flex:1;padding:.2rem 0;word-break:break-word}
 .tag{display:inline-block;font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.4px;padding:.1rem .45rem;border-radius:6px;background:color-mix(in srgb,var(--s) 15%,var(--surface));color:var(--s);margin-bottom:.2rem}
 .ex{display:inline-block;font-size:.6rem;font-weight:800;text-transform:uppercase;background:#fff3c4;color:#7a5a00;border:1px solid #f0d37a;border-radius:6px;padding:0 .35rem;margin-right:.25rem;vertical-align:middle}
 .badge{font-size:.68rem;font-weight:800;padding:.12rem .55rem;border-radius:99px;background:color-mix(in srgb,var(--p) 14%,var(--surface));color:var(--p);white-space:nowrap}
@@ -292,6 +294,11 @@ body.glass .btn.alt,body.glass .btn.red,body.glass .qh{background-color:var(--so
 .btn,.menu-btn{background:linear-gradient(180deg,rgba(255,255,255,.32),rgba(255,255,255,0) 50%,rgba(0,0,0,.16)),var(--grad);border:1px solid rgba(255,255,255,.4);box-shadow:inset 0 1.5px 0 rgba(255,255,255,.7),inset 0 -3px 6px rgba(0,0,0,.2),0 7px 14px -6px rgba(0,0,0,.45);text-shadow:0 1px 2px rgba(0,0,0,.28)}
 .btn.gold{background:linear-gradient(180deg,rgba(255,255,255,.45),rgba(255,255,255,0) 50%,rgba(0,0,0,.12)),var(--gold);text-shadow:none}
 .btn.alt,.btn.red{background:linear-gradient(180deg,rgba(255,255,255,.75),rgba(255,255,255,.08) 55%,rgba(0,0,0,.06)),var(--surface);box-shadow:inset 0 1.5px 0 rgba(255,255,255,.9),inset 0 -3px 6px rgba(0,0,0,.08),0 6px 12px -6px rgba(0,0,0,.35);text-shadow:none}
+/* menu tab on the right edge, same side the panel slides from */
+.menu-btn{position:fixed;right:0;top:38%;z-index:120;flex-direction:column;justify-content:center;gap:.4rem;width:34px;min-height:104px;padding:.5rem 0;border-radius:14px 0 0 14px;border-right:0;font-size:.8rem;letter-spacing:.06em}
+.menu-btn span:last-child{writing-mode:vertical-rl;text-orientation:mixed}
+body.menu-open .menu-btn{visibility:hidden}
+nav.tabs{min-height:0;padding:.25rem .8rem}
 .btn:active,.menu-btn:active{transform:translateY(1px) scale(.98);box-shadow:inset 0 2px 6px rgba(0,0,0,.3),0 2px 4px -2px rgba(0,0,0,.4)}
 .tab,.pill,.look{background-image:linear-gradient(180deg,rgba(255,255,255,.6),rgba(255,255,255,.04) 55%);box-shadow:inset 0 1.5px 0 rgba(255,255,255,.85),inset 0 -2px 5px rgba(0,0,0,.07),0 4px 10px -5px rgba(0,0,0,.3)}
 .tab.on,.pill.on{background-image:linear-gradient(180deg,rgba(255,255,255,.3),rgba(255,255,255,0) 50%,rgba(0,0,0,.15)),var(--grad);box-shadow:inset 0 1.5px 0 rgba(255,255,255,.65),inset 0 -3px 6px rgba(0,0,0,.2),0 6px 12px -5px rgba(0,0,0,.4)}
@@ -536,13 +543,19 @@ body[data-edge=era] .card::after,body[data-edge=era] #menuPanel::after{content:"
   <div class="row" style="margin-bottom:.7rem"><input type="text" id="musicUrl" placeholder="Paste a Spotify or YouTube link" style="flex:1"><button class="btn" data-a="music">Load</button></div>
   <div id="player" style="background:#111;border-radius:14px;overflow:hidden;min-height:9rem;display:flex;align-items:center;justify-content:center;color:#bbb;font-size:.85rem;text-align:center;padding:.5rem">Paste a link above</div>
   <div id="musicOpen" style="margin-top:.6rem"></div>
-  <div class="row" id="plSaveRow" style="margin-top:.6rem;display:none"><input type="text" id="plName" placeholder="Name it (example: Quiet morning)" aria-label="Playlist name" style="flex:1"><button class="btn alt" data-a="plSave">Save playlist</button></div></div>
+  <div class="row" id="plSaveRow" style="margin-top:.6rem;display:none"><input type="text" id="plName" placeholder="Name it (example: Quiet morning)" aria-label="Playlist name" style="flex:1"><button class="btn alt" data-a="plSave">Save playlist</button></div>
+  <div class="row" id="pkRow" style="margin-top:.6rem"><button class="btn alt" data-a="pkOpen">&#9989; Pick songs from this playlist</button></div></div>
+ <div class="card c2" id="pkCard" style="display:none"><div class="hd"><h2>&#9989; Pick Songs</h2><button class="btn sm alt" data-a="pkClose">Close</button></div>
+  <div class="small" id="pkMsg" aria-live="polite"></div>
+  <div id="pkBox"></div>
+  <div class="row" id="pkSaveRow" style="margin-top:.6rem;display:none"><input type="text" id="pkName" placeholder="Name it (example: Quiet morning)" aria-label="Playlist name" style="flex:1"><button class="btn" id="pkSaveBtn" data-a="pkSave">Save playlist</button></div></div>
  <div class="card c2" id="mpCard"><div class="hd"><h2>&#128229; Import a Playlist</h2></div>
-  <div class="sub">Pick a playlist file (a CSV from Exportify) or a music file from another phone. Or paste a song list below. It is read on this device only.</div>
+  <div class="sub">Pick a playlist file (a CSV from Exportify) or a music file from another phone. Or paste a song list below. It is read on this device only. You can tick the songs you want.</div>
   <div class="row"><input type="file" id="mpFile" accept=".csv,.txt,.json,application/json,text/csv,text/plain" style="flex:1" aria-label="Pick a playlist or music file"></div>
   <textarea id="mpText" rows="3" placeholder="Or paste songs here, one per line (Song - Artist)" aria-label="Paste songs" style="margin-top:.5rem"></textarea>
   <input type="text" id="mpName" placeholder="Playlist name (example: Weekend mix)" aria-label="Playlist name" style="margin-top:.5rem">
   <div class="small" id="mpPrev" aria-live="polite" style="margin:.5rem 0"></div>
+  <div id="mpPick"></div>
   <div class="row"><button class="btn" data-a="mpGo">Add to the approved list</button></div>
   <div class="row" style="margin-top:.8rem;gap:.5rem;flex-wrap:wrap"><button class="btn alt" style="flex:1" data-a="mpSend">&#128228; Send my music</button><button class="btn alt" style="flex:1" data-a="mpCopy">&#128203; Copy as text</button></div>
   <div class="small" style="margin-top:.4rem">Send my music packs your saved playlists and approved songs into one small file. Share it to another phone, then pick it in the box above.</div></div>
@@ -920,6 +933,7 @@ function renderEvents(){
 function renderMusic(){
  $('musicUrl').value=S.musicUrl||'';
  $('trackList').innerHTML=S.tracks.length?S.tracks.map(t=>`<div class="item"><div class="tt"><b>${esc(t.title)}</b><div class="small">${esc(t.note)}</div></div><button class="x" data-a="trD" data-id="${t.id}">✕</button></div>`).join(''):'<div class="empty">No tracks saved yet.</div>';
+ $('pkRow').style.display=YT_KEY?'':'none';
  if(S.musicUrl)buildPlayer(S.musicUrl,true);renderPlaylists()
 }
 const plOk=u=>/spotify\.com|youtu\.be\/|youtube\.com/.test(u||'');
@@ -929,7 +943,8 @@ function renderPlaylists(){const L=S.playlists||[],cur=L.find(x=>x.url===S.music
 function buildPlayer(url,quiet){
  const w=$('player');let src='';
  try{
-  if(/spotify\.com/.test(url)){src=url.replace(/\?.*$/,'').replace('spotify.com/embed/','spotify.com/').replace('spotify.com/','spotify.com/embed/')}
+  if(/watch_videos\?video_ids=/.test(url)){const ids=(url.split('video_ids=')[1]||'').split(/[&#]/)[0].split(',').filter(x=>/^[\w-]{11}$/.test(x));src=ids.length?'https://www.youtube.com/embed/'+ids[0]+(ids.length>1?'?playlist='+ids.slice(1).join(','):''):''}
+  else if(/spotify\.com/.test(url)){src=url.replace(/\?.*$/,'').replace('spotify.com/embed/','spotify.com/').replace('spotify.com/','spotify.com/embed/')}
   else if(/youtu\.be\/|youtube\.com/.test(url)){let list=(url.match(/[?&]list=([^&]+)/)||[])[1],id=url.includes('youtu.be/')?url.split('youtu.be/')[1].split(/[?&]/)[0]:(url.match(/[?&]v=([^&]+)/)||[])[1];
    src=list?'https://www.youtube.com/embed/videoseries?list='+list:(id?'https://www.youtube.com/embed/'+id:'')}
  }catch(e){}
@@ -944,7 +959,7 @@ function csvRows(t){const rows=[];let r=[],c='',q=false;for(let i=0;i<t.length;i
 function mpParse(text,fname){
  text=String(text||'').replace(/^﻿/,'').trim();if(!text)return null;
  if(text[0]==='{'){try{const o=JSON.parse(text);if(o&&o.app==='msc-hub-music'){
-  const pls=(Array.isArray(o.playlists)?o.playlists:[]).filter(x=>x&&typeof x.name==='string'&&typeof x.url==='string'&&plOk(x.url)).slice(0,200).map(x=>({name:x.name.slice(0,80),url:x.url.slice(0,500)}));
+  const pls=(Array.isArray(o.playlists)?o.playlists:[]).filter(x=>x&&typeof x.name==='string'&&typeof x.url==='string'&&plOk(x.url)).slice(0,200).map(x=>({name:x.name.slice(0,80),url:x.url.slice(0,2200)}));
   const trs=(Array.isArray(o.tracks)?o.tracks:[]).filter(x=>x&&typeof x.title==='string'&&x.title.trim()).slice(0,3000).map(x=>({title:x.title.slice(0,160),note:String(x.note||'').slice(0,200),pl:x.pl?String(x.pl).slice(0,80):''}));
   return {kind:'pack',pls,trs}}}catch(e){}return null}
  let songs=[];const rows=text.indexOf(',')>=0?csvRows(text):[],hdr=rows.length?rows[0].map(x=>x.trim().toLowerCase()):[];
@@ -953,19 +968,52 @@ function mpParse(text,fname){
  else songs=text.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
  songs=[...new Set(songs.map(x=>x.slice(0,160)))].slice(0,3000);
  return songs.length?{kind:'songs',songs,name:(fname||'').replace(/\.[^.]+$/,'')}:null}
-function mpPreview(r){MP=r;const e=$('mpPrev');
+function mpPreview(r){MP=r;const e=$('mpPrev');$('mpPick').innerHTML='';if(r&&r.kind==='songs')r.items=r.songs.map(s=>({t:s,on:true}));
  if(!r){e.textContent='No songs found. Try a CSV from Exportify, a music file from another phone, or paste songs one per line.';return}
  if(r.kind==='pack'){e.textContent='Found '+r.pls.length+' saved playlist'+(r.pls.length===1?'':'s')+' and '+r.trs.length+' song'+(r.trs.length===1?'':'s')+'. Tap Add to the approved list to bring them in.';return}
  if(!$('mpName').value.trim()&&r.name)$('mpName').value=r.name;
- e.textContent='Found '+r.songs.length+' song'+(r.songs.length===1?'':'s')+'. First: '+r.songs.slice(0,3).join('; ')+(r.songs.length>3?'...':'')+'. Give the playlist a name, then tap Add to the approved list.'}
+ e.textContent='Found '+r.songs.length+' song'+(r.songs.length===1?'':'s')+'. Untick any you do not want, name the playlist, then tap Add to the approved list.';$('mpPick').innerHTML=pkList(r,'m')}
 function mpPack(){return JSON.stringify({app:'msc-hub-music',v:1,playlists:(S.playlists||[]).map(p=>({name:p.name,url:p.url})),tracks:S.tracks.filter(t=>!String(t.title).startsWith(EX)).map(t=>({title:t.title,note:t.note||'',pl:t.pl||''}))})}
+const YT_KEY='';/*YTKEY*/
+let PK=null;
+function pkList(P,pre){return '<div class="row" style="gap:.4rem;margin:.3rem 0;align-items:center"><button class="btn sm alt" data-a="pkAll" data-k="'+pre+'" data-v="1">Tick all</button><button class="btn sm alt" data-a="pkAll" data-k="'+pre+'" data-v="0">Clear all</button><span class="small" id="pkCnt_'+pre+'" style="margin-left:auto">'+P.items.filter(x=>x.on).length+' of '+P.items.length+' ticked</span></div><div class="pkList" role="group" aria-label="Songs to tick">'+P.items.map((x,i)=>`<div class="item"><input type="checkbox" id="${pre}pk${i}" data-a="pkT" data-k="${pre}" data-id="${i}" ${x.on?'checked':''}><label for="${pre}pk${i}">${esc(x.t)}</label></div>`).join('')+'</div>'}
+function pkGet(k){return k==='y'?PK:MP}
+function pkCount(k){const P=pkGet(k);if(!P||!P.items)return;const n=P.items.filter(x=>x.on).length,c=$('pkCnt_'+k);if(c)c.textContent=n+' of '+P.items.length+' ticked';if(k==='y'){const b=$('pkSaveBtn');b.textContent=n?'Save '+n+' song'+(n===1?'':'s')+' as a playlist':'Tick songs first'}}
+async function ytFetch(list){const out=[],seen=new Set();let tok='';
+ for(let pg=0;pg<6;pg++){
+  const r=await fetch('https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=50&playlistId='+encodeURIComponent(list)+'&key='+encodeURIComponent(YT_KEY)+(tok?'&pageToken='+encodeURIComponent(tok):''));
+  if(!r.ok){const e=new Error('http');e.code=r.status;throw e}
+  const j=await r.json();
+  (j.items||[]).forEach(it=>{const sn=it.snippet||{},id=sn.resourceId&&sn.resourceId.videoId,t=(sn.title||'').trim();if(!id||seen.has(id)||/^(Private|Deleted) video$/i.test(t))return;seen.add(id);const ch=(sn.videoOwnerChannelTitle||'').replace(/ - Topic$/,'').trim();out.push({id,t:(ch&&t.toLowerCase().indexOf(ch.toLowerCase())<0?t+' - '+ch:t).slice(0,160),on:true})});
+  tok=j.nextPageToken;if(!tok)break}
+ return {items:out,more:!!tok}}
+async function pkOpen(){const u=S.musicUrl||'',msg=$('pkMsg'),card=$('pkCard');
+ if(!plOk(u)){toast('Load a Spotify or YouTube playlist first');return}
+ PK=null;card.style.display='';$('pkBox').innerHTML='';$('pkSaveRow').style.display='none';
+ const show=()=>card.scrollIntoView({block:'nearest'});
+ if(/spotify\.com/.test(u)){msg.textContent='Spotify does not let this app read its song list. To pick songs: save the playlist as a CSV file (Exportify) or paste the song names into Import a Playlist below. Then tick the ones you want.';show();return}
+ const list=(u.match(/[?&]list=([A-Za-z0-9_-]+)/)||[])[1];
+ if(!list){msg.textContent='That link is one video, not a playlist.';show();return}
+ if(!YT_KEY){msg.textContent='Picking from a YouTube playlist is not switched on yet. You can paste the song names into Import a Playlist below.';show();return}
+ msg.textContent='Loading the song list...';show();
+ try{const r=await ytFetch(list);
+  if(!r.items.length){msg.textContent='No songs found. The playlist may be private or empty.';return}
+  PK={items:r.items};$('pkBox').innerHTML=pkList(PK,'y');$('pkSaveRow').style.display='';
+  msg.textContent='Found '+r.items.length+' song'+(r.items.length===1?'':'s')+(r.more?' (the first 300)':'')+'. Untick any you do not want, name the playlist, then save.';pkCount('y')
+ }catch(e){msg.textContent=e&&e.code===404?'That playlist was not found. It may be private.':e&&e.code?'YouTube said no ('+e.code+'). Try again later.':'Could not reach YouTube. This needs the internet.'}}
+function pkSave(){if(!PK)return;const nm=($('pkName').value||'').trim().slice(0,80),ids=PK.items.filter(x=>x.on).map(x=>x.id);
+ if(!ids.length){toast('Tick at least one song');return}
+ if(!nm){toast('Type a name first');$('pkName').focus();return}
+ if(ids.length>150){toast('That is a lot. Pick 150 songs or fewer');return}
+ const url='https://www.youtube.com/watch_videos?video_ids='+ids.join(',');
+ (S.playlists=S.playlists||[]).push({id:uid(),name:nm,url});S.musicUrl=url;$('musicUrl').value=url;$('pkName').value='';PK=null;$('pkCard').style.display='none';buildPlayer(url,true);save();renderPlaylists();toast('Saved "'+nm+'" with '+ids.length+' song'+(ids.length===1?'':'s'))}
 function mpAdd(){if(!MP){toast('Pick a file or paste songs first');return}
  const have=new Set(S.tracks.map(t=>t.title.toLowerCase()+'|'+(t.pl||'')));let add=0,addP=0;
  if(MP.kind==='pack'){MP.trs.forEach(t=>{const k=t.title.toLowerCase()+'|'+t.pl;if(have.has(k))return;have.add(k);S.tracks.push({id:uid(),title:t.title,note:t.note,pl:t.pl});add++});
   S.playlists=S.playlists||[];MP.pls.forEach(p=>{if(S.playlists.some(x=>x.url===p.url))return;S.playlists.push({id:uid(),name:p.name,url:p.url});addP++})}
- else{const nm=($('mpName').value||'').trim().slice(0,80)||'My playlist';MP.songs.forEach(sg=>{const k=sg.toLowerCase()+'|'+nm;if(have.has(k))return;have.add(k);S.tracks.push({id:uid(),title:sg,note:'Approved by Amber - from "'+nm+'"',pl:nm});add++})}
+ else{const nm=($('mpName').value||'').trim().slice(0,80)||'My playlist';const pick=MP.items?MP.items.filter(x=>x.on).map(x=>x.t):MP.songs;if(!pick.length){toast('Tick at least one song');return}pick.forEach(sg=>{const k=sg.toLowerCase()+'|'+nm;if(have.has(k))return;have.add(k);S.tracks.push({id:uid(),title:sg,note:'Approved by Amber - from "'+nm+'"',pl:nm});add++})}
  const msg=add+' song'+(add===1?'':'s')+' added'+(addP?', '+addP+' playlist'+(addP===1?'':'s'):'');
- MP=null;$('mpText').value='';$('mpName').value='';$('mpFile').value='';$('mpPrev').textContent='';save();renderMusic();toast(msg)}
+ MP=null;$('mpPick').innerHTML='';$('mpText').value='';$('mpName').value='';$('mpFile').value='';$('mpPrev').textContent='';save();renderMusic();toast(msg)}
 function renderDocs(){
  $('docList').innerHTML=S.docs.length?S.docs.map(d=>`<div class="item"><div class="tt"><b>${tx(d.title)}</b><div class="small" style="white-space:pre-wrap">${esc(d.text)}</div><div class="row" style="margin-top:.4rem">${d.url?`<a class="btn sm" href="${esc(d.url)}" target="_blank" rel="noopener">Open link</a>`:''}<button class="btn sm alt" data-a="dcC" data-id="${d.id}">Copy text</button><button class="btn sm alt" data-a="dcQ" data-id="${d.id}">QR code</button></div></div><button class="x mgr" data-a="dcD" data-id="${d.id}">✕</button></div>`).join(''):'<div class="empty">No documents yet.</div>'
 }
@@ -1266,6 +1314,11 @@ function act(a,el){const id=el.dataset.id,v=el.dataset.v,k=el.dataset.k;
  case'music':{const u=$('musicUrl').value.trim();if(!u)return;S.musicUrl=u;buildPlayer(u);renderPlaylists();break}
  case'updGo':location.reload();break
  case'updLater':$('updBar').classList.remove('show');break
+ case'pkOpen':pkOpen();break
+ case'pkClose':PK=null;$('pkCard').style.display='none';break
+ case'pkSave':pkSave();break
+ case'pkT':{const P=pkGet(k);if(!P||!P.items[+id])break;P.items[+id].on=!!el.checked;pkCount(k);break}
+ case'pkAll':{const P=pkGet(k);if(!P||!P.items)break;P.items.forEach(x=>x.on=v==='1');document.querySelectorAll('#'+(k==='y'?'pkBox':'mpPick')+' input[type=checkbox]').forEach(c=>{c.checked=v==='1'});pkCount(k);break}
  case'mpGo':mpAdd();break
  case'mpCopy':copyText(mpPack(),'Music copied. Paste it into the box on the other phone.');break
  case'mpSend':{if(!(S.playlists||[]).length&&!S.tracks.some(t=>!String(t.title).startsWith(EX))){toast('Nothing to send yet');break}const txt=mpPack();try{const f=new File([txt],'msc-music.json',{type:'application/json'});if(navigator.canShare&&navigator.canShare({files:[f]})){navigator.share({files:[f],title:'MSC Hub music'}).catch(()=>{});break}}catch(e){}const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type:'application/json'}));a.download='msc-music.json';document.body.appendChild(a);a.click();a.remove();toast('Music file saved on this phone');break}
@@ -1384,7 +1437,7 @@ document.addEventListener('submit',e=>{e.preventDefault();const f=e.target.datas
 const TOUR=/*TOUR*/[
 {t:'today',k:'w',since:1,h:"Welcome!",x:"This app keeps your store day in one place. This tour takes about 2 minutes. Tap Next to move on. You can stop any time. To see it again, tap the Help button at the top."},
 {t:'today',since:1,h:"Today",x:"Your home page. It shows what is on right now, the Rush Radar for the shop, notes, and alarms. Start here each day."},
-{t:'today',since:4,w:'#menuBtn',h:"The Menu",x:"Tap Menu to slide out every section: Today, Staff, Showtimes and more. Tap a section to go there. Tap outside the panel to close it."},
+{t:'today',since:4,w:'#menuBtn',h:"The Menu",x:"Tap the Menu tab on the right edge of the screen to slide out every section: Today, Staff, Showtimes and more. Tap a section to go there. Tap outside the panel to close it."},
 {t:'today',since:3,w:'#brkCard',h:"Break Check",x:"Shows GOOD TIME, WAIT or BAD TIME for taking a break right now, so nobody is stuck on break when a rush hits. It also shows the next clear time."},
 {t:'today',since:2,w:'#teamCard',m:1,h:"Team Update",x:"On the Today tab, the Team Update card builds one message for your team: who is working, showtimes, tasks, notes and closing steps. Add your own line if you like, then tap Text whole team."},
 {t:'staff',since:1,h:"Staff",x:"Who is working, on break or off. Type a task under a person and tap Text Task to send it."},
@@ -1397,6 +1450,7 @@ const TOUR=/*TOUR*/[
 {t:'mod',since:1,h:"Manager on Duty",x:"Building sweeps, radio channels, and a shift log for your Manager on Duty shift."},
 {t:'events',since:1,h:"Events",x:"Event details, the event schedule, and setup and breakdown."},
 {t:'music',since:1,h:"Music",x:"A family-friendly store player. Save your playlists as buttons so one tap loads them. Import a playlist file to fill the approved list, and send your music to another phone."},
+{t:'music',since:5,w:'#mpCard',h:"Pick Songs",x:"When you import a song list, every song gets a tick box. Untick the ones you do not want, name the playlist, then tap Add."},
 {t:'docs',since:1,h:"Docs",x:"Handover notes and the policy vault. You can also import a Word, Excel, PDF or text file and the app sorts it for you."},
 {t:'dials',since:1,h:"Dials",x:"One-tap phone numbers. Tap a number to call it."},
 {t:'today',k:'e',since:1,h:"That is it!",x:"Tap the Help button any time to replay this tour, hear about one tab, or see what is new. A small ? next to a card title tells you what that card is for."}
@@ -1420,7 +1474,8 @@ const HINTS=/*HINTS*/[
 ['MOD Building Sweeps',"Tick off building sweeps during your Manager on Duty shift."],
 ['Radio Channels',"Radio channels and ready-made prompts."],
 ['MOD Shift Log',"Write down what happened during your Manager on Duty shift."],
-['Import a Playlist',"Pick a playlist file or paste a song list. The songs join the approved list. Send my music shares your playlists and approved songs with another phone."],
+['Pick Songs',"Shows every song from the loaded playlist with a tick box. Tick the ones you want, name it and save it as a new playlist button."],
+['Import a Playlist',"Pick a playlist file or paste a song list. Tick the songs you want. The ticked songs join the approved list. Send my music shares your playlists and approved songs with another phone."],
 ['Family-Friendly Store Player',"Paste a Spotify or YouTube playlist link you have checked is clean. Then name it and tap Save playlist. Next time, one tap loads it."],
 ['Import a document',"Pick a Word, Excel, PDF, CSV or text file, or paste text. Tap Auto-sort it for me. You see a preview first. Nothing is saved until you confirm."],
 ['Staff Handover',"Keep handover notes and store policies here."],
@@ -1473,7 +1528,7 @@ function addHints(){document.querySelectorAll('.card .hd h2').forEach(h=>{if(h.q
  const b=document.createElement('button');b.className='qh';b.type='button';b.setAttribute('data-a','hint');b.setAttribute('aria-label','What is this?');b.textContent='?';h.appendChild(b);
  const bx=document.createElement('div');bx.className='hint';bx.hidden=true;bx.textContent=e[1];h.closest('.hd').insertAdjacentElement('afterend',bx)})}
 $('mpFile').addEventListener('change',async e=>{const f=e.target.files[0];if(!f)return;try{mpPreview(mpParse(await f.text(),f.name))}catch(err){$('mpPrev').textContent='Could not read that file.'}});
-$('mpText').addEventListener('input',()=>{const t=$('mpText').value;if(!t.trim()){MP=null;$('mpPrev').textContent='';return}mpPreview(mpParse(t,''))});
+$('mpText').addEventListener('input',()=>{const t=$('mpText').value;if(!t.trim()){MP=null;$('mpPick').innerHTML='';$('mpPrev').textContent='';return}mpPreview(mpParse(t,''))});
 renderAll();addHints();tourBanner();setInterval(tick,1000);
 /* ===== Document import (Batch 2) ===== */
 const LIBS={};
