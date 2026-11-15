@@ -167,6 +167,15 @@ label.l{display:block;font-size:.68rem;font-weight:800;text-transform:uppercase;
 .empty{font-size:.82rem;color:var(--muted);font-style:italic;padding:.4rem 0}
 #toast{position:fixed;left:50%;bottom:1.2rem;transform:translateX(-50%) translateY(2rem);background:var(--ink);color:#fff;padding:.55rem 1.1rem;border-radius:99px;font-weight:700;font-size:.85rem;opacity:0;transition:.25s;z-index:200;pointer-events:none;max-width:90vw}
 #toast.show{opacity:1;transform:translateX(-50%)}
+#tourBar{position:fixed;left:0;right:0;bottom:0;z-index:170;display:none;padding:.6rem;padding-bottom:calc(.6rem + env(safe-area-inset-bottom))}
+#tourBar.show{display:block}
+.tbox{max-width:34rem;margin:0 auto;background:var(--surface);color:var(--ink);border:2px solid var(--p);border-radius:16px;padding:.85rem 1rem;box-shadow:0 10px 30px rgba(0,0,0,.4)}
+.tbox h3{font-size:1.15rem;font-weight:800;margin:.1rem 0 .3rem}
+.tbox p{font-size:.95rem;line-height:1.4;margin-bottom:.7rem}
+.tbox .row{gap:.5rem;flex-wrap:wrap}
+body.touring{padding-bottom:15rem}
+.qh{background:var(--surface);border:1.5px solid var(--p);color:var(--p);width:1.7rem;height:1.7rem;border-radius:99px;font-weight:800;font-size:.85rem;margin-left:.4rem;padding:0;flex:0 0 auto}
+.hint{background:color-mix(in srgb,var(--p) 12%,var(--surface));border-left:4px solid var(--p);border-radius:10px;padding:.55rem .75rem;font-size:.88rem;line-height:1.4;margin-bottom:.6rem}
 .modal{position:fixed;inset:0;background:rgba(30,10,50,.55);z-index:150;display:none;align-items:flex-end;justify-content:center;padding:0}
 .modal.show{display:flex}
 .sheet{background:var(--surface);width:100%;max-width:34rem;max-height:92vh;overflow:auto;border-radius:22px 22px 0 0;padding:1.1rem}
@@ -245,6 +254,7 @@ nav.tabs::after{content:"";position:absolute;right:0;top:0;bottom:2px;width:2.2r
    <div class="htitle"><h1><span id="lookEmoji">💖</span> Amber's Science Store Hub</h1><p>Store manager &bull; Manager on Duty &bull; 601 Light St</p></div>
    <div class="hclock" id="clock">--:--</div>
    <button class="gear mgr" data-a="openSetup">&#128221; Setup</button>
+   <button class="gear" data-a="help">&#10067; Help</button>
    <button class="gear" data-a="openLook">&#9881; My Look</button>
    <button class="gear" data-a="mode" id="modeBtn">&#127763; Auto</button>
   </div>
@@ -278,6 +288,7 @@ nav.tabs::after{content:"";position:absolute;right:0;top:0;bottom:2px;width:2.2r
 <main>
 <!-- TODAY -->
 <section class="pane on" id="p-today">
+ <div class="card c4" id="tourBanner" style="display:none"></div>
  <div class="card c4"><div class="hd"><h2>&#129517; Right now</h2><span class="small" id="nowDay"></span></div><div id="nowBox"></div></div>
 <div class="card mgr" id="setupHint" style="display:none;border-left:5px solid var(--gold)"><b>This app still shows example info.</b> <span class="small">Put in the real team, hours and cash in a few taps.</span> <button class="btn sm" data-a="openSetup" style="margin-left:.4rem">Set up my store</button></div>
 <div class="card" id="mscHrs" style="display:none;border-left:5px solid var(--gold)"><div id="mscHrsMain"></div><div class="small" id="mscHrsSub" style="margin-top:.2rem"></div><div class="row mgr" id="mscHrsBtns" style="margin-top:.4rem"></div></div>
@@ -550,6 +561,15 @@ nav.tabs::after{content:"";position:absolute;right:0;top:0;bottom:2px;width:2.2r
  <button class="btn alt" data-a="suClear" id="suClearBtn" style="margin-top:.4rem">Clear all examples</button>
 </div></div>
 <!-- LOOK & GUIDE -->
+<div id="tourBar"></div>
+<div class="modal" id="help"><div class="sheet">
+ <div class="hd"><h2>&#10067; Help</h2><button class="btn sm alt" data-a="helpClose">Done</button></div>
+ <div class="row"><button class="btn" data-a="tourGo" data-v="all">&#9654; Show me around (about 2 minutes)</button></div>
+ <div id="helpNew"></div>
+ <label class="l" style="margin-top:.9rem">Or pick a tab to hear what it does</label>
+ <div class="pills" id="helpTabs"></div>
+ <div class="small" style="margin-top:.9rem;color:var(--soft)">Tip: tap the small ? next to a card title to see what that card is for.</div>
+</div></div>
 <div class="modal" id="look"><div class="sheet">
  <div class="hd"><h2>&#9881; My Look &amp; Settings</h2><button class="btn sm alt" data-a="closeLook">Done</button></div>
  <label class="l">Color look</label>
@@ -573,6 +593,7 @@ nav.tabs::after{content:"";position:absolute;right:0;top:0;bottom:2px;width:2.2r
  <div class="row" style="margin-bottom:.5rem"><label class="btn" style="cursor:pointer">+ Add photos<input type="file" id="wallFile" accept="image/*" multiple style="display:none"></label><button class="btn alt" data-a="wallClear">No photo</button></div>
  <div class="looks" id="wallGrid" style="grid-template-columns:repeat(auto-fill,minmax(5rem,1fr))"></div>
  <label class="l">Photo fade <span id="tVal"></span></label><input type="range" id="tint" min="10" max="95" style="width:100%;accent-color:var(--p);margin-bottom:.9rem">
+ <div class="card" style="margin-bottom:.8rem"><div class="hd"><h2 style="font-size:.95rem">&#129517; App tour</h2></div><div class="sub">Replay the guided tour any time.</div><div class="row"><button class="btn sm" data-a="tourGo" data-v="all">Replay the tour</button></div></div>
  <div class="card" style="margin-bottom:.8rem"><div class="hd"><h2 style="font-size:.95rem">&#128190; Backup</h2></div>
   <div class="sub">Everything is saved on this device only. Copy a backup now and then and keep it somewhere safe.</div>
   <div class="row"><button class="btn sm" data-a="backup">Show backup text</button><button class="btn sm alt" data-a="restore">Restore from text below</button></div>
@@ -580,6 +601,7 @@ nav.tabs::after{content:"";position:absolute;right:0;top:0;bottom:2px;width:2.2r
   <div class="row" style="margin-top:.5rem"><button class="btn sm gold" data-a="copyBackup">Copy</button><button class="btn sm red" id="resetBtn" data-a="reset">Reset app</button></div></div>
  <div class="card c4" style="margin-bottom:0"><div class="hd"><h2 style="font-size:.95rem">&#128214; Quick Guide</h2></div>
   <div class="small" style="color:var(--soft);display:grid;gap:.4rem">
+   <p><b>Help and tour:</b> tap the Help button at the top to replay the tour or read about one tab. A small ? next to a card title tells you what that card is for.</p>
    <p><b>Saved on your phone:</b> what you type is saved inside this browser on this device.</p>
    <p><b>Home screen:</b> in Safari or Chrome, tap Share / menu, then "Add to Home Screen".</p>
    <p><b>Role switch:</b> tap "Floor / Supervisor" before handing your phone to a lead. It hides the edit forms and delete buttons.</p>
@@ -695,7 +717,7 @@ function defaults(){
  ['Sat','Sun'].forEach(d=>{staff[d]=[mk('Amber (Manager)','Gift Shop Manager','Manager Float / POS','9:30 AM - 5:30 PM','1:30 PM'),mk(EX+'Maya L.','Lead Cashier','Register 1 (Main)','9:45 AM - 5:15 PM','12:30 PM'),mk(EX+'Devon K.','Sales Associate','Register 2 (Express)','10:00 AM - 5:15 PM','2:00 PM'),mk(EX+'Elena R.','Floor & Demo Helper','Floor / Dino & Space','10:30 AM - 5:00 PM','1:00 PM')]});
  const ck=(a,p)=>a.map(x=>({id:uid(),text:x,phase:p,done:false}));
  const ck2=a=>a.map(x=>({id:uid(),text:x,done:false}));
- return {catalog:[],invOn:true,mission:'',missionEdit:false,sops:[],closeList:ck2([EX+'Count and bag the register drawers',EX+'Turn off the store lights']),walk:{Opening:ck2([EX+'Walk the floor and check displays']),Midday:ck2([EX+'Re-front displays after an exit rush']),Closing:ck2([EX+'Walk the floor before leaving'])},walkSel:'Opening',listDate:'',groups:[],wrist:{date:'',items:[]},editCt:null,editSop:null,editGrp:null,tab:'today',look:'lover',hrs:{wd:[600,960],we:[600,1020]},team:[],customLooks:[],titleFont:'auto',textFont:'system',myFonts:[],walls:[],bgStyle:'sparkle',radius:16,size:'cozy',tint:40,wall:null,role:'manager',preset:todayPreset(),cOpen:'10:00',cClose:'16:00',live:true,sim:'11:30',day:todayDay(),showFilter:'ALL',phase:'ALL',
+ return {tourVer:0,catalog:[],invOn:true,mission:'',missionEdit:false,sops:[],closeList:ck2([EX+'Count and bag the register drawers',EX+'Turn off the store lights']),walk:{Opening:ck2([EX+'Walk the floor and check displays']),Midday:ck2([EX+'Re-front displays after an exit rush']),Closing:ck2([EX+'Walk the floor before leaving'])},walkSel:'Opening',listDate:'',groups:[],wrist:{date:'',items:[]},editCt:null,editSop:null,editGrp:null,tab:'today',look:'lover',hrs:{wd:[600,960],we:[600,1020]},team:[],customLooks:[],titleFont:'auto',textFont:'system',myFonts:[],walls:[],bgStyle:'sparkle',radius:16,size:'cozy',tint:40,wall:null,role:'manager',preset:todayPreset(),cOpen:'10:00',cClose:'16:00',live:true,sim:'11:30',day:todayDay(),showFilter:'ALL',phase:'ALL',
  notes:[{id:uid(),text:EX+'Front the feature displays before the next exit rush.',tag:'Merch / Display',done:false},{id:uid(),text:EX+'Remind cashiers: MSC Members get 10% off.',tag:'Cashier Info',done:false}],
  staff,live_tasks:[{id:uid(),text:EX+'Pull 12 astronaut ice creams for Register 1',who:'Floor Team',pri:'Urgent',done:false}],
  shows:[{id:uid(),title:EX+'Colors of the Solar System',venue:'Planetarium',start:'11:30',dur:35,tip:'Glow planets, astronaut ice cream, star maps'},{id:uid(),title:EX+'Deep Sky',venue:'IMAX',start:'12:15',dur:40,tip:'Telescopes, space kits, posters'},{id:uid(),title:EX+'School Field Trip Bus Departure',venue:'Group / Event',start:'13:00',dur:35,tip:'Under-$10 souvenirs, rock candy'},{id:uid(),title:EX+'Flight of the Butterflies 3D',venue:'IMAX',start:'13:30',dur:45,tip:'Butterfly kits, bug viewers, plush'}],
@@ -1018,7 +1040,7 @@ const find=(arr,id)=>arr.find(x=>x.id===id);
 const del=(arr,id)=>{const i=arr.findIndex(x=>x.id===id);if(i>=0)arr.splice(i,1)};
 function act(a,el){const id=el.dataset.id,v=el.dataset.v,k=el.dataset.k;
  switch(a){
- case'tab':S.tab=v;renderTabs();scrollTo(0,0);break;
+ case'tab':S.tab=v;renderTabs();scrollTo(0,0);tourBanner();break;
  case'role':S.role=v;renderRole();renderTabs();break;
  case'sync':S.live=true;renderHeaderInputs();lastMin=-1;tick();toast('Back to live time');break;
  case'openLook':$('look').classList.add('show');break;
@@ -1067,6 +1089,15 @@ function act(a,el){const id=el.dataset.id,v=el.dataset.v,k=el.dataset.k;
  case'ckD':del(CKL[k](),id);renderTasks();renderLists();renderDyn();break;
  case'ckReset':CKL[k]().forEach(t=>t.done=false);renderTasks();renderLists();renderDyn();toast('All unchecked');break;
  case'tillClear':Object.keys(S.till).forEach(x=>S.till[x]=x==='start'?S.till.start:'');buildTill();break;
+ case'help':helpFill();$('help').classList.add('show');break;
+ case'helpClose':$('help').classList.remove('show');break;
+ case'tourGo':$('help').classList.remove('show');$('look').classList.remove('show');tourOpen(tourList(v==='new'?'new':'all'),true);break;
+ case'tourTab':$('help').classList.remove('show');tourOpen(tourList('all',v),false);break;
+ case'tourNext':if(tr.i<tr.list.length-1){tr.i++;tourShow()}else tourClose(tr.mark);break;
+ case'tourBack':if(tr.i>0){tr.i--;tourShow()}break;
+ case'tourEnd':tourClose(tr.mark);break;
+ case'tourLater':S.tourVer=TV();save();tourBanner();break;
+ case'hint':{const bx=el.closest('.hd').nextElementSibling;if(bx&&bx.classList.contains('hint'))bx.hidden=!bx.hidden;break}
  case'lsAdd':lsAdd([+el.dataset.id]);break;
  case'lsSave':S.catalog=LS.cat||[];save();renderStock();toast(S.catalog.length+' items saved as pick-lists');break;
  case'lsClear':S.catalog=[];save();renderStock();toast('Imported item list cleared');break;
@@ -1188,7 +1219,74 @@ document.addEventListener('submit',e=>{e.preventDefault();const f=e.target.datas
  if(ok){e.target.reset();if(f==='group'){$('gDate').value=todayISO();grpEditUI()}if(f==='sop'){previewSop();sopEditUI()}if(f==='contact')ctEditUI();if(f==='staff'){$('sShift').value='10:00 AM - 4:15 PM';$('sBreak').value='1:00 PM'}if(f==='show'){$('shStart').value='13:00';$('shDur').value=45}save();toast('Added')}
 });
 try{matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{if((S.mode||'auto')==='auto'){applyMode();renderLook()}})}catch(e){}
-renderAll();setInterval(tick,1000);
+
+/* ---- Help, tour and ? hints. KEEP IN SYNC: add a TOUR step (new since number) and a HINTS line for every new tab or card. build.py warns if one is missing. ---- */
+const TOUR=/*TOUR*/[
+{t:'today',k:'w',since:1,h:"Welcome!",x:"This app keeps your store day in one place. This tour takes about 2 minutes. Tap Next to move on. You can stop any time. To see it again, tap the Help button at the top."},
+{t:'today',since:1,h:"Today",x:"Your home page. It shows what is on right now, the Rush Radar for the shop, notes, and alarms. Start here each day."},
+{t:'staff',since:1,h:"Staff",x:"Who is working, on break or off. Type a task under a person and tap Text Task to send it."},
+{t:'shows',since:1,h:"Showtimes",x:"Today's IMAX and Planetarium shows. Pick a day, then tap Use these shows for my day."},
+{t:'groups',since:1,h:"Groups & Wristbands",x:"Groups coming today and when they arrive, and the wristbands for today."},
+{t:'tasks',since:1,h:"Checklists & Register",x:"Store checklists, a register and phone order calculator, and a till and safe drop counter. Tap a box to tick a job off."},
+{t:'lists',since:1,h:"Closing & Walks",x:"Your closing checklist and the walkthrough checklists for the floor."},
+{t:'sop',since:1,h:"Procedures",x:"Your written store procedures. Use Build a Procedure to add your own."},
+{t:'stock',since:1,h:"Stock & Orders",x:"Keep a restock list and log phone orders. Import a stock file from Lightspeed and the app fills in the items for you."},
+{t:'mod',since:1,h:"Manager on Duty",x:"Building sweeps, radio channels, and a shift log for your Manager on Duty shift."},
+{t:'events',since:1,h:"Events",x:"Event details, the event schedule, and setup and breakdown."},
+{t:'music',since:1,h:"Music",x:"A family-friendly store player and a list of clean tracks and requests."},
+{t:'docs',since:1,h:"Docs",x:"Handover notes and the policy vault. You can also import a Word, Excel, PDF or text file and the app sorts it for you."},
+{t:'dials',since:1,h:"Dials",x:"One-tap phone numbers. Tap a number to call it."},
+{t:'today',k:'e',since:1,h:"That is it!",x:"Tap the Help button any time to replay this tour, hear about one tab, or see what is new. A small ? next to a card title tells you what that card is for."}
+]/*ENDTOUR*/;
+const HINTS=/*HINTS*/[
+['Rush Radar',"Shows when IMAX, Planetarium and school groups let out toward the store, so you can see a rush coming."],
+['Manager Notes',"Write notes for yourself or the team. They are saved on this device."],
+['Alarms',"Pick a day and time and the app rings while it is open. Tap + Google Calendar to get a ring even when the app is closed."],
+['Staff Schedule',"Who is working, on break or off. Type a task under a person and tap Text Task."],
+['Shared Live Task Board',"Floor tasks and stock pulls everyone can see."],
+['Showtimes',"Today's IMAX and Planetarium shows. Pick a day, then tap Use these shows for my day."],
+['Store Checklists',"Tap a box to tick a job off."],
+['Register & Phone Order Calculator',"A quick calculator for register and phone orders."],
+['Till & Safe Drop Counter',"Count the till and safe drops here."],
+['Import a Lightspeed stock file',"Export your inventory from Lightspeed as CSV or Excel, then pick the file here. The app fills in each item for you."],
+['Hot-Seller Restock Queue',"Flag items that need to go back on the floor. Tap a status to move it along."],
+['Phone Orders & Guest Holds',"Log phone orders and guest holds. Tap a status to move it along."],
+['MOD Building Sweeps',"Tick off building sweeps during your Manager on Duty shift."],
+['Radio Channels',"Radio channels and ready-made prompts."],
+['MOD Shift Log',"Write down what happened during your Manager on Duty shift."],
+['Family-Friendly Store Player',"Paste a Spotify or YouTube playlist link you have checked is clean."],
+['Import a document',"Pick a Word, Excel, PDF, CSV or text file, or paste text. Tap Auto-sort it for me. You see a preview first. Nothing is saved until you confirm."],
+['Staff Handover',"Keep handover notes and store policies here."],
+['One-Tap Direct Dials',"Tap a number to call it."],
+['Groups & When They Arrive',"Add groups coming today and when they arrive."],
+['Wristbands Today',"Keep track of the wristbands for today."],
+['Closing / Night Checklist',"Tick off each job at closing time."],
+['Walkthrough Checklists',"Floor walkthrough checklists. Tick each one off as you go."],
+['Our Mission',"Your store mission statement."],
+['Operating Procedures',"Your written store procedures."],
+['Build a Procedure',"Add your own procedure here, step by step."]
+]/*ENDHINTS*/;
+const TOUR_IGNORE=/*IGNORE*/['Right now','Active Event Profile','Event Schedule','Setup & Breakdown','Vetted Clean Tracks','QR code','Copy this text','Quick Guide','Backup','My Look','Set up my store','App tour','Help','New here?','What is new']/*ENDIGNORE*/;
+let tr={list:[],i:0,mark:false};
+const TV=()=>TOUR.reduce((m,s)=>Math.max(m,s.since),1);
+function tourList(mode,tab){const vis=id=>!!document.querySelector('#tabs [data-v="'+id+'"]');
+ if(tab&&tab!=='all'&&tab!=='new')return TOUR.filter(s=>s.t===tab&&!s.k&&vis(s.t));
+ if(mode==='new')return TOUR.filter(s=>s.since>(S.tourVer||0)&&!s.k&&vis(s.t));
+ return TOUR.filter(s=>s.k||vis(s.t))}
+function tourOpen(list,mark){if(!list.length){toast('Nothing to show yet');return}tr={list,i:0,mark};document.body.classList.add('touring');$('tourBar').classList.add('show');tourShow()}
+function tourShow(){const s=tr.list[tr.i],n=tr.list.length;S.tab=s.t;renderTabs();scrollTo(0,0);
+ $('tourBar').innerHTML='<div class="tbox" role="dialog" aria-live="polite"><div class="small">Step '+(tr.i+1)+' of '+n+'</div><h3>'+esc(s.h)+'</h3><p>'+esc(s.x)+'</p><div class="row">'+(tr.i>0?'<button class="btn alt" data-a="tourBack">Back</button>':'')+'<button class="btn" data-a="tourNext">'+(tr.i<n-1?'Next':'Finish')+'</button><button class="btn sm alt" data-a="tourEnd">Skip tour</button></div></div>'}
+function tourClose(mark){$('tourBar').classList.remove('show');document.body.classList.remove('touring');if(mark){S.tourVer=TV();S.tab='today'}save();renderTabs();tourBanner()}
+function tourBanner(){const b=$('tourBanner');if(!b)return;const first=!(S.tourVer>0),n=tourList('new').length,show=S.tab==='today'&&!document.body.classList.contains('touring')&&(S.tourVer||0)<TV()&&(first||n>0);
+ b.style.display=show?'':'none';if(!show)return;
+ b.innerHTML=first?'<div class="hd"><h2>&#128075; New here?</h2></div><div class="small" style="margin-bottom:.5rem">Take a quick tour (about 2 minutes). It shows what each tab does.</div><div class="row"><button class="btn" data-a="tourGo" data-v="all">Show me around</button><button class="btn alt" data-a="tourLater">Not now</button></div>':'<div class="hd"><h2>&#10024; What is new</h2></div><div class="small" style="margin-bottom:.5rem">The app has '+n+' new thing'+(n===1?'':'s')+' to show you.</div><div class="row"><button class="btn" data-a="tourGo" data-v="new">Show me</button><button class="btn alt" data-a="tourLater">Not now</button></div>'}
+function helpFill(){const vis=id=>!!document.querySelector('#tabs [data-v="'+id+'"]');
+ $('helpTabs').innerHTML=TABS.filter(t=>vis(t[0])).map(t=>'<button class="pill" data-a="tourTab" data-v="'+t[0]+'">'+t[1]+' '+esc(t[2])+'</button>').join('');
+ const n=tourList('new').length;$('helpNew').innerHTML=((S.tourVer||0)>0&&n)?'<div class="row" style="margin-top:.5rem"><button class="btn gold" data-a="tourGo" data-v="new">&#10024; What is new ('+n+')</button></div>':''}
+function addHints(){document.querySelectorAll('.card .hd h2').forEach(h=>{if(h.querySelector('.qh'))return;const t=h.textContent,e=HINTS.find(x=>t.indexOf(x[0])>=0);if(!e)return;
+ const b=document.createElement('button');b.className='qh';b.type='button';b.setAttribute('data-a','hint');b.setAttribute('aria-label','What is this?');b.textContent='?';h.appendChild(b);
+ const bx=document.createElement('div');bx.className='hint';bx.hidden=true;bx.textContent=e[1];h.closest('.hd').insertAdjacentElement('afterend',bx)})}
+renderAll();addHints();tourBanner();setInterval(tick,1000);
 /* ===== Document import (Batch 2) ===== */
 const LIBS={};
 function loadLib(name){return new Promise((res,rej)=>{if(LIBS[name])return res();const el=$('lib-'+name);if(!el)return rej(new Error('Library missing'));try{const s=document.createElement('script');s.textContent=el.textContent;document.head.appendChild(s);LIBS[name]=1;res()}catch(e){rej(e)}})}
