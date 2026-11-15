@@ -168,13 +168,26 @@ label.l{display:block;font-size:.68rem;font-weight:800;text-transform:uppercase;
 .empty{font-size:.82rem;color:var(--muted);font-style:italic;padding:.4rem 0}
 #toast{position:fixed;left:50%;bottom:1.2rem;transform:translateX(-50%) translateY(2rem);background:var(--ink);color:#fff;padding:.55rem 1.1rem;border-radius:99px;font-weight:700;font-size:.85rem;opacity:0;transition:.25s;z-index:200;pointer-events:none;max-width:90vw}
 #toast.show{opacity:1;transform:translateX(-50%)}
-#tourBar{position:fixed;left:0;right:0;bottom:0;z-index:170;display:none;padding:.6rem;padding-bottom:calc(.6rem + env(safe-area-inset-bottom))}
+#tourBar{position:fixed;left:0;right:0;top:0;z-index:170;display:none;padding:.6rem;padding-bottom:calc(.6rem + env(safe-area-inset-bottom));transition:transform .45s cubic-bezier(.22,.9,.3,1);will-change:transform}
 #tourBar.show{display:block}
-.tbox{max-width:34rem;margin:0 auto;background:var(--surface);color:var(--ink);border:2px solid var(--p);border-radius:16px;padding:.85rem 1rem;box-shadow:0 10px 30px rgba(0,0,0,.4)}
+#updBar{position:fixed;left:.6rem;right:.6rem;bottom:calc(.8rem + env(safe-area-inset-bottom));z-index:210;display:none;max-width:34rem;margin:0 auto;background:#1a1033;color:#fff;border:3px solid #ffc400;border-radius:16px;padding:1rem;box-shadow:0 10px 30px rgba(0,0,0,.5)}
+#updBar.show{display:block}
+#updBar b{display:block;font-size:1.25rem;line-height:1.3;margin-bottom:.8rem;color:#fff}
+#updBar .row{gap:.6rem}
+.ubtn{flex:1;min-height:3rem;border-radius:12px;font-size:1.05rem;font-weight:800;border:2px solid #fff;background:transparent;color:#fff;padding:.5rem 1rem}
+.ubtn.go{background:#ffc400;border-color:#ffc400;color:#1a1033}
+.tbox{position:relative;max-width:34rem;margin:0 auto;background:var(--surface);color:var(--ink);border:2px solid var(--p);border-radius:16px;padding:.85rem 1rem;box-shadow:0 10px 30px rgba(0,0,0,.4)}
 .tbox h3{font-size:1.15rem;font-weight:800;margin:.1rem 0 .3rem}
 .tbox p{font-size:.95rem;line-height:1.4;margin-bottom:.7rem}
 .tbox .row{gap:.5rem;flex-wrap:wrap}
 body.touring{padding-bottom:15rem}
+.tbox::before{content:"";display:none;position:absolute;left:var(--ax,50%);width:14px;height:14px;background:var(--surface);border:2px solid var(--p);transform:translateX(-50%) rotate(45deg)}
+#tourBar.up .tbox::before{display:block;top:-9px;border-right:0;border-bottom:0}
+#tourBar.dn .tbox::before{display:block;bottom:-9px;border-left:0;border-top:0}
+.tour-hl{outline:3px solid var(--gold);outline-offset:3px;border-radius:12px;animation:tourPulse 1.5s ease-in-out infinite}
+.tour-tab{outline:3px solid var(--gold);outline-offset:-3px;border-radius:10px}
+@keyframes tourPulse{0%,100%{box-shadow:0 0 0 0 rgba(255,196,0,.6)}50%{box-shadow:0 0 0 10px rgba(255,196,0,0)}}
+@media (prefers-reduced-motion:reduce){.tour-hl{animation:none}#tourBar{transition:none}}
 .qh{background:var(--surface);border:1.5px solid var(--p);color:var(--p);width:1.7rem;height:1.7rem;border-radius:99px;font-weight:800;font-size:.85rem;margin-left:.4rem;padding:0;flex:0 0 auto}
 .hint{background:color-mix(in srgb,var(--p) 12%,var(--surface));border-left:4px solid var(--p);border-radius:10px;padding:.55rem .75rem;font-size:.88rem;line-height:1.4;margin-bottom:.6rem}
 .modal{position:fixed;inset:0;background:rgba(30,10,50,.55);z-index:150;display:none;align-items:flex-end;justify-content:center;padding:0}
@@ -457,9 +470,20 @@ nav.tabs::after{content:"";position:absolute;right:0;top:0;bottom:2px;width:2.2r
 <section class="pane" id="p-music">
  <div class="card"><div class="hd"><h2>&#127925; Family-Friendly Store Player</h2></div>
   <div class="sub">Paste a Spotify or YouTube playlist link you have checked is clean.</div>
+  <div id="plBox" style="margin-bottom:.7rem"></div>
   <div class="row" style="margin-bottom:.7rem"><input type="text" id="musicUrl" placeholder="Paste a Spotify or YouTube link" style="flex:1"><button class="btn" data-a="music">Load</button></div>
   <div id="player" style="background:#111;border-radius:14px;overflow:hidden;min-height:9rem;display:flex;align-items:center;justify-content:center;color:#bbb;font-size:.85rem;text-align:center;padding:.5rem">Paste a link above</div>
-  <div id="musicOpen" style="margin-top:.6rem"></div></div>
+  <div id="musicOpen" style="margin-top:.6rem"></div>
+  <div class="row" id="plSaveRow" style="margin-top:.6rem;display:none"><input type="text" id="plName" placeholder="Name it (example: Quiet morning)" aria-label="Playlist name" style="flex:1"><button class="btn alt" data-a="plSave">Save playlist</button></div></div>
+ <div class="card c2" id="mpCard"><div class="hd"><h2>&#128229; Import a Playlist</h2></div>
+  <div class="sub">Pick a playlist file (a CSV from Exportify) or a music file from another phone. Or paste a song list below. It is read on this device only.</div>
+  <div class="row"><input type="file" id="mpFile" accept=".csv,.txt,.json,application/json,text/csv,text/plain" style="flex:1" aria-label="Pick a playlist or music file"></div>
+  <textarea id="mpText" rows="3" placeholder="Or paste songs here, one per line (Song - Artist)" aria-label="Paste songs" style="margin-top:.5rem"></textarea>
+  <input type="text" id="mpName" placeholder="Playlist name (example: Weekend mix)" aria-label="Playlist name" style="margin-top:.5rem">
+  <div class="small" id="mpPrev" aria-live="polite" style="margin:.5rem 0"></div>
+  <div class="row"><button class="btn" data-a="mpGo">Add to the approved list</button></div>
+  <div class="row" style="margin-top:.8rem;gap:.5rem;flex-wrap:wrap"><button class="btn alt" style="flex:1" data-a="mpSend">&#128228; Send my music</button><button class="btn alt" style="flex:1" data-a="mpCopy">&#128203; Copy as text</button></div>
+  <div class="small" style="margin-top:.4rem">Send my music packs your saved playlists and approved songs into one small file. Share it to another phone, then pick it in the box above.</div></div>
  <div class="card c2"><div class="hd"><h2>&#127926; Vetted Clean Tracks &amp; Requests</h2></div>
   <form class="form f2" data-f="track"><div><label class="l">Song</label><input type="text" id="kTitle" required></div><div><label class="l">Note</label><input type="text" id="kNote" placeholder="Artist / why it is approved"></div><div style="grid-column:1/-1"><button class="btn" style="width:100%" type="submit">+ Add track</button></div></form>
   <div id="trackList"></div></div>
@@ -570,6 +594,7 @@ nav.tabs::after{content:"";position:absolute;right:0;top:0;bottom:2px;width:2.2r
 </div></div>
 <!-- LOOK & GUIDE -->
 <div id="tourBar"></div>
+<div id="updBar" role="alert"><b>A new version is ready.</b><div class="row"><button class="ubtn go" data-a="updGo">Update now</button><button class="ubtn" data-a="updLater">Later</button></div></div>
 <div class="modal" id="help"><div class="sheet">
  <div class="hd"><h2>&#10067; Help</h2><button class="btn sm alt" data-a="helpClose">Done</button></div>
  <div class="row"><button class="btn" data-a="tourGo" data-v="all">&#9654; Show me around (about 2 minutes)</button></div>
@@ -668,7 +693,7 @@ function defaults(){
  ['Sat','Sun'].forEach(d=>{staff[d]=[mk('Amber (Manager)','Gift Shop Manager','Manager Float / POS','9:30 AM - 5:30 PM','1:30 PM'),mk(EX+'Maya L.','Lead Cashier','Register 1 (Main)','9:45 AM - 5:15 PM','12:30 PM'),mk(EX+'Devon K.','Sales Associate','Register 2 (Express)','10:00 AM - 5:15 PM','2:00 PM'),mk(EX+'Elena R.','Floor & Demo Helper','Floor / Dino & Space','10:30 AM - 5:00 PM','1:00 PM')]});
  const ck=(a,p)=>a.map(x=>({id:uid(),text:x,phase:p,done:false}));
  const ck2=a=>a.map(x=>({id:uid(),text:x,done:false}));
- return {tourVer:0,catalog:[],invOn:true,mission:'',missionEdit:false,sops:[],closeList:ck2([EX+'Count and bag the register drawers',EX+'Turn off the store lights']),walk:{Opening:ck2([EX+'Walk the floor and check displays']),Midday:ck2([EX+'Re-front displays after an exit rush']),Closing:ck2([EX+'Walk the floor before leaving'])},walkSel:'Opening',listDate:'',groups:[],wrist:{date:'',items:[]},editCt:null,editSop:null,editGrp:null,tab:'today',look:'lover',hrs:{wd:[600,960],we:[600,1020]},team:[],customLooks:[],titleFont:'auto',textFont:'system',myFonts:[],walls:[],bgStyle:'sparkle',radius:16,size:'cozy',tint:40,wall:null,role:'manager',preset:todayPreset(),cOpen:'10:00',cClose:'16:00',live:true,sim:'11:30',day:todayDay(),showFilter:'ALL',phase:'ALL',
+ return {tourVer:0,playlists:[],catalog:[],invOn:true,mission:'',missionEdit:false,sops:[],closeList:ck2([EX+'Count and bag the register drawers',EX+'Turn off the store lights']),walk:{Opening:ck2([EX+'Walk the floor and check displays']),Midday:ck2([EX+'Re-front displays after an exit rush']),Closing:ck2([EX+'Walk the floor before leaving'])},walkSel:'Opening',listDate:'',groups:[],wrist:{date:'',items:[]},editCt:null,editSop:null,editGrp:null,tab:'today',look:'lover',hrs:{wd:[600,960],we:[600,1020]},team:[],customLooks:[],titleFont:'auto',textFont:'system',myFonts:[],walls:[],bgStyle:'sparkle',radius:16,size:'cozy',tint:40,wall:null,role:'manager',preset:todayPreset(),cOpen:'10:00',cClose:'16:00',live:true,sim:'11:30',day:todayDay(),showFilter:'ALL',phase:'ALL',
  notes:[{id:uid(),text:EX+'Front the feature displays before the next exit rush.',tag:'Merch / Display',done:false},{id:uid(),text:EX+'Remind cashiers: MSC Members get 10% off.',tag:'Cashier Info',done:false}],
  staff,live_tasks:[{id:uid(),text:EX+'Pull 12 astronaut ice creams for Register 1',who:'Floor Team',pri:'Urgent',done:false}],
  shows:[{id:uid(),title:EX+'Colors of the Solar System',venue:'Planetarium',start:'11:30',dur:35,tip:'Glow planets, astronaut ice cream, star maps'},{id:uid(),title:EX+'Deep Sky',venue:'IMAX',start:'12:15',dur:40,tip:'Telescopes, space kits, posters'},{id:uid(),title:EX+'School Field Trip Bus Departure',venue:'Group / Event',start:'13:00',dur:35,tip:'Under-$10 souvenirs, rock candy'},{id:uid(),title:EX+'Flight of the Butterflies 3D',venue:'IMAX',start:'13:30',dur:45,tip:'Butterfly kits, bug viewers, plush'}],
@@ -811,8 +836,12 @@ function renderEvents(){
 function renderMusic(){
  $('musicUrl').value=S.musicUrl||'';
  $('trackList').innerHTML=S.tracks.length?S.tracks.map(t=>`<div class="item"><div class="tt"><b>${esc(t.title)}</b><div class="small">${esc(t.note)}</div></div><button class="x" data-a="trD" data-id="${t.id}">✕</button></div>`).join(''):'<div class="empty">No tracks saved yet.</div>';
- if(S.musicUrl)buildPlayer(S.musicUrl,true)
+ if(S.musicUrl)buildPlayer(S.musicUrl,true);renderPlaylists()
 }
+const plOk=u=>/spotify\.com|youtu\.be\/|youtube\.com/.test(u||'');
+function renderPlaylists(){const L=S.playlists||[],cur=L.find(x=>x.url===S.musicUrl);
+ $('plBox').innerHTML=L.length?'<div class="small" style="margin-bottom:.35rem"><b>Saved playlists</b> &mdash; tap one to load it</div><div class="pills">'+L.map(x=>`<button class="pill ${cur&&cur.id===x.id?'on':''}" data-a="plGo" data-id="${x.id}">${esc(x.name)}</button>`).join('')+'</div>'+(cur?`<button class="btn sm alt mgr" style="margin-top:.4rem" data-a="plD" data-id="${cur.id}">Remove &ldquo;${esc(cur.name)}&rdquo; from saved</button>`:''):'';
+ $('plSaveRow').style.display=(plOk(S.musicUrl)&&!cur)?'':'none'}
 function buildPlayer(url,quiet){
  const w=$('player');let src='';
  try{
@@ -821,10 +850,38 @@ function buildPlayer(url,quiet){
    src=list?'https://www.youtube.com/embed/videoseries?list='+list:(id?'https://www.youtube.com/embed/'+id:'')}
  }catch(e){}
  if(!src){w.innerHTML='<span style="color:#ff9ec7">Please use a Spotify or YouTube link.</span>';$('musicOpen').innerHTML='';return}
- w.innerHTML=`<iframe src="${esc(src)}" width="100%" height="${src.includes('spotify')?352:220}" style="border:0" allow="autoplay; encrypted-media" loading="lazy"></iframe>`;
+ w.innerHTML=`<iframe title="Music player" src="${esc(src)}" width="100%" height="${src.includes('spotify')?352:220}" style="border:0" allow="autoplay; encrypted-media" loading="lazy"></iframe>`;
  $('musicOpen').innerHTML=`<a class="btn alt sm" href="${esc(url)}" target="_blank" rel="noopener">Open in its own app / tab</a> <span class="small">If the player stays blank here, use this button.</span>`;
  if(!quiet)toast('Player loaded')
 }
+let MP=null;
+function csvRows(t){const rows=[];let r=[],c='',q=false;for(let i=0;i<t.length;i++){const ch=t[i];if(q){if(ch==='"'){if(t[i+1]==='"'){c+='"';i++}else q=false}else c+=ch}else if(ch==='"')q=true;else if(ch===','){r.push(c);c=''}else if(ch==='\n'||ch==='\r'){if(ch==='\r'&&t[i+1]==='\n')i++;r.push(c);c='';if(r.some(x=>x.trim()))rows.push(r);r=[]}else c+=ch}
+ r.push(c);if(r.some(x=>x.trim()))rows.push(r);return rows}
+function mpParse(text,fname){
+ text=String(text||'').replace(/^﻿/,'').trim();if(!text)return null;
+ if(text[0]==='{'){try{const o=JSON.parse(text);if(o&&o.app==='msc-hub-music'){
+  const pls=(Array.isArray(o.playlists)?o.playlists:[]).filter(x=>x&&typeof x.name==='string'&&typeof x.url==='string'&&plOk(x.url)).slice(0,200).map(x=>({name:x.name.slice(0,80),url:x.url.slice(0,500)}));
+  const trs=(Array.isArray(o.tracks)?o.tracks:[]).filter(x=>x&&typeof x.title==='string'&&x.title.trim()).slice(0,3000).map(x=>({title:x.title.slice(0,160),note:String(x.note||'').slice(0,200),pl:x.pl?String(x.pl).slice(0,80):''}));
+  return {kind:'pack',pls,trs}}}catch(e){}return null}
+ let songs=[];const rows=text.indexOf(',')>=0?csvRows(text):[],hdr=rows.length?rows[0].map(x=>x.trim().toLowerCase()):[];
+ const ti=hdr.findIndex(h=>h==='track name'||h==='title'||h==='song'||h==='name'),ai=hdr.findIndex(h=>h.indexOf('artist')===0);
+ if(ti>=0){rows.slice(1).forEach(r=>{const t=(r[ti]||'').trim(),a=ai>=0?(r[ai]||'').trim().replace(/;\s*/g,', '):'';if(t)songs.push(a?t+' - '+a:t)})}
+ else songs=text.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
+ songs=[...new Set(songs.map(x=>x.slice(0,160)))].slice(0,3000);
+ return songs.length?{kind:'songs',songs,name:(fname||'').replace(/\.[^.]+$/,'')}:null}
+function mpPreview(r){MP=r;const e=$('mpPrev');
+ if(!r){e.textContent='No songs found. Try a CSV from Exportify, a music file from another phone, or paste songs one per line.';return}
+ if(r.kind==='pack'){e.textContent='Found '+r.pls.length+' saved playlist'+(r.pls.length===1?'':'s')+' and '+r.trs.length+' song'+(r.trs.length===1?'':'s')+'. Tap Add to the approved list to bring them in.';return}
+ if(!$('mpName').value.trim()&&r.name)$('mpName').value=r.name;
+ e.textContent='Found '+r.songs.length+' song'+(r.songs.length===1?'':'s')+'. First: '+r.songs.slice(0,3).join('; ')+(r.songs.length>3?'...':'')+'. Give the playlist a name, then tap Add to the approved list.'}
+function mpPack(){return JSON.stringify({app:'msc-hub-music',v:1,playlists:(S.playlists||[]).map(p=>({name:p.name,url:p.url})),tracks:S.tracks.filter(t=>!String(t.title).startsWith(EX)).map(t=>({title:t.title,note:t.note||'',pl:t.pl||''}))})}
+function mpAdd(){if(!MP){toast('Pick a file or paste songs first');return}
+ const have=new Set(S.tracks.map(t=>t.title.toLowerCase()+'|'+(t.pl||'')));let add=0,addP=0;
+ if(MP.kind==='pack'){MP.trs.forEach(t=>{const k=t.title.toLowerCase()+'|'+t.pl;if(have.has(k))return;have.add(k);S.tracks.push({id:uid(),title:t.title,note:t.note,pl:t.pl});add++});
+  S.playlists=S.playlists||[];MP.pls.forEach(p=>{if(S.playlists.some(x=>x.url===p.url))return;S.playlists.push({id:uid(),name:p.name,url:p.url});addP++})}
+ else{const nm=($('mpName').value||'').trim().slice(0,80)||'My playlist';MP.songs.forEach(sg=>{const k=sg.toLowerCase()+'|'+nm;if(have.has(k))return;have.add(k);S.tracks.push({id:uid(),title:sg,note:'Approved by Amber - from "'+nm+'"',pl:nm});add++})}
+ const msg=add+' song'+(add===1?'':'s')+' added'+(addP?', '+addP+' playlist'+(addP===1?'':'s'):'');
+ MP=null;$('mpText').value='';$('mpName').value='';$('mpFile').value='';$('mpPrev').textContent='';save();renderMusic();toast(msg)}
 function renderDocs(){
  $('docList').innerHTML=S.docs.length?S.docs.map(d=>`<div class="item"><div class="tt"><b>${tx(d.title)}</b><div class="small" style="white-space:pre-wrap">${esc(d.text)}</div><div class="row" style="margin-top:.4rem">${d.url?`<a class="btn sm" href="${esc(d.url)}" target="_blank" rel="noopener">Open link</a>`:''}<button class="btn sm alt" data-a="dcC" data-id="${d.id}">Copy text</button><button class="btn sm alt" data-a="dcQ" data-id="${d.id}">QR code</button></div></div><button class="x mgr" data-a="dcD" data-id="${d.id}">✕</button></div>`).join(''):'<div class="empty">No documents yet.</div>'
 }
@@ -1077,7 +1134,15 @@ function act(a,el){const id=el.dataset.id,v=el.dataset.v,k=el.dataset.k;
  case'tmAll':{const nums=(S.staff[actDay()]||[]).filter(p=>p.phone&&p.status!=='Off Shift').map(p=>p.phone.replace(/[^0-9+]/g,'')).join(',');if(!nums){toast('No cell numbers on today\'s staff yet');break}smsTo(nums,teamUpdate());break}
  case'copyHandover':copyText(handover(),'Handover copied');break;
  case'miD':del(S.ev.miles,id);renderEvents();break;
- case'music':{const u=$('musicUrl').value.trim();if(!u)return;S.musicUrl=u;buildPlayer(u);break}
+ case'music':{const u=$('musicUrl').value.trim();if(!u)return;S.musicUrl=u;buildPlayer(u);renderPlaylists();break}
+ case'updGo':location.reload();break
+ case'updLater':$('updBar').classList.remove('show');break
+ case'mpGo':mpAdd();break
+ case'mpCopy':copyText(mpPack(),'Music copied. Paste it into the box on the other phone.');break
+ case'mpSend':{if(!(S.playlists||[]).length&&!S.tracks.some(t=>!String(t.title).startsWith(EX))){toast('Nothing to send yet');break}const txt=mpPack();try{const f=new File([txt],'msc-music.json',{type:'application/json'});if(navigator.canShare&&navigator.canShare({files:[f]})){navigator.share({files:[f],title:'MSC Hub music'}).catch(()=>{});break}}catch(e){}const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type:'application/json'}));a.download='msc-music.json';document.body.appendChild(a);a.click();a.remove();toast('Music file saved on this phone');break}
+ case'plSave':{const nm=($('plName').value||'').trim();if(!nm){toast('Type a name first');break}if(!plOk(S.musicUrl)){toast('Load a Spotify or YouTube link first');break}(S.playlists=S.playlists||[]).push({id:uid(),name:nm,url:S.musicUrl});$('plName').value='';save();renderPlaylists();toast('Playlist saved');break}
+ case'plGo':{const x=find(S.playlists,id);if(!x)break;S.musicUrl=x.url;$('musicUrl').value=x.url;buildPlayer(x.url);save();renderPlaylists();break}
+ case'plD':del(S.playlists,id);save();renderPlaylists();toast('Removed');break
  case'trD':del(S.tracks,id);renderMusic();break;
  case'dcC':{const d=find(S.docs,id);copyText(d.title.replace(EX,'')+'\n'+(d.url?d.url+'\n':'')+d.text,'Copied');break}
  case'dcQ':showQR(id);break;
@@ -1191,7 +1256,7 @@ try{matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{if
 const TOUR=/*TOUR*/[
 {t:'today',k:'w',since:1,h:"Welcome!",x:"This app keeps your store day in one place. This tour takes about 2 minutes. Tap Next to move on. You can stop any time. To see it again, tap the Help button at the top."},
 {t:'today',since:1,h:"Today",x:"Your home page. It shows what is on right now, the Rush Radar for the shop, notes, and alarms. Start here each day."},
-{t:'today',since:2,h:"Team Update",x:"On the Today tab, the Team Update card builds one message for your team: who is working, showtimes, tasks, notes and closing steps. Add your own line if you like, then tap Text whole team."},
+{t:'today',since:2,w:'#teamCard',m:1,h:"Team Update",x:"On the Today tab, the Team Update card builds one message for your team: who is working, showtimes, tasks, notes and closing steps. Add your own line if you like, then tap Text whole team."},
 {t:'staff',since:1,h:"Staff",x:"Who is working, on break or off. Type a task under a person and tap Text Task to send it."},
 {t:'shows',since:1,h:"Showtimes",x:"Today's IMAX and Planetarium shows. Pick a day, then tap Use these shows for my day."},
 {t:'groups',since:1,h:"Groups & Wristbands",x:"Groups coming today and when they arrive, and the wristbands for today."},
@@ -1201,7 +1266,7 @@ const TOUR=/*TOUR*/[
 {t:'stock',since:1,h:"Stock & Orders",x:"Keep a restock list and log phone orders. Import a stock file from Lightspeed and the app fills in the items for you."},
 {t:'mod',since:1,h:"Manager on Duty",x:"Building sweeps, radio channels, and a shift log for your Manager on Duty shift."},
 {t:'events',since:1,h:"Events",x:"Event details, the event schedule, and setup and breakdown."},
-{t:'music',since:1,h:"Music",x:"A family-friendly store player and a list of clean tracks and requests."},
+{t:'music',since:1,h:"Music",x:"A family-friendly store player. Save your playlists as buttons so one tap loads them. Import a playlist file to fill the approved list, and send your music to another phone."},
 {t:'docs',since:1,h:"Docs",x:"Handover notes and the policy vault. You can also import a Word, Excel, PDF or text file and the app sorts it for you."},
 {t:'dials',since:1,h:"Dials",x:"One-tap phone numbers. Tap a number to call it."},
 {t:'today',k:'e',since:1,h:"That is it!",x:"Tap the Help button any time to replay this tour, hear about one tab, or see what is new. A small ? next to a card title tells you what that card is for."}
@@ -1223,7 +1288,8 @@ const HINTS=/*HINTS*/[
 ['MOD Building Sweeps',"Tick off building sweeps during your Manager on Duty shift."],
 ['Radio Channels',"Radio channels and ready-made prompts."],
 ['MOD Shift Log',"Write down what happened during your Manager on Duty shift."],
-['Family-Friendly Store Player',"Paste a Spotify or YouTube playlist link you have checked is clean."],
+['Import a Playlist',"Pick a playlist file or paste a song list. The songs join the approved list. Send my music shares your playlists and approved songs with another phone."],
+['Family-Friendly Store Player',"Paste a Spotify or YouTube playlist link you have checked is clean. Then name it and tap Save playlist. Next time, one tap loads it."],
 ['Import a document',"Pick a Word, Excel, PDF, CSV or text file, or paste text. Tap Auto-sort it for me. You see a preview first. Nothing is saved until you confirm."],
 ['Staff Handover',"Keep handover notes and store policies here."],
 ['One-Tap Direct Dials',"Tap a number to call it."],
@@ -1238,14 +1304,33 @@ const HINTS=/*HINTS*/[
 const TOUR_IGNORE=/*IGNORE*/['Right now','Active Event Profile','Event Schedule','Setup & Breakdown','Vetted Clean Tracks','QR code','Copy this text','Quick Guide','Backup','My Look','Set up my store','App tour','Help','New here?','What is new']/*ENDIGNORE*/;
 let tr={list:[],i:0,mark:false};
 const TV=()=>TOUR.reduce((m,s)=>Math.max(m,s.since),1);
-function tourList(mode,tab){const vis=id=>!!document.querySelector('#tabs [data-v="'+id+'"]');
+function tourList(m,t){return tourList0(m,t).filter(s=>!s.m||!document.body.classList.contains('floor'))}
+function tourList0(mode,tab){const vis=id=>!!document.querySelector('#tabs [data-v="'+id+'"]');
  if(tab&&tab!=='all'&&tab!=='new')return TOUR.filter(s=>s.t===tab&&!s.k&&vis(s.t));
  if(mode==='new')return TOUR.filter(s=>s.since>(S.tourVer||0)&&!s.k&&vis(s.t));
  return TOUR.filter(s=>s.k||vis(s.t))}
-function tourOpen(list,mark){if(!list.length){toast('Nothing to show yet');return}tr={list,i:0,mark};document.body.classList.add('touring');$('tourBar').classList.add('show');tourShow()}
-function tourShow(){const s=tr.list[tr.i],n=tr.list.length;S.tab=s.t;renderTabs();scrollTo(0,0);
- $('tourBar').innerHTML='<div class="tbox" role="dialog" aria-live="polite"><div class="small">Step '+(tr.i+1)+' of '+n+'</div><h3>'+esc(s.h)+'</h3><p>'+esc(s.x)+'</p><div class="row">'+(tr.i>0?'<button class="btn alt" data-a="tourBack">Back</button>':'')+'<button class="btn" data-a="tourNext">'+(tr.i<n-1?'Next':'Finish')+'</button><button class="btn sm alt" data-a="tourEnd">Skip tour</button></div></div>'}
-function tourClose(mark){$('tourBar').classList.remove('show');document.body.classList.remove('touring');if(mark){S.tourVer=TV();S.tab='today'}save();renderTabs();tourBanner()}
+function tourOpen(list,mark){if(!list.length){toast('Nothing to show yet');return}tr={list,i:0,mark,hl:null};document.body.classList.add('touring');const bar=$('tourBar');bar.style.transition='none';bar.style.transform='translateY(100vh)';bar.classList.add('show');bar.offsetHeight;bar.style.transition='';tourShow()}
+function tourClear(){document.querySelectorAll('.tour-hl,.tour-tab').forEach(e=>e.classList.remove('tour-hl','tour-tab'))}
+function tourTarget(s){if(s.k)return null;if(s.w){const e=document.querySelector(s.w);return e&&e.offsetParent?e:null}return[...document.querySelectorAll('#p-'+s.t+' .card')].find(c=>c.offsetParent&&c.id!=='tourBanner')||null}
+function tourPlace(hl){const bar=$('tourBar'),box=bar.firstElementChild;if(!box||!bar.classList.contains('show'))return;
+ const vh=innerHeight,bh=bar.offsetHeight,pad=8,nav=($('tabs')||{}).offsetHeight||56,r=hl?hl.getBoundingClientRect():null;let y=vh-bh,cls='';
+ if(r){if(r.bottom+bh+pad<=vh&&r.bottom>nav){y=r.bottom+pad;cls='up'}else if(r.top-bh-pad>=nav){y=r.top-bh-pad;cls='dn'}}
+ bar.classList.remove('up','dn');if(cls)bar.classList.add(cls);
+ if(r&&cls){const bx=box.getBoundingClientRect();box.style.setProperty('--ax',Math.min(Math.max(r.left+r.width/2-bx.left,24),bx.width-24)+'px')}
+ bar.style.transform='translateY('+Math.max(y,0)+'px)'}
+function tourShow(){const s=tr.list[tr.i],n=tr.list.length;S.tab=s.t;renderTabs();tourClear();
+ $('tourBar').innerHTML='<div class="tbox" role="dialog" aria-live="polite"><div class="small">Step '+(tr.i+1)+' of '+n+'</div><h3>'+esc(s.h)+'</h3><p>'+esc(s.x)+'</p><div class="row">'+(tr.i>0?'<button class="btn alt" data-a="tourBack">Back</button>':'')+'<button class="btn" data-a="tourNext">'+(tr.i<n-1?'Next':'Finish')+'</button><button class="btn sm alt" data-a="tourEnd">Skip tour</button></div></div>';
+ const rm=matchMedia('(prefers-reduced-motion:reduce)').matches,beh=rm?'auto':'smooth';
+ const tb=document.querySelector('#tabs [data-v="'+s.t+'"]');if(tb&&!s.k){tb.classList.add('tour-tab');try{tb.scrollIntoView({block:'nearest',inline:'center'})}catch(e){}}
+ const el=tourTarget(s);tr.hl=null;
+ if(!el){scrollTo({top:0,behavior:beh});tourPlace(null);return}
+ let hl=el;if(el.getBoundingClientRect().height>innerHeight*.45)hl=el.querySelector('.hd')||el;
+ hl.classList.add('tour-hl');tr.hl=hl;const nav=($('tabs')||{}).offsetHeight||56;
+ scrollTo({top:Math.max(0,hl.getBoundingClientRect().top+scrollY-nav-14),behavior:beh});
+ tourPlace(hl);setTimeout(()=>{if(tr.hl===hl)tourPlace(hl)},rm?40:550)}
+let tourTm;addEventListener('scroll',()=>{if(!tr||!tr.list||!$('tourBar').classList.contains('show'))return;clearTimeout(tourTm);tourTm=setTimeout(()=>tourPlace(tr.hl),120)},{passive:true});
+addEventListener('resize',()=>{if(tr&&tr.list&&$('tourBar').classList.contains('show'))tourPlace(tr.hl)});
+function tourClose(mark){tourClear();tr.hl=null;$('tourBar').classList.remove('show','up','dn');document.body.classList.remove('touring');if(mark){S.tourVer=TV();S.tab='today'}save();renderTabs();tourBanner()}
 function tourBanner(){const b=$('tourBanner');if(!b)return;const first=!(S.tourVer>0),n=tourList('new').length,show=S.tab==='today'&&!document.body.classList.contains('touring')&&(S.tourVer||0)<TV()&&(first||n>0);
  b.style.display=show?'':'none';if(!show)return;
  b.innerHTML=first?'<div class="hd"><h2>&#128075; New here?</h2></div><div class="small" style="margin-bottom:.5rem">Take a quick tour (about 2 minutes). It shows what each tab does.</div><div class="row"><button class="btn" data-a="tourGo" data-v="all">Show me around</button><button class="btn alt" data-a="tourLater">Not now</button></div>':'<div class="hd"><h2>&#10024; What is new</h2></div><div class="small" style="margin-bottom:.5rem">The app has '+n+' new thing'+(n===1?'':'s')+' to show you.</div><div class="row"><button class="btn" data-a="tourGo" data-v="new">Show me</button><button class="btn alt" data-a="tourLater">Not now</button></div>'}
@@ -1255,6 +1340,8 @@ function helpFill(){const vis=id=>!!document.querySelector('#tabs [data-v="'+id+
 function addHints(){document.querySelectorAll('.card .hd h2').forEach(h=>{if(h.querySelector('.qh'))return;const t=h.textContent,e=HINTS.find(x=>t.indexOf(x[0])>=0);if(!e)return;
  const b=document.createElement('button');b.className='qh';b.type='button';b.setAttribute('data-a','hint');b.setAttribute('aria-label','What is this?');b.textContent='?';h.appendChild(b);
  const bx=document.createElement('div');bx.className='hint';bx.hidden=true;bx.textContent=e[1];h.closest('.hd').insertAdjacentElement('afterend',bx)})}
+$('mpFile').addEventListener('change',async e=>{const f=e.target.files[0];if(!f)return;try{mpPreview(mpParse(await f.text(),f.name))}catch(err){$('mpPrev').textContent='Could not read that file.'}});
+$('mpText').addEventListener('input',()=>{const t=$('mpText').value;if(!t.trim()){MP=null;$('mpPrev').textContent='';return}mpPreview(mpParse(t,''))});
 renderAll();addHints();tourBanner();setInterval(tick,1000);
 /* ===== Document import (Batch 2) ===== */
 const LIBS={};
@@ -1618,7 +1705,7 @@ setInterval(alarmCheck,5000);
 alInit();alarmCheck();
 /* ===== end alarms ===== */
 /* ===== install-as-app helper (only on a real web address) ===== */
-try{if('serviceWorker'in navigator&&/^https?:$/.test(location.protocol)){navigator.serviceWorker.register('sw.js').catch(()=>{});navigator.serviceWorker.addEventListener('message',e=>{if(e.data==='msc-update')toast('A new version is ready. Close and reopen the app to get it.')})}}catch(e){}
+try{if('serviceWorker'in navigator&&/^https?:$/.test(location.protocol)){navigator.serviceWorker.register('sw.js').catch(()=>{});navigator.serviceWorker.addEventListener('message',e=>{if(e.data==='msc-update')$('updBar').classList.add('show')})}}catch(e){}
 
 /* ---- accessibility labels ---- */
 function a11y(){document.querySelectorAll('input[type=checkbox]:not([aria-label]),select:not([aria-label]),input:not([type=hidden]):not([type=checkbox]):not([aria-label])').forEach(e=>{
