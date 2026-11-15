@@ -135,6 +135,9 @@ label.l{display:block;font-size:.68rem;font-weight:800;text-transform:uppercase;
 .item.done{opacity:.55}.item.done .tt{text-decoration:line-through}
 .item .tt{flex:1;font-size:.88rem;font-weight:600}
 .item input[type=checkbox]{width:1.15rem;height:1.15rem;margin-top:.15rem;accent-color:var(--p);flex:0 0 auto}
+.dz{border:2px dashed var(--p);border-radius:16px;padding:1rem .8rem;text-align:center;font-weight:700;cursor:pointer;margin:.2rem 0 .7rem;background:color-mix(in srgb,var(--p) 8%,transparent)}
+.dz small{display:block;font-weight:600;opacity:.8;margin-top:.2rem}
+.dz.over{background:color-mix(in srgb,var(--p) 24%,transparent);border-style:solid}
 .pkList{max-height:20rem;overflow:auto;border-radius:12px}
 .pkList .item label{flex:1;padding:.2rem 0;word-break:break-word}
 .ypT{flex:1;text-align:left;background:none;border:0;color:inherit;font:inherit;padding:.35rem .2rem;min-height:44px;word-break:break-word;cursor:pointer}
@@ -544,6 +547,7 @@ body[data-edge=era] .card::after,body[data-edge=era] #menuPanel::after{content:"
   <div class="sub">Paste a Spotify or YouTube playlist link you have checked is clean. A YouTube list shows every song so you can play, queue and skip.</div>
   <div id="plBox" style="margin-bottom:.7rem"></div>
   <div class="row" style="margin-bottom:.7rem"><input type="text" id="musicUrl" placeholder="Paste a Spotify or YouTube link" style="flex:1"><button class="btn" data-a="music">Load</button></div>
+  <div class="dz" id="mpDrop" tabindex="0" role="button" aria-label="Drop a playlist file here, or tap to choose one">&#128194; Drop a playlist file here<small>A Spotify file (CSV or JSON). Or tap here to pick one.</small></div>
   <div id="player" style="background:#111;border-radius:14px;overflow:hidden;min-height:9rem;display:flex;align-items:center;justify-content:center;color:#bbb;font-size:.85rem;text-align:center;padding:.5rem">Paste a link above</div>
   <div id="musicOpen" style="margin-top:.6rem"></div>
   <div class="row" id="plSaveRow" style="margin-top:.6rem;display:none"><input type="text" id="plName" placeholder="Name it (example: Quiet morning)" aria-label="Playlist name" style="flex:1"><button class="btn alt" data-a="plSave">Save playlist</button></div>
@@ -561,7 +565,7 @@ body[data-edge=era] .card::after,body[data-edge=era] #menuPanel::after{content:"
   <div id="pkBox"></div>
   <div class="row" id="pkSaveRow" style="margin-top:.6rem;display:none"><input type="text" id="pkName" placeholder="Name it (example: Quiet morning)" aria-label="Playlist name" style="flex:1"><button class="btn" id="pkSaveBtn" data-a="pkSave">Save playlist</button></div></div>
  <div class="card c2" id="mpCard"><div class="hd"><h2>&#128229; Import a Playlist</h2></div>
-  <div class="sub">Pick a playlist file (a CSV from Exportify) or a music file from another phone. Or paste a song list below. It is read on this device only. You can tick the songs you want.</div>
+  <div class="sub">Pick a playlist file (a CSV from Exportify, a JSON from Spotify) or a music file from another phone. Or paste a song list below. It is read on this device only. You can tick the songs you want.</div>
   <div class="row"><input type="file" id="mpFile" accept=".csv,.txt,.json,application/json,text/csv,text/plain" style="flex:1" aria-label="Pick a playlist or music file"></div>
   <textarea id="mpText" rows="3" placeholder="Or paste songs here, one per line (Song - Artist)" aria-label="Paste songs" style="margin-top:.5rem"></textarea>
   <input type="text" id="mpName" placeholder="Playlist name (example: Weekend mix)" aria-label="Playlist name" style="margin-top:.5rem">
@@ -972,9 +976,23 @@ function buildPlayer(url,quiet){
 let MP=null;
 function csvRows(t){const rows=[];let r=[],c='',q=false;for(let i=0;i<t.length;i++){const ch=t[i];if(q){if(ch==='"'){if(t[i+1]==='"'){c+='"';i++}else q=false}else c+=ch}else if(ch==='"')q=true;else if(ch===','){r.push(c);c=''}else if(ch==='\n'||ch==='\r'){if(ch==='\r'&&t[i+1]==='\n')i++;r.push(c);c='';if(r.some(x=>x.trim()))rows.push(r);r=[]}else c+=ch}
  r.push(c);if(r.some(x=>x.trim()))rows.push(r);return rows}
+function mpSong(t,a){t=String(t||'').trim();a=String(a||'').trim();return t?(a?t+' - '+a:t):''}
+function mpOne(x){if(!x||typeof x!=='object')return '';const tr=x.track&&typeof x.track==='object'?x.track:x;
+ const t=tr.trackName||tr.track_name||(typeof tr.track==='string'?tr.track:'')||tr.name||tr.title||'';
+ const a=tr.artistName||tr.artist_name||(typeof tr.artist==='string'?tr.artist:'')||(Array.isArray(tr.artists)?tr.artists.map(z=>(z&&z.name)||z).join(', '):'')||'';
+ return mpSong(t,a)}
+const mpUniq=a=>[...new Set(a.filter(Boolean).map(x=>x.slice(0,160)))].slice(0,3000);
+function mpJson(o,fname){const nm=(fname||'').replace(/\.[^.]+$/,'');let songs=[];
+ if(o&&Array.isArray(o.playlists)){const pl=o.playlists.filter(p=>p&&Array.isArray(p.items));
+  if(pl.length>1)return {kind:'multi',pls:pl.slice(0,200).map(p=>({name:String(p.name||'Playlist').slice(0,80),songs:mpUniq(p.items.map(mpOne))})).filter(p=>p.songs.length)};
+  if(pl.length===1){songs=mpUniq(pl[0].items.map(mpOne));return songs.length?{kind:'songs',songs,name:String(pl[0].name||nm).slice(0,80)}:null}}
+ else if(o&&Array.isArray(o.tracks))songs=o.tracks.map(mpOne);
+ else if(o&&Array.isArray(o.items))songs=o.items.map(mpOne);
+ else if(Array.isArray(o))songs=o.map(mpOne);
+ songs=mpUniq(songs);return songs.length?{kind:'songs',songs,name:nm}:null}
 function mpParse(text,fname){
  text=String(text||'').replace(/^﻿/,'').trim();if(!text)return null;
- if(text[0]==='{'){try{const o=JSON.parse(text);if(o&&o.app==='msc-hub-music'){
+ if(text[0]==='['||text[0]==='{'){try{const o=JSON.parse(text);if(!(o&&o.app==='msc-hub-music'))return mpJson(o,fname);if(o&&o.app==='msc-hub-music'){
   const pls=(Array.isArray(o.playlists)?o.playlists:[]).filter(x=>x&&typeof x.name==='string'&&typeof x.url==='string'&&plOk(x.url)).slice(0,200).map(x=>({name:x.name.slice(0,80),url:x.url.slice(0,2200)}));
   const trs=(Array.isArray(o.tracks)?o.tracks:[]).filter(x=>x&&typeof x.title==='string'&&x.title.trim()).slice(0,3000).map(x=>({title:x.title.slice(0,160),note:String(x.note||'').slice(0,200),pl:x.pl?String(x.pl).slice(0,80):''}));
   return {kind:'pack',pls,trs}}}catch(e){}return null}
@@ -986,6 +1004,7 @@ function mpParse(text,fname){
  return songs.length?{kind:'songs',songs,name:(fname||'').replace(/\.[^.]+$/,'')}:null}
 function mpPreview(r){MP=r;const e=$('mpPrev');$('mpPick').innerHTML='';if(r&&r.kind==='songs')r.items=r.songs.map(s=>({t:s,on:true}));
  if(!r){e.textContent='No songs found. Try a CSV from Exportify, a music file from another phone, or paste songs one per line.';return}
+ if(r.kind==='multi'){if(!r.pls.length){MP=null;e.textContent='No songs found in that file.';return}e.textContent='This file has '+r.pls.length+' playlists. Tap the one you want.';$('mpPick').innerHTML='<div class="pills" style="margin:.3rem 0">'+r.pls.map((p,i)=>`<button class="pill" data-a="mpPickPl" data-id="${i}">${esc(p.name)} (${p.songs.length})</button>`).join('')+'</div>';return}
  if(r.kind==='pack'){e.textContent='Found '+r.pls.length+' saved playlist'+(r.pls.length===1?'':'s')+' and '+r.trs.length+' song'+(r.trs.length===1?'':'s')+'. Tap Add to the approved list to bring them in.';return}
  if(!$('mpName').value.trim()&&r.name)$('mpName').value=r.name;
  e.textContent='Found '+r.songs.length+' song'+(r.songs.length===1?'':'s')+'. Untick any you do not want, name the playlist, then tap Add to the approved list.';$('mpPick').innerHTML=pkList(r,'m')}
@@ -1366,6 +1385,7 @@ function act(a,el){const id=el.dataset.id,v=el.dataset.v,k=el.dataset.k;
  case'music':{const u=$('musicUrl').value.trim();if(!u)return;S.musicUrl=u;buildPlayer(u);renderPlaylists();break}
  case'updGo':location.reload();break
  case'updLater':$('updBar').classList.remove('show');break
+ case'mpPickPl':{const pp=MP&&MP.kind==='multi'&&MP.pls[+id];if(pp){const q=MP.pls;$('mpName').value=pp.name;mpPreview({kind:'songs',songs:pp.songs,name:pp.name})}break}
  case'pkOpen':pkOpen();break
  case'pkClose':ypStop();break
  case'ypGo':ypPlay(+id);break
@@ -1590,7 +1610,14 @@ function helpFill(){const vis=id=>!!document.querySelector('#tabs [data-v="'+id+
 function addHints(){document.querySelectorAll('.card .hd h2').forEach(h=>{if(h.querySelector('.qh'))return;const t=h.textContent,e=HINTS.find(x=>t.indexOf(x[0])>=0);if(!e)return;
  const b=document.createElement('button');b.className='qh';b.type='button';b.setAttribute('data-a','hint');b.setAttribute('aria-label','What is this?');b.textContent='?';h.appendChild(b);
  const bx=document.createElement('div');bx.className='hint';bx.hidden=true;bx.textContent=e[1];h.closest('.hd').insertAdjacentElement('afterend',bx)})}
-$('mpFile').addEventListener('change',async e=>{const f=e.target.files[0];if(!f)return;try{mpPreview(mpParse(await f.text(),f.name))}catch(err){$('mpPrev').textContent='Could not read that file.'}});
+async function mpFileGo(f){if(!f)return;if(f.size>8e6){$('mpPrev').textContent='That file is too big.';return}try{mpPreview(mpParse(await f.text(),f.name))}catch(err){$('mpPrev').textContent='Could not read that file.'}try{$('mpCard').scrollIntoView({block:'nearest'})}catch(e){}}
+$('mpFile').addEventListener('change',e=>mpFileGo(e.target.files[0]));
+(()=>{const dz=$('mpDrop'),pane=$('p-music'),hasF=e=>e.dataTransfer&&[...(e.dataTransfer.types||[])].indexOf('Files')>=0,inFile=e=>e.target&&e.target.closest&&e.target.closest('input[type=file]');
+ ['dragenter','dragover'].forEach(t=>document.addEventListener(t,e=>{if(!hasF(e)||inFile(e))return;e.preventDefault();if(pane.contains(e.target))dz.classList.add('over')}));
+ document.addEventListener('dragleave',e=>{if(!e.relatedTarget)dz.classList.remove('over')});
+ document.addEventListener('drop',e=>{if(!hasF(e)||inFile(e))return;e.preventDefault();dz.classList.remove('over');const f=e.dataTransfer.files[0];if(!f)return;
+  if(pane.contains(e.target))mpFileGo(f);else toast('Open the Music tab and drop the file on the box there')});
+ dz.addEventListener('click',()=>$('mpFile').click());dz.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();$('mpFile').click()}})})();
 $('ypBar').addEventListener('input',()=>{YP.drag=true;try{$('ypCur').textContent=fmtT(YP.pl.getDuration()*$('ypBar').value/1000)}catch(e){}});
 $('ypBar').addEventListener('change',()=>{try{YP.pl.seekTo(YP.pl.getDuration()*$('ypBar').value/1000,true)}catch(e){}YP.drag=false});
 $('mpText').addEventListener('input',()=>{const t=$('mpText').value;if(!t.trim()){MP=null;$('mpPick').innerHTML='';$('mpPrev').textContent='';return}mpPreview(mpParse(t,''))});
