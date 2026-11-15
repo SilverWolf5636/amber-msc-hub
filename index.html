@@ -215,6 +215,8 @@ body[data-mode=dark]{--pd:color-mix(in srgb,var(--p) 40%,#fff);--sd:color-mix(in
 body:not([data-mode=dark]) .small,body:not([data-mode=dark]) .x{color:color-mix(in srgb,var(--muted) 62%,#000)}
 body[data-mode=dark] .badge,body[data-mode=dark] .tag{color:var(--pd)}
 body[data-mode=dark] .tag{color:var(--sd)}
+/* timeline times + radio channel labels: use the readable text colour (light and dark) */
+.tl b,.acc b[style*="--p"]{color:var(--pd)!important}
 body[data-mode=dark] .badge.hot{color:#fff}
 .x,.pill,.btn.sm,.gear,.hmore{position:relative}
 .x::after,.pill::after,.btn.sm::after,.gear::after,.hmore::after{content:"";position:absolute;inset:-.5rem -.3rem}
@@ -569,7 +571,10 @@ nav.tabs::after{content:"";position:absolute;right:0;top:0;bottom:2px;width:2.2r
    <p><b>Role switch:</b> tap "Floor / Supervisor" before handing your phone to a lead. It hides the edit forms and delete buttons.</p>
    <p><b>Text Task:</b> on the Staff tab, type a task under a person and tap Text Task.</p>
    <p><b>Sticky notes:</b> the gold button makes notes you can drag around any tab.</p>
-   <p><b>Floor clock:</b> follows the real time. Change it to practice a busy day, tap Live to go back.</p></div></div>
+   <p><b>Floor clock:</b> follows the real time. Change it to practice a busy day, tap Live to go back.</p>
+   <p><b>Import a document:</b> on the Docs tab, pick a Word, Excel, PDF, CSV or text file (or paste text). Tap "Auto-sort it for me" and the app guesses where each part belongs: showtimes, groups, contacts or steps. You see a preview first. Nothing is saved until you confirm.</p>
+   <p><b>Small header on phones:</b> the "Store info" button shows or hides the phone chips and hours so your screen has more room.</p>
+   <p><b>Museum hours:</b> a helper refreshes them once a day. The card shows when it last updated.</p></div></div>
 </div></div>
 
 <div class="modal" id="copyModal"><div class="sheet"><div class="hd"><h2>Copy this text</h2><button class="btn sm alt" data-a="closeCopy">Done</button></div>
