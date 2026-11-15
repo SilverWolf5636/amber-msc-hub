@@ -142,7 +142,7 @@ label.l{display:block;font-size:.68rem;font-weight:800;text-transform:uppercase;
 @keyframes pulse{50%{opacity:.6}}
 .wave{border:2px solid var(--line);background:var(--surface);border-radius:calc(var(--r) - 4px);padding:.7rem .8rem;margin-bottom:.6rem}
 .wave.now{border-color:var(--p);background:color-mix(in srgb,var(--p) 8%,var(--surface));box-shadow:0 0 0 3px color-mix(in srgb,var(--p) 20%,transparent)}
-.wave.past{opacity:.55}
+.wave.past{filter:saturate(.35) brightness(.97)}
 .venue{font-size:.62rem;font-weight:800;text-transform:uppercase;border-radius:6px;padding:.1rem .45rem;color:#fff;background:var(--s)}
 .venue.pl{background:var(--p)}.venue.ev{background:#0f8f82}
 .tip{display:inline-block;background:color-mix(in srgb,var(--t) 18%,var(--surface));border-radius:8px;padding:.1rem .5rem;font-size:.75rem;margin-top:.3rem}
@@ -170,6 +170,10 @@ label.l{display:block;font-size:.68rem;font-weight:800;text-transform:uppercase;
 #toast.show{opacity:1;transform:translateX(-50%)}
 #tourBar{position:fixed;left:0;right:0;top:0;z-index:170;display:none;padding:.6rem;padding-bottom:calc(.6rem + env(safe-area-inset-bottom));transition:transform .45s cubic-bezier(.22,.9,.3,1);will-change:transform}
 #tourBar.show{display:block}
+.brk{border-radius:14px;padding:.8rem 1rem;color:#fff}
+.brk b{display:block;font-size:1.5rem;font-weight:800;letter-spacing:.02em}
+.brk p{margin:.3rem 0 0;font-size:.95rem;line-height:1.4}
+.brk.grn{background:#0b6b3a}.brk.amb{background:#8a5200}.brk.red{background:#a31616}
 #updBar{position:fixed;left:.6rem;right:.6rem;bottom:calc(.8rem + env(safe-area-inset-bottom));z-index:210;display:none;max-width:34rem;margin:0 auto;background:#1a1033;color:#fff;border:3px solid #ffc400;border-radius:16px;padding:1rem;box-shadow:0 10px 30px rgba(0,0,0,.5)}
 #updBar.show{display:block}
 #updBar b{display:block;font-size:1.25rem;line-height:1.3;margin-bottom:.8rem;color:#fff}
@@ -314,6 +318,7 @@ nav.tabs::after{content:"";position:absolute;right:0;top:0;bottom:2px;width:2.2r
   <div class="kpi"><small>&#128203; Store checklist</small><strong id="kCheck">-</strong><div class="bar"><i id="kBar" style="width:0"></i></div></div>
   <div class="kpi"><small>&#128230; Stock &amp; orders</small><strong id="kStock">-</strong><span id="kStockSub"></span></div>
  </div>
+ <div class="card" id="brkCard"><div class="hd"><h2>&#9749; Break Check</h2></div><div id="brkBox" role="status" aria-live="polite"></div></div>
  <div class="grid g2">
   <div class="card"><div class="hd"><div><h2>&#127754; Gift Shop Rush Radar</h2><div class="sub">When IMAX, Planetarium and school groups let out toward the store.</div></div><button class="btn sm mgr" data-a="tab" data-v="shows">Edit showtimes</button></div><div id="radar"></div></div>
   <div>
@@ -737,7 +742,18 @@ function renderTabs(){
  $('tabs').innerHTML=TABS.filter(t=>!(S.role==='floor'&&t[0]==='mod')&&!(t[0]==='stock'&&!S.invOn)).map(t=>`<button class="tab ${S.tab===t[0]?'on':''}" data-a="tab" data-v="${t[0]}">${t[1]} ${t[2]}</button>`).join('');
  document.querySelectorAll('.pane').forEach(p=>p.classList.toggle('on',p.id==='p-'+S.tab));
 }
-function renderDyn(){try{renderTeam()}catch(e){}
+function renderBreak(){const el=$('brkBox');if(!el)return;const h=hours(),n=Math.floor(nowMin()),cl=h.on?t2m(h.close):0,op=h.on?t2m(h.open):0;let cls,big,msg;
+ if(!h.on||n<op||n>=cl){cls='grn';big='STORE CLOSED';msg='No rush to plan around right now.'}
+ else{const rw=rushWin(),inR=rw.find(r=>n>=r.s&&n<r.e),clash=rushClash(n,BRK),nxt=rw.find(r=>r.s>n);
+  let free=null;if(inR||clash){let t=Math.ceil(n/5)*5;while(t+BRK<=cl&&rushClash(t,BRK))t+=5;if(t+BRK<=cl)free=t}
+  const fr=inR||clash?(free!=null?' Next clear break: from '+m12(free)+'.':' No clear 30-minute break is left today.'):'';
+  if(inR){cls='red';big='BAD TIME';msg='The '+m12(inR.exit)+' exit rush is on until '+m12(inR.e)+'. Stay on the floor.'+fr}
+  else if(clash){cls='amb';big='WAIT';msg='A rush starts at '+m12(clash.s)+', in '+Math.max(1,Math.round(clash.s-n))+' min. A 30-minute break would run into it.'+fr}
+  else if(n+BRK>cl){cls='amb';big='TOO LATE';msg='The store closes in less than 30 minutes.'}
+  else{cls='grn';big='GOOD TIME';msg=nxt?'Next rush starts at '+m12(nxt.s)+', in '+Math.round(nxt.s-n)+' min.':'No more rushes today.'}
+  const ob=(S.staff[actDay()]||[]).filter(p=>p.status==='On Break').map(nm);if(ob.length)msg+=' Already on break: '+ob.join(', ')+'.'}
+ el.innerHTML='<div class="brk '+cls+'"><b>'+big+'</b><p>'+esc(msg)+'</p></div>'}
+function renderDyn(){try{renderTeam()}catch(e){}try{renderBreak()}catch(e){}
  const h=hours(),n=nowMin(),w=nextWave();
  $('hHours').textContent=h.label+(h.on?(n>=t2m(h.open)&&n<t2m(h.close)?'  • STORE OPEN':n<t2m(h.open)?'  • Opens '+m12(t2m(h.open)):'  • After hours'):'');
  $('hNext').textContent=w?'Next exit rush: '+m12(w.exit)+' ('+w.title.replace(EX,'')+')':'No more exit rushes';
@@ -1256,6 +1272,7 @@ try{matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{if
 const TOUR=/*TOUR*/[
 {t:'today',k:'w',since:1,h:"Welcome!",x:"This app keeps your store day in one place. This tour takes about 2 minutes. Tap Next to move on. You can stop any time. To see it again, tap the Help button at the top."},
 {t:'today',since:1,h:"Today",x:"Your home page. It shows what is on right now, the Rush Radar for the shop, notes, and alarms. Start here each day."},
+{t:'today',since:3,w:'#brkCard',h:"Break Check",x:"Shows GOOD TIME, WAIT or BAD TIME for taking a break right now, so nobody is stuck on break when a rush hits. It also shows the next clear time."},
 {t:'today',since:2,w:'#teamCard',m:1,h:"Team Update",x:"On the Today tab, the Team Update card builds one message for your team: who is working, showtimes, tasks, notes and closing steps. Add your own line if you like, then tap Text whole team."},
 {t:'staff',since:1,h:"Staff",x:"Who is working, on break or off. Type a task under a person and tap Text Task to send it."},
 {t:'shows',since:1,h:"Showtimes",x:"Today's IMAX and Planetarium shows. Pick a day, then tap Use these shows for my day."},
@@ -1274,6 +1291,7 @@ const TOUR=/*TOUR*/[
 const HINTS=/*HINTS*/[
 ['Rush Radar',"Shows when IMAX, Planetarium and school groups let out toward the store, so you can see a rush coming."],
 ['Manager Notes',"Write notes for yourself or the team. They are saved on this device."],
+['Break Check',"Tells you if now is a good time for a 30-minute break. It watches the exit rushes from the showtimes."],
 ['Team Update',"Builds one message for your team from what is in the app. Add your own line, then copy it or text it. Texting the whole team uses the cell numbers on the Staff tab."],
 ['Alarms',"Pick a day and time and the app rings while it is open. Tap + Google Calendar to get a ring even when the app is closed."],
 ['Staff Schedule',"Who is working, on break or off. Type a task under a person and tap Text Task."],
