@@ -26,7 +26,7 @@ class Text(HTMLParser):
         if tag in ("script", "style", "noscript"): self.skip = max(0, self.skip - 1)
         if tag in self.BLOCK: self.out.append("\n")
     def handle_data(self, d):
-        if not self.skip: self.out.append(d)
+        if not self.skip: self.out.append(re.sub(r"\s+", " ", d))
 
 def page_lines(html):
     p = Text(); p.feed(html)
@@ -73,6 +73,7 @@ def parse_holidays(lines, today):
         if not m: continue
         rest = l[m.end():]
         v = parse_range(rest)
+        if v is None and not rest.strip() and i + 1 < len(lines): v = parse_range(lines[i + 1])
         if v is None: continue
         mo = MONTHS[m.group(1).lower()]; d = int(m.group(2))
         # pick the year that puts this date within [today-60d, today+305d]
@@ -122,6 +123,13 @@ def main(argv):
     data, problems = build(html, today)
     if problems:
         print("PARSE LOOKS WRONG (keeping the last good file):"); [print(" -", p) for p in problems]; return 0
+    try:
+        old = json.load(open(out))
+        future_old = [e for e in old.get("holidays", []) if e["date"] >= today.isoformat()]
+        if future_old and not data["holidays"]:
+            print("NO HOLIDAY ROWS FOUND but the old file had some (keeping the last good file)"); return 0
+    except Exception:
+        pass
     json.dump(data, open(out, "w"), indent=1); open(out, "a").write("\n")
     print("Wrote", out, "-", len(data["holidays"]), "holiday rows"); return 0
 
