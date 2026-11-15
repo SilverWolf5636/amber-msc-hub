@@ -6,44 +6,44 @@
   {
    "title": "Grown Up Field Trip: Clue",
    "url": "https://www.mdsci.org/events/grown-up-field-trip-clue/",
-   "type": "Special",
-   "dates": "Nov. 20 , 7",
-   "times": "10pm",
-   "first": "2026-11-07",
+   "type": "Adult",
+   "dates": "Nov. 20",
+   "times": "7-10pm",
+   "first": "2026-11-20",
    "last": "2026-11-20"
+  },
+  {
+   "title": "Music Under the Dome: Pink Floyd",
+   "url": "https://www.mdsci.org/events/music-under-the-dome-pink-floyd/",
+   "type": "Adult",
+   "dates": "Dec. 11",
+   "times": "7-10pm",
+   "first": "2026-12-11",
+   "last": "2026-12-11"
   },
   {
    "title": "Glass Art: Sea Glass Tree",
    "url": "https://www.mdsci.org/events/glass-art-sea-glass-tree/",
    "type": "Special",
-   "dates": "Dec. 13 , 1",
-   "times": "4pm",
-   "first": "2026-12-01",
+   "dates": "Dec. 13",
+   "times": "1-4pm",
+   "first": "2026-12-13",
    "last": "2026-12-13"
-  },
-  {
-   "title": "Music Under the Dome: Pink Floyd",
-   "url": "https://www.mdsci.org/events/music-under-the-dome-pink-floyd/",
-   "type": "Special",
-   "dates": "Dec. 11 , 7",
-   "times": "10pm",
-   "first": "2026-12-07",
-   "last": "2026-12-11"
   },
   {
    "title": "Toddler & Me: Cleaning Helpers",
    "url": "https://www.mdsci.org/events/toddlerandme-cleaning-helpers/",
    "type": "Special",
-   "dates": "Dec. 13 , 10",
-   "times": "15am-12:15pm",
-   "first": "2026-12-10",
+   "dates": "Dec. 13",
+   "times": "10:15am-12:15pm",
+   "first": "2026-12-13",
    "last": "2026-12-13"
   },
   {
    "title": "Snow Days",
    "url": "https://www.mdsci.org/events/snow-days/",
    "type": "Special",
-   "dates": "Dec. 24, Dec. 26, Dec. 27, Dec. 28",
+   "dates": "Dec. 24, 26, 27, 28",
    "times": "",
    "first": "2026-12-24",
    "last": "2026-12-28"
@@ -52,7 +52,7 @@
    "title": "Liquid Nitrogen Frozen Cocoa",
    "url": "https://www.mdsci.org/events/frozen-cocoa/",
    "type": "Special",
-   "dates": "Dec. 27, Dec. 28",
+   "dates": "Dec. 27, 28",
    "times": "12pm and 1pm",
    "first": "2026-12-27",
    "last": "2026-12-28"

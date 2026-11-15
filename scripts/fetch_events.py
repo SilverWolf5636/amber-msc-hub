@@ -14,7 +14,8 @@ import datetime, html, json, re, sys, urllib.request
 PAGE = "https://www.mdsci.org/whats-happening/events/"
 UA = "Mozilla/5.0 (compatible; AmberHubShowtimesBot/1.0; +https://github.com/SilverWolf5636/amber-msc-hub)"
 MON = {m: i + 1 for i, m in enumerate("jan feb mar apr may jun jul aug sep oct nov dec".split())}
-DATE = re.compile(r"\b(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s+(\d{1,2})((?:\s*(?:,|and|&|–|—|-|to)\s*\d{1,2}\b)*)", re.I)
+MNAME = {1: "Jan.", 2: "Feb.", 3: "Mar.", 4: "Apr.", 5: "May", 6: "June", 7: "July", 8: "Aug.", 9: "Sept.", 10: "Oct.", 11: "Nov.", 12: "Dec."}
+DATE = re.compile(r"\b(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s+(\d{1,2})((?:\s*(?:,|and|&|–|—|-|to)\s*\d{1,2}\b(?!\s*(?::|am|pm|a\.m|p\.m|–|—|-\s*\d)))*)", re.I)
 CLOCK = r"\d{1,2}(?::\d{2})?\s*(?:am|pm|a\.m\.|p\.m\.)"
 RANGE = re.compile(r"\b\d{1,2}(?::\d{2})?\s*(?:am|pm)?\s*(?:–|—|-|to)\s*" + CLOCK, re.I)
 ONE = re.compile(r"\b" + CLOCK, re.I)
@@ -48,7 +49,7 @@ def tokens(body):
             if t:
                 out.append(("txt", t))
         if s[1] == "sec":
-            out.append(("sec", s[2])); pos = max(pos, s[0])
+            out.append(("sec", s[2])); pos = max(pos, body.find(">", s[0]) + 1 or s[0])
         else:
             out.append(("ev", s[2], s[3])); pos = max(pos, s[4])
     t = flat(body[pos:])
@@ -90,12 +91,14 @@ def parse(body, today):
                 events[slug] = {"slug": slug, "title": "", "type": sec, "dts": [], "dates": [], "times": []}
                 order.append(slug)
             cur = events[slug]
+            if sec == "Adult":
+                cur["type"] = "Adult"
             if title and title.lower() not in GENERIC and not cur["title"]:
                 cur["title"] = title
         elif cur is not None:
             txt = t[1]
-            if len(txt) > 400:
-                txt = txt[:400]
+            if len(txt) > 90:
+                txt = txt[:90]
             for m in DATE.finditer(txt):
                 ds = days_from(m, today)
                 if ds:
@@ -112,17 +115,17 @@ def parse(body, today):
         if not e["dts"]:
             problems.append("no date found for " + title); continue
         dts = sorted(set(e["dts"]))
-        seen, dates = set(), []
-        for d in e["dates"]:
-            if d not in seen:
-                seen.add(d); dates.append(d)
+        by = {}
+        for d in dts:
+            by.setdefault(d.month, []).append(d)
+        dates = ["%s %s" % (MNAME[mo], ", ".join(str(x.day) for x in v)) for mo, v in sorted(by.items(), key=lambda kv: kv[1][0])]
         seen, times = set(), []
         for x in e["times"]:
             k = x.lower().replace(" ", "")
             if k not in seen:
                 seen.add(k); times.append(x)
         rows.append({"title": title, "url": "https://www.mdsci.org/events/%s/" % slug, "type": e["type"],
-                     "dates": ", ".join(dates), "times": " and ".join(times[:3]),
+                     "dates": "; ".join(dates), "times": " and ".join(times[:3]),
                      "first": dts[0].isoformat(), "last": dts[-1].isoformat()})
     rows.sort(key=lambda r: (r["first"], r["title"]))
     return rows, problems, toks
