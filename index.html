@@ -293,6 +293,14 @@ nav.tabs::after{content:"";position:absolute;right:0;top:0;bottom:2px;width:2.2r
     <form class="form mgr" data-f="note"><input type="text" id="noteText" placeholder="Add a shift note..." required>
      <div class="row"><select id="noteTag" style="flex:1"><option>Rush Prep</option><option>Cashier Info</option><option>Merch / Display</option></select><button class="btn" type="submit">+ Pin</button></div></form>
     <div id="notes"></div></div>
+   <div class="card c2" id="alarmCard" style="margin-top:.8rem"><div class="hd"><h2>&#9200; Alarms</h2><span class="badge" id="alarmCount"></span></div>
+    <form class="form" data-f="alarm"><input type="text" id="alText" placeholder="What is it for?" required>
+     <div class="row"><input type="date" id="alDate" required aria-label="Alarm date"><select id="alSel" aria-label="Alarm time" style="flex:1"></select><button class="btn" type="submit">+ Set alarm</button></div>
+     <div class="row" id="alOther" style="display:none"><input type="time" id="alTime" aria-label="Type a time (check AM or PM)"></div>
+     <div class="row" style="margin-top:.2rem"><button class="btn sm alt" type="button" data-a="alQ" data-v="15">In 15 min</button><button class="btn sm alt" type="button" data-a="alQ" data-v="30">In 30 min</button><button class="btn sm alt" type="button" data-a="alQ" data-v="60">In 1 hour</button></div></form>
+    <div class="small" id="alDone" aria-live="polite" style="margin-top:.5rem"></div>
+    <div class="note-box" id="alHint" style="margin-top:.6rem"></div>
+    <div id="alarms"></div></div>
   </div>
  </div>
 </section>
@@ -695,7 +703,7 @@ function defaults(){
  musicUrl:'',tracks:[],
  docs:[{id:uid(),title:EX+'Cash Drawer & Z-Report SOP',url:'',text:'Count drawers, bag deposit, sign the slip.'},{id:uid(),title:'Member Discount Policy',url:'',text:'MSC members get 10% off with a valid membership card at checkout.'}],
  contacts:[{id:uid(),name:'Science Store (direct)',role:'Gift shop line',phone:'410-545-5924'},{id:uid(),name:'Museum Operator',role:'Main desk',phone:'410-685-2370'},{id:uid(),name:EX+'Security Desk',role:'Add the real number',phone:''}],
- stickies:[]};
+ stickies:[],alarms:[]};
 }
 let S=load();
 function load(){const d=defaults();try{const r=localStorage.getItem(KEY);if(r){const p=JSON.parse(r);return Object.assign(d,p)}}catch(e){}return d}
@@ -890,7 +898,7 @@ function renderLook(){
 function renderRole(){document.body.classList.toggle('floor',S.role==='floor');$('rM').classList.toggle('on',S.role==='manager');$('rF').classList.toggle('on',S.role==='floor');if(S.role==='floor'&&S.tab==='mod')S.tab='today'}
 function renderHeaderInputs(){$('preset').value=S.preset;$('customHrs').style.display=S.preset==='custom'?'inline':'none';$('cOpen').value=S.cOpen;$('cClose').value=S.cClose;$('sim').value=S.live?m12x():S.sim}
 function m12x(){const d=new Date();return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')}
-function renderAll(){dailyReset();applyHrs();renderRole();renderLook();renderHeaderInputs();renderTabs();renderNotes();renderStaff();renderShows();renderTasks();renderStock();renderMod();renderEvents();renderMusic();renderDocs();renderDials();renderLists();renderGroups();renderSop();ctEditUI();grpEditUI();$('cPrice').value=S.calc.price;$('cDisc').value=S.calc.disc;renderCalc();buildTill();renderStickies();renderWalls();$('myEmoji').innerHTML=EMOJIS.map(e=>`<option>${e}</option>`).join('');lastMin=-1;tick()}
+function renderAll(){dailyReset();applyHrs();renderRole();renderLook();renderHeaderInputs();renderTabs();renderNotes();renderStaff();renderShows();renderTasks();renderStock();renderMod();renderEvents();renderMusic();renderDocs();renderDials();renderLists();renderGroups();renderSop();ctEditUI();grpEditUI();$('cPrice').value=S.calc.price;$('cDisc').value=S.calc.disc;renderCalc();buildTill();renderStickies();renderAlarms();renderWalls();$('myEmoji').innerHTML=EMOJIS.map(e=>`<option>${e}</option>`).join('');lastMin=-1;tick()}
 
 
 /* ---------- batch 1: lists, groups, wristbands, procedures ---------- */
@@ -1085,6 +1093,9 @@ function act(a,el){const id=el.dataset.id,v=el.dataset.v,k=el.dataset.k;
  case'snC':{const n=find(S.stickies,id);n.c=SC[(SC.indexOf(n.c)+1)%4];renderStickies();break}
  case'snM':{const n=find(S.stickies,id);n.min=!n.min;renderStickies();break}
  case'snD':del(S.stickies,id);renderStickies();break;
+ case'alD':del(S.alarms,id);alStopSound();save();renderAlarms();break;
+ case'alQ':{const d=new Date(Date.now()+(+el.dataset.v)*60000),p2=n=>String(n).padStart(2,'0');if(alSubmit(d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate()),p2(d.getHours())+':'+p2(d.getMinutes()),$('alText').value.trim(),'q'+el.dataset.v))$('alText').value='';break}
+ case'alStop':{const a=find(S.alarms,id);if(a){a.state='rang';alStopSound();save();renderAlarms()}break}
  case'backup':$('backupBox').value=JSON.stringify(S);toast('Backup text ready');break;
  case'copyBackup':copyText(JSON.stringify(S),'Backup copied');break;
  case'restore':try{const p=JSON.parse($('backupBox').value);S=Object.assign(defaults(),p);save();renderAll();toast('Restored')}catch(e){toast('That backup text did not work')}return;
@@ -1160,6 +1171,7 @@ document.addEventListener('submit',e=>{e.preventDefault();const f=e.target.datas
  case'walkadd':(S.walk[S.walkSel]=S.walk[S.walkSel]||[]).push({id:uid(),text:v('wlText'),done:false});renderLists();break;
  case'group':{const o={name:v('gName'),date:$('gDate').value,time:$('gTime').value,count:v('gCount'),band:$('gBand').value,note:v('gNote')};if(S.editGrp){const g=find(S.groups,S.editGrp);if(g)Object.assign(g,o);S.editGrp=null}else S.groups.push(Object.assign({id:uid()},o));renderGroups();break}
  case'wrist':{S.wrist=S.wrist||{date:'',items:[]};if(!S.wrist.items.length)S.wrist.date=todayISO();S.wrist.items.push({id:uid(),color:$('wColor').value,mean:v('wMean'),who:v('wWho')});renderGroups();break}
+ case'alarm':{if(!alSubmit($('alDate').value,alPick(),v('alText'))){ok=false;break}setTimeout(alInit,0);break}
  case'sop':{const steps=$('spSteps').value.split('\n').map(x=>x.trim()).filter(Boolean);if(!steps.length){toast('Add at least one step');ok=false;break}const o={title:v('spTitle'),cat:$('spCat').value,steps};if(S.editSop){const x=find(S.sops,S.editSop);if(x)Object.assign(x,o);S.editSop=null}else S.sops.unshift(Object.assign({id:uid()},o));renderSopList();break}
  case'contact':{const o={name:v('kName'),role:v('kRole'),phone:v('kPhone')};if(S.editCt){const c=find(S.contacts,S.editCt);if(c)Object.assign(c,o);S.editCt=null}else S.contacts.push(Object.assign({id:uid()},o));renderDials();break}
  default:ok=false}
@@ -1412,6 +1424,64 @@ async function loadMscShows(){
  renderMscShows()}
 loadMscShows();
 /* ===== end MSC hours ===== */
+
+/* ===== Alarms: only inside museum hours +/- 2 hours (closed days use 8 AM - 6 PM). Rings only while the app is open. ===== */
+var AL_PAD=120,alSnd=null,alCtx=null;
+function alWin(iso){
+ const dow=new Date(iso+'T12:00:00').getDay();let r=null;
+ if(MSCH){const hol=(MSCH.holidays||[]).find(x=>x.date===iso),w=MSCH.weekly||{};r=hol||(dow===1?w.mon:(dow>=2&&dow<=5)?w.tuefri:w.satsun)}
+ else if(dow!==1)r=dow<=5?{open:600,close:960}:{open:600,close:1020};
+ if(!r||r.closed||r.open==null)return[480,1080];
+ return[Math.max(0,r.open-AL_PAD),Math.min(1439,r.close+AL_PAD)]}
+var alArm='';
+function alMsg(t){$('alDone').textContent='';$('alHint').textContent=t}
+function alPick(){const v=$('alSel').value;return v==='other'?$('alTime').value:v}
+function alInit(){
+ const dEl=$('alDate');if(!dEl)return;if(!dEl.value)dEl.value=todayISO();
+ const d=dEl.value,w=alWin(d),now=new Date(),isT=d===todayISO(),nm=now.getHours()*60+now.getMinutes();
+ const p2=n=>String(n).padStart(2,'0'),hm=m=>p2(Math.floor(m/60))+':'+p2(m%60);
+ let o='',first=null;
+ for(let m=Math.ceil(w[0]/15)*15;m<=w[1];m+=15){if(isT&&m<=nm)continue;if(first===null)first=m;o+='<option value="'+hm(m)+'">'+esc(m12(m))+'</option>'}
+ o+='<option value="other">Other time (type it)...</option>';
+ $('alSel').innerHTML=o;$('alOther').style.display='none';alArm='';
+ $('alHint').textContent='Alarms ring only while this app is open on the phone. Usual window on '+new Date(d+'T12:00:00').toLocaleDateString([],{weekday:'long'})+': '+m12(w[0])+' to '+m12(w[1])+'. A time outside it needs one extra tap to confirm.'}
+function alHint(){alInit()}
+function alRel(due){const mm=Math.max(0,Math.round((due-new Date())/60000)),h=Math.floor(mm/60),m=mm%60;return 'in '+(h?h+' hr ':'')+(m||!h?m+' min':'')}
+function alSubmit(d,t,text,key){
+ if(!text){alMsg('Type what the alarm is for first.');return false}
+ if(!d||!t){alMsg('Pick a date and a time.');return false}
+ const due=new Date(d+'T'+t);if(isNaN(due)||due<=new Date()){alMsg('That time has already passed.');return false}
+ const w=alWin(d),m=t2m(t),out=m<w[0]||m>w[1],k=key||d+t;
+ if(out&&alArm!==k){alArm=k;alMsg('Heads up: '+m12(m)+' is outside the usual alarm window ('+m12(w[0])+' to '+m12(w[1])+'). Press again to set it anyway.');return false}
+ alArm='';S.alarms.push({id:uid(),text,date:d,time:t,state:'wait',over:out});
+ try{if('Notification'in window&&Notification.permission==='default')Notification.requestPermission()}catch(x){}
+ save();renderAlarms();alInit();
+ $('alDone').textContent='Alarm set for '+(d===todayISO()?'today':new Date(d+'T12:00:00').toLocaleDateString([],{weekday:'long',month:'short',day:'numeric'}))+' at '+m12(m)+' ('+alRel(due)+').';return true}
+(function(){const d=$('alDate'),s2=$('alSel'),t2=$('alTime');if(!d)return;
+ d.addEventListener('change',alInit);
+ s2.addEventListener('change',()=>{alArm='';$('alOther').style.display=s2.value==='other'?'flex':'none'});
+ t2.addEventListener('input',()=>{alArm=''})})();
+function renderAlarms(){
+ const box=$('alarms');if(!box)return;
+ const L=S.alarms.slice().sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time));
+ $('alarmCount').textContent=S.alarms.filter(a=>a.state==='wait').length+' set';
+ box.innerHTML=L.length?L.map(a=>{const when=new Date(a.date+'T12:00:00').toLocaleDateString([],{weekday:'short',month:'short',day:'numeric'})+' '+m12(t2m(a.time));
+  const st=a.state==='ring'?'<button class="btn sm" data-a="alStop" data-id="'+a.id+'">Stop ringing</button>':a.state==='rang'?'<span class="badge">Rang</span>':a.state==='missed'?'<span class="badge">Missed (app was closed)</span>':'<span class="badge hot">Waiting</span>';
+  const ov=a.over?' <span class="badge">Outside usual hours</span>':'';
+  return '<div class="item"><div class="tt"><b>'+esc(a.text)+'</b>'+ov+'<div class="small">'+esc(when)+'</div></div><div class="row">'+st+'<button class="x" data-a="alD" data-id="'+a.id+'" aria-label="Delete alarm">&#10005;</button></div></div>'}).join(''):'<div class="empty">No alarms set.</div>'}
+function alBeep(){try{alCtx=alCtx||new (window.AudioContext||window.webkitAudioContext)();const o=alCtx.createOscillator(),g=alCtx.createGain();o.connect(g);g.connect(alCtx.destination);o.frequency.value=880;g.gain.value=.25;o.start();o.stop(alCtx.currentTime+.25)}catch(e){}try{navigator.vibrate&&navigator.vibrate([200,100,200])}catch(e){}}
+function alStopSound(){if(!S.alarms.some(a=>a.state==='ring')&&alSnd){clearInterval(alSnd);alSnd=null}}
+function alarmCheck(){
+ const now=new Date();let ch=false;
+ S.alarms.forEach(a=>{if(a.state!=='wait')return;const due=new Date(a.date+'T'+a.time);if(now<due)return;
+  if(now-due>5*60000){a.state='missed';ch=true;return}
+  a.state='ring';ch=true;toast('⏰ '+a.text);
+  try{if('Notification'in window&&Notification.permission==='granted')new Notification('Alarm',{body:a.text})}catch(e){}});
+ if(ch){save();renderAlarms()}
+ if(S.alarms.some(a=>a.state==='ring')){if(!alSnd){alBeep();alSnd=setInterval(alBeep,2000)}}else alStopSound()}
+setInterval(alarmCheck,5000);
+alInit();alarmCheck();
+/* ===== end alarms ===== */
 
 /* ---- accessibility labels ---- */
 function a11y(){document.querySelectorAll('input[type=checkbox]:not([aria-label]),select:not([aria-label]),input:not([type=hidden]):not([type=checkbox]):not([aria-label])').forEach(e=>{
