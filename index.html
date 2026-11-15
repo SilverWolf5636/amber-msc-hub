@@ -377,7 +377,7 @@ body[data-edge=era] .card::after,body[data-edge=era] #menuPanel::after{content:"
 <div id="menuBack" data-a="menuClose"></div>
 <div id="menuPanel" role="dialog" aria-modal="true" aria-labelledby="menuTtl" aria-hidden="true">
  <div class="mp-head"><div><h2 id="menuTtl">Menu</h2><p>Pick where to go</p></div><button class="mp-close" data-a="menuClose">✕ Close</button></div>
- <div class="mp-mode" role="group" aria-label="How many sections to show"><button class="pill" type="button" id="mEasy" data-a="easy" data-v="1" aria-pressed="false">Easy</button><button class="pill" type="button" id="mFull" data-a="easy" data-v="0" aria-pressed="true">Full</button><span class="small" id="mpNote">Easy shows only the daily sections.</span></div>
+ <div class="mp-mode" role="group" aria-label="How many sections to show"><button class="pill" type="button" id="mEasy" data-a="easy" data-v="1" aria-pressed="false">Easy</button><button class="pill" type="button" id="mFull" data-a="easy" data-v="0" aria-pressed="true">Full</button><span class="small" id="mpNote">Full shows every section.</span></div>
  <div class="mp-list" id="tabs" role="group" aria-label="Sections"></div>
  <div class="mp-list" style="flex:none;padding-top:0"><button class="tab" type="button" data-a="openSettings"><span class="mr-ico" aria-hidden="true">&#9881;</span><span class="mr-t">Settings</span></button></div>
 </div>
@@ -784,7 +784,7 @@ const money=n=>(n<0?'-':'')+'$'+Math.abs(n).toFixed(2);
 const PRESETS={weekday:{open:'10:00',close:'16:00',on:true,label:'Today: 10:00 AM - 4:00 PM'},weekend:{open:'10:00',close:'17:00',on:true,label:'Today: 10:00 AM - 5:00 PM'},late:{open:'11:00',close:'17:00',on:true,label:'Today: 11:00 AM - 5:00 PM'},early:{open:'10:00',close:'15:00',on:true,label:'Today: 10:00 AM - 3:00 PM'},closed:{open:'00:00',close:'00:00',on:false,label:'Closed today (prep day)'}};
 const DAYS=['Tue','Wed','Thu','Fri','Sat','Sun'];
 const FS={cozy:1,roomy:1.12,big:1.28,huge:1.45},SIZES=['cozy','roomy','big','huge'];
-const EASY=['today','staff','shows','tasks','lists','stock'];
+const EASY=['today','staff','shows','tasks','lists','stock','events','music','dials'];
 const TABS=[['today','\u{1F3E0}','Today'],['staff','\u{1F469}‍\u{1F4BC}','Staff'],['shows','\u{1F3AC}','Showtimes'],['groups','\u{1F68C}','Groups & Wristbands'],['tasks','✅','Checklists & Register'],['lists','\u{1F319}','Closing & Walks'],['sop','\u{1F4DC}','Procedures'],['stock','\u{1F4E6}','Stock & Orders'],['mod','\u{1F3DB}️','Manager on Duty'],['events','\u{1F389}','Events'],['music','\u{1F3B5}','Music'],['docs','\u{1F4D6}','Docs'],['dials','\u{1F4DE}','Dials']];
 const LOOKS=[['lover','Lover','\u{1F496}','#e0397f','#8b5cf6'],['debut','Taylor Swift','\u{1F3B8}','#0a8591','#3d9b5a'],['fearless','Fearless','\u{1F49B}','#b07300','#f2c94c'],['speaknow','Speak Now','\u{1F49C}','#8e44ad','#c06bd6'],['red','Red','\u{1F9E3}','#b3122e','#d9a066'],['e1989','1989','\u{1F54A}️','#0b84c6','#f7d56b'],['rep','reputation','\u{1F40D}','#334155','#22a06b'],['folklore','folklore','\u{1F332}','#5b6b5a','#c9b99a'],['evermore','evermore','\u{1F342}','#9a4a1f','#d9a441'],['midnights','Midnights','\u{1F319}','#4338ca','#f59e0b'],['ttpd','The Tortured Poets Department','\u{1F58B}️','#3d3d3d','#b0a59a'],['showgirl','The Life of a Showgirl','\u{1F9E1}','#d9480f','#0f9d8a'],['mint','Science Center Mint','\u{1F9EA}','#0f8f82','#2b6fd6']];
 const CUSTOM_VARS=['--p','--s','--t','--ink','--soft','--muted','--bg1','--bg2','--bg3','--line'];
@@ -857,7 +857,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&document.body.class
 function renderTabs(){
  if(!S.invOn&&S.tab==='stock')S.tab='today';{const kk=$('kStock'),kp=kk&&kk.closest('.kpi');if(kp)kp.style.display=S.invOn?'':'none'}
  const vt=TABS.filter(t=>!(S.role==='floor'&&t[0]==='mod')&&!(t[0]==='stock'&&!S.invOn)&&!(S.easy&&!EASY.includes(t[0])&&t[0]!==S.tab));
- $('mEasy').setAttribute('aria-pressed',S.easy?'true':'false');$('mFull').setAttribute('aria-pressed',S.easy?'false':'true');$('mEasy').classList.toggle('on',!!S.easy);$('mFull').classList.toggle('on',!S.easy);$('mpNote').textContent=S.easy?'Easy shows only the daily sections.':'Full shows every section.';
+ $('mEasy').setAttribute('aria-pressed',S.easy?'true':'false');$('mFull').setAttribute('aria-pressed',S.easy?'false':'true');$('mEasy').classList.toggle('on',!!S.easy);$('mFull').classList.toggle('on',!S.easy);$('mpNote').textContent=S.easy?'Easy hides the harder sections.':'Full shows every section.';
  $('tabs').innerHTML=vt.map(t=>`<button class="tab ${S.tab===t[0]?'on':''}" data-a="tab" data-v="${t[0]}"${S.tab===t[0]?' aria-current="page"':''}><span class="mr-ico" aria-hidden="true">${t[1]}</span><span class="mr-t">${t[2]}</span>${S.tab===t[0]?'<span class="mr-ok" aria-hidden="true">✓</span>':''}</button>`).join('')+(S.easy?'<button class="tab more" type="button" data-a="easy" data-v="0">More sections (switch to Full)</button>':'');
  {const c=vt.find(t=>t[0]===S.tab);$('menuCur').textContent=c?c[1]+' '+c[2]:''}
  document.querySelectorAll('.pane').forEach(p=>p.classList.toggle('on',p.id==='p-'+S.tab));
@@ -1213,7 +1213,7 @@ function renderLook(){
  if(cu){st.setProperty('--p',ensureDark(cu.c1));st.setProperty('--s',ensureDark(cu.c2));st.setProperty('--t','color-mix(in srgb,var(--s) 55%,#fff)');st.setProperty('--ink','color-mix(in srgb,var(--p) 25%,#000)');st.setProperty('--soft','color-mix(in srgb,var(--p) 55%,#222)');st.setProperty('--muted','color-mix(in srgb,var(--p) 40%,#888)');st.setProperty('--bg1','color-mix(in srgb,var(--p) 8%,#fff)');st.setProperty('--bg2','color-mix(in srgb,var(--s) 12%,#fff)');st.setProperty('--bg3','color-mix(in srgb,var(--t) 20%,#fff)');st.setProperty('--line','color-mix(in srgb,var(--p) 25%,transparent)')}
  st.setProperty('--grad','linear-gradient(120deg,'+ensureDark(L[3])+','+ensureDark(L[4])+')');
  if(document.body.dataset.mode==='dark')['--ink','--soft','--muted','--bg1','--bg2','--bg3','--line'].forEach(k=>st.removeProperty(k));
- const rs=document.documentElement.style;rs.setProperty('--r',S.radius+'px');rs.setProperty('--fs',FS[S.size]||1);rs.setProperty('--tint',S.tint/100);{const g=S.glass||0;document.body.classList.toggle('glass',!!S.wall&&g>0);rs.setProperty('--gp',(100-g*.7)+'%');rs.setProperty('--gb',(2+g*.12)+'px')}
+ const rs=document.documentElement.style;rs.setProperty('--r',S.radius+'px');rs.setProperty('--fs',FS[S.size]||1);rs.setProperty('--tint',S.tint/100);{const g=S.glass||0;document.body.classList.toggle('glass',!!S.wall&&g>0);rs.setProperty('--gp',(100-g*.92)+'%');rs.setProperty('--gb',(2+g*.18)+'px')}
  $('wall').style.backgroundImage=S.wall?`url(${S.wall})`:'none';$('wallTint').style.display=S.wall?'block':'none';
  $('lookEmoji').textContent=L[2];renderFonts();
  $('lookGrid').innerHTML=allLooks().map(l=>`<div style="position:relative"><button class="look ${S.look===l[0]?'on':''}" style="width:100%" data-a="look" data-v="${l[0]}"><i style="background:linear-gradient(90deg,${l[3]},${l[4]})"></i>${l[2]} ${esc(l[1])}</button>${l[5]?`<button class="x" data-a="clDel" data-id="${l[0]}" style="position:absolute;top:2px;right:2px;background:var(--surface);padding:0 .35rem" aria-label="Delete this look">\u2715</button>`:''}</div>`).join('');
@@ -1596,7 +1596,7 @@ const TOUR=/*TOUR*/[
 {t:'music',since:5,w:'#mpCard',h:"Pick Songs",x:"Load a YouTube playlist and every song shows in a list. Tap a song to play it. Tap + Queue to line songs up. Use the buttons to skip, go back or rewind. You can also import a song list and tick the songs you want."},
 {t:'music',since:6,w:'#trackList',h:"Play Spotify songs",x:"Songs that came from a Spotify file have a play button. Tap it to play. The Spotify Player card has buttons to skip, go back and rewind.",},
 {t:'today',since:7,w:'#aPlus',h:"Bigger text",x:"Tap the big A+ button to make the words bigger. Tap it again for even bigger. At the biggest size it turns into A−, and one tap puts the text back to normal."},
-{t:'today',since:7,w:'#menuBtn',h:"Easy menu",x:"Open the Menu and tap Easy to see only the daily sections. Tap Full any time to see everything again."},
+{t:'today',since:7,w:'#menuBtn',h:"Easy menu",x:"Open the Menu and tap Easy to hide the harder sections. Tap Full any time to see everything again."},
 {t:'events',since:8,w:'#mscEv',h:"Coming up at the museum",x:"Shows the museum's own list of coming events, with dates and times. Tap Details to open the museum's page for that event. When an event is happening today, a line shows on the Today page. Always check the museum's page before you rely on a date."},
 {t:'docs',since:1,h:"Docs",x:"Handover notes and the policy vault. You can also import a Word, Excel, PDF or text file and the app sorts it for you."},
 {t:'dials',since:1,h:"Dials",x:"One-tap phone numbers. Tap a number to call it."},
