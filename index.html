@@ -12,7 +12,7 @@
 <link rel="icon" type="image/png" href="icon-192.png">
 <style>
 :root{--p:#e0397f;--s:#8b5cf6;--t:#38bdf8;--gold:#f5b83d;--ink:#2e1045;--soft:#5b4570;--muted:#85739a;
---bg1:#fff0f6;--bg2:#fce7f3;--bg3:#f3e8ff;--card:rgba(255,255,255,.95);--line:rgba(139,92,246,.2);--r:16px;--fs:1;--tint:.4;--surface:#fff;--tintc:255,255,255;--grad:linear-gradient(120deg,var(--p),var(--s))}
+--bg1:#fff0f6;--bg2:#fce7f3;--bg3:#f3e8ff;--card:rgba(255,255,255,.95);--line:rgba(139,92,246,.2);--r:16px;--fs:1;--tint:.4;--surface:#fff;--solid:#fff;--gp:100%;--gb:0px;--tintc:255,255,255;--grad:linear-gradient(120deg,var(--p),var(--s))}
 body[data-look=mint]{--p:#0f8f82;--s:#2b6fd6;--t:#ff7a59;--gold:#f5b83d;--ink:#0f2f3a;--soft:#33596a;--muted:#6a8c98;--bg1:#e8fbf7;--bg2:#e0f4ff;--bg3:#f1f8ff;--line:rgba(15,143,130,.22)}
 body{--grad:linear-gradient(120deg,var(--p),var(--s))}
 body[data-look=lover]{}
@@ -221,7 +221,7 @@ h1,h2,.nbig,.htitle h1{font-family:var(--ft,inherit)}
 details.sop{display:block}details.sop summary{cursor:pointer;list-style:none}details.sop summary::-webkit-details-marker{display:none}
 .steps{margin:.5rem 0 .2rem 1.3rem;padding:0}.steps li{margin:.25rem 0}
 
-body[data-mode=dark]{color-scheme:dark;--surface:#181a1b;--tintc:19,21,22;--card:rgba(24,26,27,.95);--ink:#e8e6e3;--soft:#c8c3bc;--muted:#9a948a;--line:rgba(255,255,255,.16);--bg1:color-mix(in srgb,var(--p) 7%,#131516);--bg2:color-mix(in srgb,var(--s) 5%,#131516);--bg3:color-mix(in srgb,var(--t) 4%,#131516)}
+body[data-mode=dark]{color-scheme:dark;--surface:#181a1b;--solid:#181a1b;--tintc:19,21,22;--card:rgba(24,26,27,.95);--ink:#e8e6e3;--soft:#c8c3bc;--muted:#9a948a;--line:rgba(255,255,255,.16);--bg1:color-mix(in srgb,var(--p) 7%,#131516);--bg2:color-mix(in srgb,var(--s) 5%,#131516);--bg3:color-mix(in srgb,var(--t) 4%,#131516)}
 body[data-mode=dark] .btn.alt,body[data-mode=dark] .tab:not(.on),body[data-mode=dark] .acc>button{color:color-mix(in srgb,var(--p) 55%,#fff)}
 body[data-mode=dark] .tag,body[data-mode=dark] .badge:not(.ok):not(.warn):not(.gray):not(.hot){color:color-mix(in srgb,var(--p) 50%,#fff)}
 body[data-mode=dark] .sy,body[data-mode=dark] .sp,body[data-mode=dark] .sb,body[data-mode=dark] .sg,body[data-mode=dark] .note-box,body[data-mode=dark] .ex{color:#2e1045}
@@ -258,7 +258,59 @@ input[type=file]{max-width:100%;min-width:0;width:100%}
  .htop .gear{padding:.35rem .6rem;font-size:.8rem}
 }
 main{padding-bottom:7.5rem}
-nav.tabs::after{content:"";position:absolute;right:0;top:0;bottom:2px;width:2.2rem;background:linear-gradient(90deg,transparent,var(--surface));pointer-events:none}
+nav.tabs{display:flex;align-items:center;gap:.7rem;max-width:none;padding:.45rem .8rem}
+.menu-btn{display:inline-flex;align-items:center;gap:.45rem;min-height:44px;padding:0 1rem;border-radius:99px;font-weight:800;font-size:.9rem;font-family:inherit;color:#fff;background:var(--grad);border:0;box-shadow:0 4px 12px -2px rgba(0,0,0,.3)}
+.menu-btn .mb-ico{font-size:1.2rem;line-height:1}
+.menu-cur{font-weight:800;font-size:.95rem;color:var(--ink);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#menuBack{position:fixed;inset:0;z-index:300;background:rgba(15,8,35,.62);backdrop-filter:blur(6px);opacity:0;visibility:hidden;transition:opacity .3s ease,visibility 0s linear .3s}
+#menuPanel{position:fixed;top:0;bottom:0;right:0;z-index:310;width:min(88vw,380px);display:flex;flex-direction:column;background:#fff;color:var(--ink);border-left:2px solid var(--p);border-radius:26px 0 0 26px;box-shadow:-16px 0 50px color-mix(in srgb,var(--p) 40%,transparent);transform:translateX(104%);visibility:hidden;transition:transform .38s cubic-bezier(.22,.9,.3,1),visibility 0s linear .38s}
+body.menu-open #menuBack{opacity:1;visibility:visible;transition:opacity .3s ease}
+body.menu-open #menuPanel{transform:none;visibility:visible;transition:transform .38s cubic-bezier(.22,.9,.3,1)}
+body.menu-open{overflow:hidden}
+body[data-mode=dark] #menuPanel{background:#000}
+.mp-head h2{color:var(--p)}
+body[data-mode=dark] .mp-head h2{color:color-mix(in srgb,var(--p) 55%,#fff)}
+.mp-list .tab{background-color:color-mix(in srgb,var(--p) 9%,transparent);border-color:color-mix(in srgb,var(--p) 50%,transparent);color:var(--ink)}
+.mp-list .tab.on{background:var(--grad);color:#fff;border-color:transparent}
+body[data-mode=dark] .mp-list .tab.on{color:#fff}
+.mp-head{display:flex;align-items:center;justify-content:space-between;gap:.6rem;padding:calc(.9rem + env(safe-area-inset-top)) 1rem .7rem;border-bottom:1px solid var(--line)}
+.mp-head h2{font-size:.85rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ink)}
+.mp-head p{font-size:.72rem;color:var(--soft);margin-top:.1rem}
+.mp-close{display:inline-flex;align-items:center;gap:.3rem;min-height:40px;padding:0 .9rem;border-radius:99px;font-family:inherit;font-weight:700;font-size:.8rem;letter-spacing:.02em;color:var(--ink);border:1.5px solid var(--p);background:color-mix(in srgb,var(--p) 20%,transparent)}
+.mp-list{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:.45rem;padding:.8rem .9rem calc(1rem + env(safe-area-inset-bottom))}
+.mp-list .tab{display:flex;align-items:center;gap:.7rem;width:100%;min-height:52px;padding:.5rem .9rem;border-radius:14px;font-size:.98rem;text-align:left;white-space:normal}
+.mp-list .tab .mr-ico{font-size:1.35rem;width:1.8rem;text-align:center;flex:none}
+.mp-list .tab .mr-t{flex:1;min-width:0}
+.mp-list .tab .mr-ok{font-weight:800}
+@media (prefers-reduced-motion:reduce){#menuPanel,#menuBack{transition:none}}
+body.glass{--surface:color-mix(in srgb,var(--solid) var(--gp),transparent);--card:color-mix(in srgb,var(--solid) var(--gp),transparent)}
+body.glass .card,body.glass .kpi,body.glass .item,body.glass .wave,body.glass .acc,body.glass .contact,body.glass .form,body.glass .hint,body.glass .pill,body.glass .drop,body.glass nav.tabs{-webkit-backdrop-filter:blur(var(--gb));backdrop-filter:blur(var(--gb))}
+body.glass input[type=text],body.glass input[type=tel],body.glass input[type=time],body.glass input[type=number],body.glass input[type=url],body.glass select,body.glass textarea,body.glass .tbox,body.glass .sheet,body.glass .hsel select,body.glass .hsel input{background:var(--solid)}
+body.glass .tbox::before{background:var(--solid)}
+body.glass .btn.alt,body.glass .btn.red,body.glass .qh{background-color:var(--solid)}
+/* ===== frosted-glass 3D look ===== */
+.btn,.menu-btn{background:linear-gradient(180deg,rgba(255,255,255,.32),rgba(255,255,255,0) 50%,rgba(0,0,0,.16)),var(--grad);border:1px solid rgba(255,255,255,.4);box-shadow:inset 0 1.5px 0 rgba(255,255,255,.7),inset 0 -3px 6px rgba(0,0,0,.2),0 7px 14px -6px rgba(0,0,0,.45);text-shadow:0 1px 2px rgba(0,0,0,.28)}
+.btn.gold{background:linear-gradient(180deg,rgba(255,255,255,.45),rgba(255,255,255,0) 50%,rgba(0,0,0,.12)),var(--gold);text-shadow:none}
+.btn.alt,.btn.red{background:linear-gradient(180deg,rgba(255,255,255,.75),rgba(255,255,255,.08) 55%,rgba(0,0,0,.06)),var(--surface);box-shadow:inset 0 1.5px 0 rgba(255,255,255,.9),inset 0 -3px 6px rgba(0,0,0,.08),0 6px 12px -6px rgba(0,0,0,.35);text-shadow:none}
+.btn:active,.menu-btn:active{transform:translateY(1px) scale(.98);box-shadow:inset 0 2px 6px rgba(0,0,0,.3),0 2px 4px -2px rgba(0,0,0,.4)}
+.tab,.pill,.look{background-image:linear-gradient(180deg,rgba(255,255,255,.6),rgba(255,255,255,.04) 55%);box-shadow:inset 0 1.5px 0 rgba(255,255,255,.85),inset 0 -2px 5px rgba(0,0,0,.07),0 4px 10px -5px rgba(0,0,0,.3)}
+.tab.on,.pill.on{background-image:linear-gradient(180deg,rgba(255,255,255,.3),rgba(255,255,255,0) 50%,rgba(0,0,0,.15)),var(--grad);box-shadow:inset 0 1.5px 0 rgba(255,255,255,.65),inset 0 -3px 6px rgba(0,0,0,.2),0 6px 12px -5px rgba(0,0,0,.4)}
+.look.on{box-shadow:inset 0 1.5px 0 rgba(255,255,255,.85),0 0 0 3px color-mix(in srgb,var(--p) 25%,transparent),0 4px 10px -5px rgba(0,0,0,.3)}
+.mp-list .tab.on{background-image:linear-gradient(180deg,rgba(255,255,255,.3),rgba(255,255,255,0) 50%,rgba(0,0,0,.15)),var(--grad)}
+.hclock,.gear,.hchip,.ticker,.role button.on{box-shadow:inset 0 1.5px 0 rgba(255,255,255,.5),inset 0 -2px 5px rgba(0,0,0,.15),0 4px 10px -4px rgba(0,0,0,.4);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.card{position:relative;box-shadow:inset 0 1.5px 0 rgba(255,255,255,.7),0 10px 26px -10px rgba(40,20,80,.35)}
+.kpi,.item,.wave,.acc,.contact{box-shadow:inset 0 1.5px 0 rgba(255,255,255,.6),0 4px 12px -6px rgba(0,0,0,.25)}
+.mp-close,.mp-list .tab{box-shadow:inset 0 1.5px 0 rgba(255,255,255,.6),0 4px 10px -5px rgba(0,0,0,.3)}
+body[data-mode=dark] .btn.alt,body[data-mode=dark] .btn.red{background-image:linear-gradient(180deg,rgba(255,255,255,.16),rgba(255,255,255,.02) 55%,rgba(0,0,0,.1))}
+body[data-mode=dark] .tab,body[data-mode=dark] .pill,body[data-mode=dark] .look{background-image:linear-gradient(180deg,rgba(255,255,255,.14),rgba(255,255,255,.01) 55%);box-shadow:inset 0 1.5px 0 rgba(255,255,255,.18),inset 0 -2px 5px rgba(0,0,0,.3),0 4px 10px -5px rgba(0,0,0,.6)}
+body[data-mode=dark] .tab.on,body[data-mode=dark] .pill.on{background-image:linear-gradient(180deg,rgba(255,255,255,.22),rgba(255,255,255,0) 50%,rgba(0,0,0,.18)),var(--grad)}
+body[data-mode=dark] .card{box-shadow:inset 0 1.5px 0 rgba(255,255,255,.14),0 10px 26px -10px rgba(0,0,0,.7)}
+body[data-mode=dark] .kpi,body[data-mode=dark] .item,body[data-mode=dark] .wave,body[data-mode=dark] .acc,body[data-mode=dark] .contact{box-shadow:inset 0 1.5px 0 rgba(255,255,255,.12),0 4px 12px -6px rgba(0,0,0,.6)}
+/* ===== edge borders ===== */
+body[data-edge=glow] .card{box-shadow:inset 0 1.5px 0 rgba(255,255,255,.7),0 0 0 2px color-mix(in srgb,var(--p) 55%,transparent),0 0 20px color-mix(in srgb,var(--p) 50%,transparent)}
+body[data-edge=era] .card::after,body[data-edge=era] #menuPanel::after{content:"";position:absolute;inset:0;padding:14px;pointer-events:none;z-index:1;border-radius:inherit;background:var(--eh) top left/56px 14px repeat-x,var(--eh) bottom left/56px 14px repeat-x,var(--ev) top left/14px 56px repeat-y,var(--ev) top right/14px 56px repeat-y;-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0)}
+@media print{body[data-edge] .card::after{display:none}}
+
 </style>
 </head>
 <body data-look="lover">
@@ -275,7 +327,7 @@ nav.tabs::after{content:"";position:absolute;right:0;top:0;bottom:2px;width:2.2r
    <button class="gear mgr" data-a="openSetup">&#128221; Setup</button>
    <button class="gear" data-a="help">&#10067; Help</button>
    <button class="gear" data-a="openLook">&#9881; My Look</button>
-   <button class="gear" data-a="mode" id="modeBtn">&#127763; Auto</button>
+   <button class="gear" data-a="mode" id="modeBtn">&#9728;&#65039; Light</button>
   </div>
   <div class="hrow">
    <button class="hmore" id="hmoreBtn" data-a="hmore" aria-expanded="false">&#9776; Store info</button>
@@ -302,7 +354,12 @@ nav.tabs::after{content:"";position:absolute;right:0;top:0;bottom:2px;width:2.2r
  </div>
 </header>
 
-<nav class="tabs"><div class="tabs-in" id="tabs" role="group" tabindex="0" aria-label="Sections"></div></nav>
+<nav class="tabs"><button class="menu-btn" id="menuBtn" data-a="menuOpen" aria-haspopup="dialog" aria-expanded="false" aria-controls="menuPanel"><span class="mb-ico" aria-hidden="true">☰</span><span>Menu</span></button><span class="menu-cur" id="menuCur" aria-live="polite"></span></nav>
+<div id="menuBack" data-a="menuClose"></div>
+<aside id="menuPanel" role="dialog" aria-modal="true" aria-labelledby="menuTtl" aria-hidden="true">
+ <div class="mp-head"><div><h2 id="menuTtl">Menu</h2><p>Pick where to go</p></div><button class="mp-close" data-a="menuClose">✕ Close</button></div>
+ <div class="mp-list" id="tabs" role="group" aria-label="Sections"></div>
+</aside>
 
 <main>
 <!-- TODAY -->
@@ -624,13 +681,19 @@ nav.tabs::after{content:"";position:absolute;right:0;top:0;bottom:2px;width:2.2r
  <label class="l">Text font (everything else)</label><select id="fText" style="width:100%"></select>
  <div id="fSample" class="small" style="margin:.3rem 0 .5rem"><b style="font-family:var(--ft,inherit);font-size:1.2rem">Amber's Science Store</b><br>Sample text: the quick brown fox rings up a sale. 0123456789</div>
  <div style="margin-bottom:.8rem"><label class="btn ghost" style="display:inline-block;cursor:pointer">+ Add my own font<input type="file" id="fontFile" accept=".ttf,.otf,.woff,.woff2" style="display:none"></label> <button class="pill" data-a="fontDel" id="fontDelBtn" style="display:none">Remove my fonts</button><div class="small">Use a font file you already have (.ttf .otf .woff .woff2). It stays on this device only.</div></div>
+ <div style="margin-bottom:.8rem"><label class="l" for="fSearch">Search fonts</label><input type="text" id="fSearch" placeholder="Type a font name, like Lobster" autocomplete="off" autocapitalize="off"><div class="pills" id="fResults" style="margin-top:.4rem"></div><div id="fPick" class="small" style="display:none;margin-bottom:.4rem"></div><div class="small">Font search asks Google Fonts for the font, so it needs the internet. The fonts you pick are remembered on this device.</div></div>
  <label class="l">Text size</label><div class="pills"><button class="pill" data-a="size" data-v="cozy" id="szCozy">Cozy</button><button class="pill" data-a="size" data-v="roomy" id="szRoomy">Roomy (bigger)</button></div>
  <label class="l">Background style</label><div class="pills" id="bgStyles"></div>
  <label class="l">My background photos</label>
  <div class="small" style="margin-bottom:.4rem">Add as many as you like (the last 8 stay saved on this device). Tap one to use it.</div>
  <div class="row" style="margin-bottom:.5rem"><label class="btn" style="cursor:pointer">+ Add photos<input type="file" id="wallFile" accept="image/*" multiple style="display:none"></label><button class="btn alt" data-a="wallClear">No photo</button></div>
  <div class="looks" id="wallGrid" style="grid-template-columns:repeat(auto-fill,minmax(5rem,1fr))"></div>
- <label class="l">Photo fade <span id="tVal"></span></label><input type="range" id="tint" min="10" max="95" style="width:100%;accent-color:var(--p);margin-bottom:.9rem">
+ <label class="l">Photo fade <span id="tVal"></span></label><input type="range" id="tint" min="10" max="95" style="width:100%;accent-color:var(--p);margin-bottom:.4rem">
+ <div class="sub" style="margin-bottom:.8rem">Lower = clearer photo.</div>
+ <label class="l">Glass: see-through cards <span id="gVal"></span></label><input type="range" id="glass" min="0" max="100" style="width:100%;accent-color:var(--p);margin-bottom:.4rem">
+ <div class="sub" style="margin-bottom:.9rem">Higher = you see more of your photo through the cards. Works when a photo is chosen.</div>
+ <label class="l">Edge border</label><div class="pills" id="edgePills"></div>
+ <div class="sub" style="margin-bottom:.9rem">Era pattern follows your look: snakes for reputation, pines for folklore, stars and moons for Midnights, and more.</div>
  <div class="card" style="margin-bottom:.8rem"><div class="hd"><h2 style="font-size:.95rem">&#129517; App tour</h2></div><div class="sub">Replay the guided tour any time.</div><div class="row"><button class="btn sm" data-a="tourGo" data-v="all">Replay the tour</button></div></div>
  <div class="card" style="margin-bottom:.8rem"><div class="hd"><h2 style="font-size:.95rem">&#128190; Backup</h2></div>
   <div class="sub">Everything is saved on this device only. Copy a backup now and then and keep it somewhere safe.</div>
@@ -698,7 +761,7 @@ function defaults(){
  ['Sat','Sun'].forEach(d=>{staff[d]=[mk('Amber (Manager)','Gift Shop Manager','Manager Float / POS','9:30 AM - 5:30 PM','1:30 PM'),mk(EX+'Maya L.','Lead Cashier','Register 1 (Main)','9:45 AM - 5:15 PM','12:30 PM'),mk(EX+'Devon K.','Sales Associate','Register 2 (Express)','10:00 AM - 5:15 PM','2:00 PM'),mk(EX+'Elena R.','Floor & Demo Helper','Floor / Dino & Space','10:30 AM - 5:00 PM','1:00 PM')]});
  const ck=(a,p)=>a.map(x=>({id:uid(),text:x,phase:p,done:false}));
  const ck2=a=>a.map(x=>({id:uid(),text:x,done:false}));
- return {tourVer:0,playlists:[],catalog:[],invOn:true,mission:'',missionEdit:false,sops:[],closeList:ck2([EX+'Count and bag the register drawers',EX+'Turn off the store lights']),walk:{Opening:ck2([EX+'Walk the floor and check displays']),Midday:ck2([EX+'Re-front displays after an exit rush']),Closing:ck2([EX+'Walk the floor before leaving'])},walkSel:'Opening',listDate:'',groups:[],wrist:{date:'',items:[]},editCt:null,editSop:null,editGrp:null,tab:'today',look:'lover',hrs:{wd:[600,960],we:[600,1020]},team:[],customLooks:[],titleFont:'auto',textFont:'system',myFonts:[],walls:[],bgStyle:'sparkle',radius:16,size:'cozy',tint:40,wall:null,role:'manager',preset:todayPreset(),cOpen:'10:00',cClose:'16:00',live:true,sim:'11:30',day:todayDay(),showFilter:'ALL',phase:'ALL',
+ return {tourVer:0,playlists:[],catalog:[],invOn:true,mission:'',missionEdit:false,sops:[],closeList:ck2([EX+'Count and bag the register drawers',EX+'Turn off the store lights']),walk:{Opening:ck2([EX+'Walk the floor and check displays']),Midday:ck2([EX+'Re-front displays after an exit rush']),Closing:ck2([EX+'Walk the floor before leaving'])},walkSel:'Opening',listDate:'',groups:[],wrist:{date:'',items:[]},editCt:null,editSop:null,editGrp:null,tab:'today',look:'lover',hrs:{wd:[600,960],we:[600,1020]},team:[],customLooks:[],titleFont:'auto',textFont:'system',myFonts:[],walls:[],bgStyle:'sparkle',radius:16,size:'cozy',tint:40,glass:45,edge:'none',wall:null,role:'manager',preset:todayPreset(),cOpen:'10:00',cClose:'16:00',live:true,sim:'11:30',day:todayDay(),showFilter:'ALL',phase:'ALL',
  notes:[{id:uid(),text:EX+'Front the feature displays before the next exit rush.',tag:'Merch / Display',done:false},{id:uid(),text:EX+'Remind cashiers: MSC Members get 10% off.',tag:'Cashier Info',done:false}],
  staff,live_tasks:[{id:uid(),text:EX+'Pull 12 astronaut ice creams for Register 1',who:'Floor Team',pri:'Urgent',done:false}],
  shows:[{id:uid(),title:EX+'Colors of the Solar System',venue:'Planetarium',start:'11:30',dur:35,tip:'Glow planets, astronaut ice cream, star maps'},{id:uid(),title:EX+'Deep Sky',venue:'IMAX',start:'12:15',dur:40,tip:'Telescopes, space kits, posters'},{id:uid(),title:EX+'School Field Trip Bus Departure',venue:'Group / Event',start:'13:00',dur:35,tip:'Under-$10 souvenirs, rock candy'},{id:uid(),title:EX+'Flight of the Butterflies 3D',venue:'IMAX',start:'13:30',dur:45,tip:'Butterfly kits, bug viewers, plush'}],
@@ -737,9 +800,14 @@ function tick(){
 }
 
 /* ---------- render ---------- */
+function menuSet(o){document.body.classList.toggle('menu-open',o);$('menuBtn').setAttribute('aria-expanded',o?'true':'false');$('menuPanel').setAttribute('aria-hidden',o?'false':'true');
+ if(o){const c=$('tabs').querySelector('.tab.on')||$('tabs').querySelector('.tab');if(c)setTimeout(()=>{try{c.focus({preventScroll:true});c.scrollIntoView({block:'nearest'})}catch(e){}},60)}else if(document.activeElement&&$('menuPanel').contains(document.activeElement))$('menuBtn').focus()}
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&document.body.classList.contains('menu-open'))menuSet(false)});
 function renderTabs(){
  if(!S.invOn&&S.tab==='stock')S.tab='today';{const kk=$('kStock'),kp=kk&&kk.closest('.kpi');if(kp)kp.style.display=S.invOn?'':'none'}
- $('tabs').innerHTML=TABS.filter(t=>!(S.role==='floor'&&t[0]==='mod')&&!(t[0]==='stock'&&!S.invOn)).map(t=>`<button class="tab ${S.tab===t[0]?'on':''}" data-a="tab" data-v="${t[0]}">${t[1]} ${t[2]}</button>`).join('');
+ const vt=TABS.filter(t=>!(S.role==='floor'&&t[0]==='mod')&&!(t[0]==='stock'&&!S.invOn));
+ $('tabs').innerHTML=vt.map(t=>`<button class="tab ${S.tab===t[0]?'on':''}" data-a="tab" data-v="${t[0]}"${S.tab===t[0]?' aria-current="page"':''}><span class="mr-ico" aria-hidden="true">${t[1]}</span><span class="mr-t">${t[2]}</span>${S.tab===t[0]?'<span class="mr-ok" aria-hidden="true">✓</span>':''}</button>`).join('');
+ {const c=vt.find(t=>t[0]===S.tab);$('menuCur').textContent=c?c[1]+' '+c[2]:''}
  document.querySelectorAll('.pane').forEach(p=>p.classList.toggle('on',p.id==='p-'+S.tab));
 }
 function renderBreak(){const el=$('brkBox');if(!el)return;const h=hours(),n=Math.floor(nowMin()),cl=h.on?t2m(h.close):0,op=h.on?t2m(h.open):0;let cls,big,msg;
@@ -920,15 +988,54 @@ const TF=['Pacifico','Caveat','Playfair Display','Great Vibes','Abril Fatface','
 const BF=['Nunito','Atkinson Hyperlegible','Poppins','Fredoka'];
 const LOOKFONT={lover:'Pacifico',debut:'Caveat',fearless:'Playfair Display',speaknow:'Great Vibes',red:'Abril Fatface',e1989:'Poppins',rep:'Pirata One',folklore:'Cormorant Garamond',evermore:'EB Garamond',midnights:'Josefin Sans',ttpd:'Special Elite',showgirl:'Limelight',mint:'Fredoka'};
 const SYS='system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif';
-const REGD=new Set();function regFonts(){(S.myFonts||[]).forEach(f=>{if(REGD.has(f.fam))return;REGD.add(f.fam);try{const ff=new FontFace(f.fam,'url('+f.data+')');ff.load().then(x=>{document.fonts.add(x);applyFonts()}).catch(()=>{})}catch(e){}})}
+const REGD=new Set();function regFonts(){try{gfLoad(S.gFonts||[])}catch(e){}(S.myFonts||[]).forEach(f=>{if(REGD.has(f.fam))return;REGD.add(f.fam);try{const ff=new FontFace(f.fam,'url('+f.data+')');ff.load().then(x=>{document.fonts.add(x);applyFonts()}).catch(()=>{})}catch(e){}})}
 function applyFonts(){const rs=document.documentElement.style,q=n=>'"'+n+'"',my=n=>(S.myFonts||[]).some(f=>f.fam===n);
  const bodyName=S.textFont==='system'?null:S.textFont;rs.setProperty('--fb',(bodyName?q(bodyName)+',':'')+SYS);
  let t=S.titleFont;if(t==='auto'){const cu=S.customLooks.find(c=>c.key===S.look);t=cu?'Fredoka':(LOOKFONT[S.look]||'Fredoka')}
  if(t==='same')rs.setProperty('--ft','inherit');else rs.setProperty('--ft',q(t)+',cursive,'+SYS)}
-function fontOpts(list,first){return first.map(o=>`<option value="${o[0]}">${o[1]}</option>`).join('')+list.map(n=>`<option value="${n}" style="font-family:'${n}'">${n}</option>`).join('')+(S.myFonts||[]).map(f=>`<option value="${esc(f.fam)}">${esc(f.name)} (mine)</option>`).join('')}
-function renderFonts(){$('fTitle').innerHTML=fontOpts(TF.concat(BF.filter(x=>!TF.includes(x))),[['auto','Match my look'],['same','Same as text']]);$('fText').innerHTML=fontOpts(BF,[['system','Default (clean)']]);$('fTitle').value=S.titleFont;$('fText').value=S.textFont;$('fontDelBtn').style.display=(S.myFonts||[]).length?'inline-block':'none';regFonts();applyFonts()}
+function fontOpts(list,first){return first.map(o=>`<option value="${o[0]}">${o[1]}</option>`).join('')+list.map(n=>`<option value="${n}" style="font-family:'${n}'">${n}</option>`).join('')+(S.myFonts||[]).map(f=>`<option value="${esc(f.fam)}">${esc(f.name)} (mine)</option>`).join('')+(S.gFonts||[]).map(n=>`<option value="${esc(n)}">${esc(n)} (Google)</option>`).join('')}
+function renderFonts(){gfWire();$('fTitle').innerHTML=fontOpts(TF.concat(BF.filter(x=>!TF.includes(x))),[['auto','Match my look'],['same','Same as text']]);$('fText').innerHTML=fontOpts(BF,[['system','Default (clean)']]);$('fTitle').value=S.titleFont;$('fText').value=S.textFont;$('fontDelBtn').style.display=((S.myFonts||[]).length||(S.gFonts||[]).length)?'inline-block':'none';regFonts();applyFonts()}
 function addFont(file){if(!file)return;if(file.size>700*1024){toast('That font file is too big (max about 700 KB)');return}const r=new FileReader();r.onload=()=>{const fam='MyFont'+Date.now(),name=file.name.replace(/\.[^.]+$/,'');S.myFonts=(S.myFonts||[]).concat([{fam,name,data:r.result}]);S.titleFont=fam;if(!save()){S.myFonts.pop();S.titleFont='auto';toast('Not enough room to save that font');return}renderFonts();toast('Font added')};r.readAsDataURL(file)}
-function applyMode(){const m=S.mode||'auto',dk=m==='dark'||(m==='auto'&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches);document.body.dataset.mode=dk?'dark':'light';const tc=document.querySelector('meta[name=theme-color]');if(tc)tc.content=dk?'#1d1630':'#e8478b';const b=$('modeBtn');if(b)b.innerHTML=m==='auto'?'&#127763; Auto':m==='dark'?'&#127769; Dark':'&#9728;&#65039; Light'}
+
+const GF=['Roboto','Open Sans','Lato','Montserrat','Poppins','Oswald','Raleway','Nunito','Nunito Sans','Playfair Display','Merriweather','Ubuntu','Rubik','Work Sans','Quicksand','Mulish','Karla','Inter','Source Sans 3','Noto Sans','Noto Serif','PT Sans','PT Serif','Lora','Bebas Neue','Anton','Fjalla One','Josefin Sans','Josefin Slab','Cabin','Dosis','Barlow','Barlow Condensed','Titillium Web','Libre Baskerville','Crimson Text','EB Garamond','Cormorant Garamond','Abril Fatface','Alegreya','Bitter','Archivo','Archivo Black','DM Sans','DM Serif Display','Manrope','Outfit','Urbanist','Lexend','Sora','Space Grotesk','Figtree','Plus Jakarta Sans','Comfortaa','Fredoka','Baloo 2','Chewy','Bangers','Lobster','Lobster Two','Pacifico','Caveat','Dancing Script','Great Vibes','Satisfy','Sacramento','Shadows Into Light','Indie Flower','Permanent Marker','Amatic SC','Patrick Hand','Gloria Hallelujah','Courgette','Kaushan Script','Yellowtail','Parisienne','Allura','Alex Brush','Tangerine','Cookie','Handlee','Rock Salt','Reenie Beanie','Cinzel','Cinzel Decorative','Righteous','Orbitron','Press Start 2P','Special Elite','Creepster','Pirata One','UnifrakturCook','Fascinate','Monoton','Limelight','Bungee','Bungee Shade','Fugaz One','Passion One','Luckiest Guy','Titan One','Russo One','Black Ops One','Audiowide','Philosopher','Cardo','Spectral','Vollkorn','Zilla Slab','Roboto Slab','Roboto Mono','Source Code Pro','Fira Sans','IBM Plex Sans','IBM Plex Serif','Atkinson Hyperlegible','Lexend Deca','Merienda','Marck Script','Pinyon Script','Mr Dafoe','Norican','Playball','Rancho','Sriracha','Varela Round','Comic Neue','Schoolbell','Covered By Your Grace','Just Another Hand','Gochi Hand','Delius','Short Stack','Sniglet','Kalam','Neucha'];
+const GFL=new Set();let GFSEL='';
+function gfLoad(names){names.forEach(n=>{if(GFL.has(n))return;GFL.add(n);const l=document.createElement('link');l.rel='stylesheet';l.href='https://fonts.googleapis.com/css2?family='+encodeURIComponent(n).replace(/%20/g,'+')+'&display=swap';l.onload=()=>{try{applyFonts()}catch(e){}};l.onerror=()=>{GFL.delete(n);l.remove()};document.head.appendChild(l)})}
+function gfWire(){if(window._gfW)return;window._gfW=1;const e=$('fSearch');if(e)e.addEventListener('input',()=>gfSearch(e.value))}
+function gfSearch(v){const q=String(v||'').trim(),box=$('fResults');if(!box)return;$('fPick').style.display='none';if(!q){box.innerHTML='';return}
+ const ql=q.toLowerCase(),m=GF.filter(n=>n.toLowerCase().includes(ql)).slice(0,8);gfLoad(m);
+ const typed=q.replace(/[^A-Za-z0-9 ]/g,'').replace(/\s+/g,' ').trim().slice(0,40);
+ let h=m.map(n=>`<button class="pill" data-a="gfPick" data-v="${esc(n)}" style="font-family:'${esc(n)}',inherit;font-size:.9rem">${esc(n)}</button>`).join('');
+ if(typed.length>1&&!GF.some(n=>n.toLowerCase()===typed.toLowerCase()))h+=`<button class="pill" data-a="gfPick" data-v="${esc(typed)}">Try the name: ${esc(typed)}</button>`;
+ box.innerHTML=h||'<span class="small">No match. Check the spelling.</span>'}
+function gfPick(n){GFSEL=n;gfLoad([n]);const b=$('fPick');b.style.display='block';b.innerHTML=`Use <b>${esc(n)}</b> for: <button class="pill" data-a="gfUse" data-v="title">Titles</button> <button class="pill" data-a="gfUse" data-v="text">Text</button> <button class="pill" data-a="gfUse" data-v="both">Both</button>`}
+function gfUse(w){const n=GFSEL;if(!n)return;
+ (document.fonts&&document.fonts.load?document.fonts.load('16px "'+n+'"'):Promise.resolve([])).then(f=>{if(document.fonts&&f&&!f.length){toast("Couldn't load that font. Check the name and the internet.");return}
+  S.gFonts=(S.gFonts||[]).filter(x=>x!==n).concat([n]).slice(-12);if(w==='title'||w==='both')S.titleFont=n;if(w==='text'||w==='both')S.textFont=n;save();renderFonts();applyFonts();toast('Font saved: '+n)}).catch(()=>toast("Couldn't load that font."))}
+
+const EDGES=[['none','Plain'],['glow','Glow'],['era','Era pattern']];
+function star4(x,y,r,c){return `<path d="M${x} ${y-r}Q${x} ${y} ${x+r} ${y}Q${x} ${y} ${x} ${y+r}Q${x} ${y} ${x-r} ${y}Q${x} ${y} ${x} ${y-r}Z" fill="${c}"/>`}
+function star5(x,y,r,c){let p=[];for(let i=0;i<10;i++){const a=-Math.PI/2+i*Math.PI/5,rr=i%2?r*.45:r;p.push((x+rr*Math.cos(a)).toFixed(1)+','+(y+rr*Math.sin(a)).toFixed(1))}return `<polygon points="${p.join(' ')}" fill="${c}"/>`}
+function heart(x,y,r,c){return `<path d="M${x} ${y+r*.8}C${x-r*1.6} ${y-r*.2} ${x-r*.7} ${y-r*1.3} ${x} ${y-r*.35}C${x+r*.7} ${y-r*1.3} ${x+r*1.6} ${y-r*.2} ${x} ${y+r*.8}Z" fill="${c}"/>`}
+function EDGE(k,a,b){const W='fill="none" stroke-linecap="round"';
+ const M={
+ rep:`<path d="M0 7Q7 -1 14 7T28 7T42 7T56 7" ${W} stroke="${a}" stroke-width="4.4"/><path d="M0 7Q7 -1 14 7T28 7T42 7T56 7" ${W} stroke="${b}" stroke-width="1.3" stroke-dasharray="1.5 3.2"/>`,
+ folklore:[10,28,46].map((x,i)=>`<polygon points="${x},${i%2?3:2} ${x+4},7 ${x+2},7 ${x+5},11 ${x-5},11 ${x-2},7 ${x-4},7" fill="${a}"/><rect x="${x-.8}" y="11" width="1.6" height="3" fill="${b}"/>`).join(''),
+ evermore:`<path d="M0 8Q14 3 28 8T56 8" ${W} stroke="${a}" stroke-width="1.6"/>`+[[7,5.5,-30],[21,10.5,30],[35,5.5,-30],[49,10.5,30]].map(l=>`<ellipse cx="${l[0]}" cy="${l[1]}" rx="3.6" ry="1.7" fill="${b}" transform="rotate(${l[2]} ${l[0]} ${l[1]})"/>`).join(''),
+ midnights:star4(12,7,5.5,b)+star4(34,5,3.2,b)+star4(46,10,2.4,a)+`<circle cx="22" cy="10" r="1.1" fill="${a}"/><circle cx="53" cy="4" r="1.2" fill="${a}"/><path d="M26 4a4 4 0 1 0 5 5a3.2 3.2 0 1 1-5-5z" fill="${a}"/>`,
+ e1989:`<path d="M3 8Q7 3 11 8Q15 3 19 8M30 6Q33 2 36 6Q39 2 42 6" ${W} stroke="${a}" stroke-width="1.8"/><path d="M0 12Q7 10 14 12T28 12T42 12T56 12" ${W} stroke="${b}" stroke-width="1" opacity=".7"/>`,
+ red:[[6,5,40,a],[24,9,-30,b],[40,4,20,a],[50,10,-50,b]].map(l=>`<path d="M0 0Q5 -4 10 0Q5 4 0 0Z" fill="${l[3]}" transform="translate(${l[0]} ${l[1]}) rotate(${l[2]}) translate(-5 0)"/>`).join(''),
+ fearless:star4(10,7,5.5,b)+star4(30,4,3.4,b)+star4(44,10,4.2,b)+`<circle cx="20" cy="10" r="1.2" fill="${a}"/><circle cx="52" cy="5" r="1.3" fill="${a}"/>`,
+ speaknow:[14,42].map(x=>`<ellipse cx="${x-3.2}" cy="5.2" rx="3.5" ry="2.7" fill="${a}" transform="rotate(-25 ${x-3.2} 5.2)"/><ellipse cx="${x+3.2}" cy="5.2" rx="3.5" ry="2.7" fill="${a}" transform="rotate(25 ${x+3.2} 5.2)"/><ellipse cx="${x-2.4}" cy="9.4" rx="2.4" ry="1.9" fill="${b}"/><ellipse cx="${x+2.4}" cy="9.4" rx="2.4" ry="1.9" fill="${b}"/><path d="M${x} 3.5V11" stroke="${a}" stroke-width="1"/>`).join(''),
+ debut:`<path d="M0 7H56" ${W} stroke="${a}" stroke-width="1.4" stroke-dasharray="4 3"/>`+star5(14,7,5.2,b)+star5(42,7,5.2,b),
+ lover:heart(14,7,5,a)+heart(42,7,4,b),
+ ttpd:`<path d="M2 7H12M17 7H21M26 7H44M49 7H52" ${W} stroke="${a}" stroke-width="1.7"/><circle cx="7" cy="3" r="1" fill="${b}"/><circle cx="33" cy="11.2" r="1.2" fill="${b}"/>`,
+ showgirl:[7,21,35,49].map((x,i)=>`<polygon points="${x},2 ${x+4},7 ${x},12 ${x-4},7" fill="${i%2?b:a}"/>`).join('')+star4(14,7,2,b)+star4(42,7,2,a),
+ mint:`<circle cx="8" cy="7" r="3.4" ${W} stroke="${a}" stroke-width="1.4"/><circle cx="20" cy="4" r="1.6" fill="${b}"/><circle cx="30" cy="8" r="4" ${W} stroke="${a}" stroke-width="1.4"/><circle cx="42" cy="10" r="1.5" fill="${b}"/><circle cx="50" cy="5" r="2.4" ${W} stroke="${a}" stroke-width="1.4"/>`};
+ return M[k]||M.mint}
+function edgeApply(){const m=S.edge||'none';document.body.dataset.edge=m;if(m!=='era')return;const cs=getComputedStyle(document.body),g=n=>{const v=cs.getPropertyValue(n).trim();return /^(#[0-9a-f]{3,8}|rgba?\([^)]*\))$/i.test(v)?v:'#888888'};
+ const k=(S.customLooks||[]).some(c=>c.key===S.look)?'mint':S.look,inner=EDGE(k,g('--p'),g('--s'));
+ const H=`<svg xmlns="http://www.w3.org/2000/svg" width="56" height="14" viewBox="0 0 56 14">${inner}</svg>`,V=`<svg xmlns="http://www.w3.org/2000/svg" width="14" height="56" viewBox="0 0 14 56"><g transform="translate(14 0) rotate(90)">${inner}</g></svg>`,u=x=>'url("data:image/svg+xml,'+encodeURIComponent(x)+'")',rs=document.documentElement.style;rs.setProperty('--eh',u(H));rs.setProperty('--ev',u(V))}
+function applyMode(){if(S.mode!=='dark'&&S.mode!=='light')S.mode=(window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light';const dk=S.mode==='dark';document.body.dataset.mode=dk?'dark':'light';const tc=document.querySelector('meta[name=theme-color]');if(tc)tc.content=dk?'#1d1630':'#e8478b';const b=$('modeBtn');if(b)b.innerHTML=dk?'&#127769; Dark':'&#9728;&#65039; Light'}
 function renderLook(){
  applyMode();
  if(!S.customLooks)S.customLooks=[];
@@ -939,12 +1046,13 @@ function renderLook(){
  if(cu){st.setProperty('--p',ensureDark(cu.c1));st.setProperty('--s',ensureDark(cu.c2));st.setProperty('--t','color-mix(in srgb,var(--s) 55%,#fff)');st.setProperty('--ink','color-mix(in srgb,var(--p) 25%,#000)');st.setProperty('--soft','color-mix(in srgb,var(--p) 55%,#222)');st.setProperty('--muted','color-mix(in srgb,var(--p) 40%,#888)');st.setProperty('--bg1','color-mix(in srgb,var(--p) 8%,#fff)');st.setProperty('--bg2','color-mix(in srgb,var(--s) 12%,#fff)');st.setProperty('--bg3','color-mix(in srgb,var(--t) 20%,#fff)');st.setProperty('--line','color-mix(in srgb,var(--p) 25%,transparent)')}
  st.setProperty('--grad','linear-gradient(120deg,'+ensureDark(L[3])+','+ensureDark(L[4])+')');
  if(document.body.dataset.mode==='dark')['--ink','--soft','--muted','--bg1','--bg2','--bg3','--line'].forEach(k=>st.removeProperty(k));
- const rs=document.documentElement.style;rs.setProperty('--r',S.radius+'px');rs.setProperty('--fs',S.size==='roomy'?1.12:1);rs.setProperty('--tint',S.tint/100);
+ const rs=document.documentElement.style;rs.setProperty('--r',S.radius+'px');rs.setProperty('--fs',S.size==='roomy'?1.12:1);rs.setProperty('--tint',S.tint/100);{const g=S.glass||0;document.body.classList.toggle('glass',!!S.wall&&g>0);rs.setProperty('--gp',(100-g*.7)+'%');rs.setProperty('--gb',(2+g*.12)+'px')}
  $('wall').style.backgroundImage=S.wall?`url(${S.wall})`:'none';$('wallTint').style.display=S.wall?'block':'none';
  $('lookEmoji').textContent=L[2];renderFonts();
  $('lookGrid').innerHTML=allLooks().map(l=>`<div style="position:relative"><button class="look ${S.look===l[0]?'on':''}" style="width:100%" data-a="look" data-v="${l[0]}"><i style="background:linear-gradient(90deg,${l[3]},${l[4]})"></i>${l[2]} ${esc(l[1])}</button>${l[5]?`<button class="x" data-a="clDel" data-id="${l[0]}" style="position:absolute;top:2px;right:2px;background:var(--surface);padding:0 .35rem" aria-label="Delete this look">\u2715</button>`:''}</div>`).join('');
  $('bgStyles').innerHTML=BGS.map(b=>`<button class="pill ${(S.bgStyle||'none')===b[0]?'on':''}" data-a="bg" data-v="${b[0]}">${b[1]}</button>`).join('');
- $('rad').value=S.radius;$('rVal').textContent=S.radius+'px';$('tint').value=S.tint;$('tVal').textContent=S.tint+'%';
+ $('rad').value=S.radius;$('rVal').textContent=S.radius+'px';$('tint').value=S.tint;$('tVal').textContent=S.tint+'%';$('glass').value=S.glass||0;$('gVal').textContent=(S.glass||0)+'%';
+ edgeApply();$('edgePills').innerHTML=EDGES.map(e=>`<button class="pill ${(S.edge||'none')===e[0]?'on':''}" data-a="edge" data-v="${e[0]}">${e[1]}</button>`).join('');
  $('szCozy').classList.toggle('on',S.size==='cozy');$('szRoomy').classList.toggle('on',S.size==='roomy');
 }
 function renderRole(){document.body.classList.toggle('floor',S.role==='floor');$('rM').classList.toggle('on',S.role==='manager');$('rF').classList.toggle('on',S.role==='floor');if(S.role==='floor'&&S.tab==='mod')S.tab='today'}
@@ -1064,7 +1172,9 @@ const find=(arr,id)=>arr.find(x=>x.id===id);
 const del=(arr,id)=>{const i=arr.findIndex(x=>x.id===id);if(i>=0)arr.splice(i,1)};
 function act(a,el){const id=el.dataset.id,v=el.dataset.v,k=el.dataset.k;
  switch(a){
- case'tab':S.tab=v;renderTabs();scrollTo(0,0);tourBanner();break;
+ case'tab':S.tab=v;renderTabs();menuSet(false);scrollTo(0,0);tourBanner();break;
+ case'menuOpen':menuSet(true);break;
+ case'menuClose':menuSet(false);break;
  case'role':S.role=v;renderRole();renderTabs();break;
  case'sync':S.live=true;renderHeaderInputs();lastMin=-1;tick();toast('Back to live time');break;
  case'openLook':$('look').classList.add('show');break;
@@ -1086,12 +1196,15 @@ function act(a,el){const id=el.dataset.id,v=el.dataset.v,k=el.dataset.k;
  case'ctE':{const c=find(S.contacts,id);if(!c)break;S.editCt=id;$('kName').value=c.name.replace(EX,'');$('kRole').value=c.role||'';$('kPhone').value=c.phone||'';ctEditUI();$('kName').scrollIntoView({behavior:'smooth',block:'center'});break}
  case'ctCancel':S.editCt=null;$('kName').value='';$('kRole').value='';$('kPhone').value='';ctEditUI();break;
  case'hmore':{const h=document.querySelector('header');const o=h.classList.toggle('hopen');el.setAttribute('aria-expanded',o);el.innerHTML=o?'&#10005; Hide info':'&#9776; Store info';break}
- case'mode':S.mode=S.mode==='auto'||!S.mode?'dark':S.mode==='dark'?'light':'auto';applyMode();renderLook();toast('Mode: '+S.mode);break;
+ case'mode':S.mode=S.mode==='dark'?'light':'dark';applyMode();renderLook();toast('Mode: '+S.mode);break;
  case'closeLook':$('look').classList.remove('show');break;
  case'closeCopy':$('copyModal').classList.remove('show');break;
  case'look':S.look=v;renderLook();break;
  case'size':S.size=v;renderLook();break;
- case'fontDel':S.myFonts=[];if(!S.titleFont.startsWith('MyFont'))S.titleFont=S.titleFont;else S.titleFont='auto';if(String(S.textFont).startsWith('MyFont'))S.textFont='system';save();renderFonts();toast('My fonts removed');break;
+ case'edge':S.edge=v;renderLook();save();break;
+ case'gfPick':gfPick(v);break;
+ case'gfUse':gfUse(v);break;
+ case'fontDel':{const g=S.gFonts||[];if(g.includes(S.titleFont))S.titleFont='auto';if(g.includes(S.textFont))S.textFont='system';S.gFonts=[]}S.myFonts=[];if(!S.titleFont.startsWith('MyFont'))S.titleFont=S.titleFont;else S.titleFont='auto';if(String(S.textFont).startsWith('MyFont'))S.textFont='system';save();renderFonts();toast('My fonts removed');break;
  case'wallClear':S.wall=null;renderLook();renderWalls();break;
  case'bg':S.bgStyle=v;renderLook();break;
  case'clDel':S.customLooks=S.customLooks.filter(c=>c.key!==id);if(S.look===id)S.look='lover';renderLook();break;
@@ -1224,7 +1337,7 @@ document.addEventListener('input',e=>{const t=e.target;
  else if(t.dataset.lt){const g=find(S.mod.log,t.dataset.lt);if(g){g.text=t.value;save();if($('hoPreview'))$('hoPreview').textContent=handover()}}
  else if(t.id==='modName'||t.id==='modRadio'||t.id==='modHand'){S.mod[{modName:'name',modRadio:'radio',modHand:'hand'}[t.id]]=t.value;save();$('hoPreview').textContent=handover()}
  else if(t.id==='evTitle'){S.ev.title=t.value;save()}else if(t.id==='evHours'){S.ev.hours=t.value;save()}else if(t.id==='evZone'){S.ev.zone=t.value;save()}
- else if(t.id==='rad'){S.radius=+t.value;renderLook();save()}else if(t.id==='tint'){S.tint=+t.value;renderLook();save()}
+ else if(t.id==='rad'){S.radius=+t.value;renderLook();save()}else if(t.id==='tint'){S.tint=+t.value;renderLook();save()}else if(t.id==='glass'){S.glass=+t.value;renderLook();save()}
  else if(t.id==='cOpen'){S.cOpen=t.value;renderDyn();save()}else if(t.id==='cClose'){S.cClose=t.value;renderDyn();save()}
  else if(t.id==='sim'){if(t.value){S.live=false;S.sim=t.value;lastMin=-1;tick();save()}}
  else if(t.id==='sopQ'){sopQ=t.value;renderSopList()}
@@ -1266,12 +1379,12 @@ document.addEventListener('submit',e=>{e.preventDefault();const f=e.target.datas
  default:ok=false}
  if(ok){e.target.reset();if(f==='group'){$('gDate').value=todayISO();grpEditUI()}if(f==='sop'){previewSop();sopEditUI()}if(f==='contact')ctEditUI();if(f==='staff'){$('sShift').value='10:00 AM - 4:15 PM';$('sBreak').value='1:00 PM'}if(f==='show'){$('shStart').value='13:00';$('shDur').value=45}save();toast('Added')}
 });
-try{matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{if((S.mode||'auto')==='auto'){applyMode();renderLook()}})}catch(e){}
 
 /* ---- Help, tour and ? hints. KEEP IN SYNC: add a TOUR step (new since number) and a HINTS line for every new tab or card. build.py warns if one is missing. ---- */
 const TOUR=/*TOUR*/[
 {t:'today',k:'w',since:1,h:"Welcome!",x:"This app keeps your store day in one place. This tour takes about 2 minutes. Tap Next to move on. You can stop any time. To see it again, tap the Help button at the top."},
 {t:'today',since:1,h:"Today",x:"Your home page. It shows what is on right now, the Rush Radar for the shop, notes, and alarms. Start here each day."},
+{t:'today',since:4,w:'#menuBtn',h:"The Menu",x:"Tap Menu to slide out every section: Today, Staff, Showtimes and more. Tap a section to go there. Tap outside the panel to close it."},
 {t:'today',since:3,w:'#brkCard',h:"Break Check",x:"Shows GOOD TIME, WAIT or BAD TIME for taking a break right now, so nobody is stuck on break when a rush hits. It also shows the next clear time."},
 {t:'today',since:2,w:'#teamCard',m:1,h:"Team Update",x:"On the Today tab, the Team Update card builds one message for your team: who is working, showtimes, tasks, notes and closing steps. Add your own line if you like, then tap Text whole team."},
 {t:'staff',since:1,h:"Staff",x:"Who is working, on break or off. Type a task under a person and tap Text Task to send it."},
@@ -1291,6 +1404,7 @@ const TOUR=/*TOUR*/[
 const HINTS=/*HINTS*/[
 ['Rush Radar',"Shows when IMAX, Planetarium and school groups let out toward the store, so you can see a rush coming."],
 ['Manager Notes',"Write notes for yourself or the team. They are saved on this device."],
+['Menu',"Slide-out list of every section. Tap a section to go there."],
 ['Break Check',"Tells you if now is a good time for a 30-minute break. It watches the exit rushes from the showtimes."],
 ['Team Update',"Builds one message for your team from what is in the app. Add your own line, then copy it or text it. Texting the whole team uses the cell numbers on the Staff tab."],
 ['Alarms',"Pick a day and time and the app rings while it is open. Tap + Google Calendar to get a ring even when the app is closed."],
@@ -1339,7 +1453,7 @@ function tourPlace(hl){const bar=$('tourBar'),box=bar.firstElementChild;if(!box|
 function tourShow(){const s=tr.list[tr.i],n=tr.list.length;S.tab=s.t;renderTabs();tourClear();
  $('tourBar').innerHTML='<div class="tbox" role="dialog" aria-live="polite"><div class="small">Step '+(tr.i+1)+' of '+n+'</div><h3>'+esc(s.h)+'</h3><p>'+esc(s.x)+'</p><div class="row">'+(tr.i>0?'<button class="btn alt" data-a="tourBack">Back</button>':'')+'<button class="btn" data-a="tourNext">'+(tr.i<n-1?'Next':'Finish')+'</button><button class="btn sm alt" data-a="tourEnd">Skip tour</button></div></div>';
  const rm=matchMedia('(prefers-reduced-motion:reduce)').matches,beh=rm?'auto':'smooth';
- const tb=document.querySelector('#tabs [data-v="'+s.t+'"]');if(tb&&!s.k){tb.classList.add('tour-tab');try{tb.scrollIntoView({block:'nearest',inline:'center'})}catch(e){}}
+ const tb=document.querySelector('#tabs [data-v="'+s.t+'"]');if(tb&&!s.k){tb.classList.add('tour-tab');$('menuBtn').classList.add('tour-tab');try{tb.scrollIntoView({block:'nearest',inline:'center'})}catch(e){}}
  const el=tourTarget(s);tr.hl=null;
  if(!el){scrollTo({top:0,behavior:beh});tourPlace(null);return}
  let hl=el;if(el.getBoundingClientRect().height>innerHeight*.45)hl=el.querySelector('.hd')||el;

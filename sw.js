@@ -9,7 +9,9 @@ const ver=r=>r&&(r.headers.get('etag')||r.headers.get('last-modified'));
 const notify=()=>self.clients.matchAll().then(cs=>cs.forEach(c=>c.postMessage('msc-update')));
 self.addEventListener('fetch',e=>{
  const r=e.request;if(r.method!=='GET')return;
- const u=new URL(r.url);if(u.origin!==location.origin)return;
+ const u=new URL(r.url);
+ if(/^fonts\.(googleapis|gstatic)\.com$/.test(u.hostname)){e.respondWith(caches.match(r).then(m=>m||fetch(r).then(res=>{if(res&&(res.ok||res.type==='opaque')){const copy=res.clone();caches.open(CACHE).then(c=>c.put(r,copy))}return res})));return}
+ if(u.origin!==location.origin)return;
  const page=r.mode==='navigate'||/\/(index\.html)?$/.test(u.pathname);
  if(page){
   e.respondWith(caches.match('index.html',{ignoreSearch:true}).then(cached=>{
