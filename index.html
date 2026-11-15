@@ -765,6 +765,7 @@ function renderLook(){
  document.body.dataset.look=cu?'custom':S.look;document.body.dataset.bg=S.bgStyle||'none';
  CUSTOM_VARS.forEach(k=>st.removeProperty(k));
  if(cu){st.setProperty('--p',ensureDark(cu.c1));st.setProperty('--s',ensureDark(cu.c2));st.setProperty('--t','color-mix(in srgb,var(--s) 55%,#fff)');st.setProperty('--ink','color-mix(in srgb,var(--p) 25%,#000)');st.setProperty('--soft','color-mix(in srgb,var(--p) 55%,#222)');st.setProperty('--muted','color-mix(in srgb,var(--p) 40%,#888)');st.setProperty('--bg1','color-mix(in srgb,var(--p) 8%,#fff)');st.setProperty('--bg2','color-mix(in srgb,var(--s) 12%,#fff)');st.setProperty('--bg3','color-mix(in srgb,var(--t) 20%,#fff)');st.setProperty('--line','color-mix(in srgb,var(--p) 25%,transparent)')}
+ st.setProperty('--grad','linear-gradient(120deg,'+ensureDark(L[3])+','+ensureDark(L[4])+')');
  if(document.body.dataset.mode==='dark')['--ink','--soft','--muted','--bg1','--bg2','--bg3','--line'].forEach(k=>st.removeProperty(k));
  const rs=document.documentElement.style;rs.setProperty('--r',S.radius+'px');rs.setProperty('--fs',S.size==='roomy'?1.12:1);rs.setProperty('--tint',S.tint/100);
  $('wall').style.backgroundImage=S.wall?`url(${S.wall})`:'none';$('wallTint').style.display=S.wall?'block':'none';
