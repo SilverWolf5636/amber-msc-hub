@@ -1,0 +1,26 @@
+name: Update MSC showtimes
+on:
+  schedule:
+    - cron: "47 10 * * *"   # every day, about 5:47 AM Eastern
+  workflow_dispatch: {}      # lets you press "Run workflow" by hand
+permissions:
+  contents: write
+concurrency:
+  group: msc-robots
+  cancel-in-progress: false
+jobs:
+  showtimes:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Read the public Calendar of Events (slow and gentle, about 3 minutes)
+        run: python scripts/fetch_showtimes.py
+      - name: Save showtimes.json if it changed
+        run: |
+          git config user.name "showtimes-robot"
+          git config user.email "showtimes-robot@users.noreply.github.com"
+          [ -f showtimes.json ] && git add showtimes.json
+          git diff --cached --quiet || (git commit -m "Update MSC showtimes" && git pull --rebase && git push)

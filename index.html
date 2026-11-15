@@ -322,6 +322,7 @@ nav.tabs::after{content:"";position:absolute;right:0;top:0;bottom:2px;width:2.2r
 
 <!-- SHOWTIMES -->
 <section class="pane" id="p-shows">
+ <div class="card" id="mscShows" style="display:none;border-left:5px solid var(--gold)"><div id="mscShowsMain"></div><div class="small" id="mscShowsList" style="margin-top:.35rem"></div><div class="small" id="mscShowsSub" style="margin-top:.35rem"></div><div class="row mgr" id="mscShowsBtns" style="margin-top:.4rem"></div></div>
  <div class="card"><div class="hd"><div><h2>&#127916; IMAX &amp; Planetarium Showtimes</h2><div class="sub">Each show works out its <b>exit rush</b> time (start + runtime) and what to put out front before the doors open.</div></div></div>
   <div class="pills" id="showFilter"></div>
   <form class="form f2 mgr" data-f="show">
@@ -574,6 +575,7 @@ nav.tabs::after{content:"";position:absolute;right:0;top:0;bottom:2px;width:2.2r
    <p><b>Floor clock:</b> follows the real time. Change it to practice a busy day, tap Live to go back.</p>
    <p><b>Import a document:</b> on the Docs tab, pick a Word, Excel, PDF, CSV or text file (or paste text). Tap "Auto-sort it for me" and the app guesses where each part belongs: showtimes, groups, contacts or steps. You see a preview first. Nothing is saved until you confirm.</p>
    <p><b>Small header on phones:</b> the "Store info" button shows or hides the phone chips and hours so your screen has more room.</p>
+   <p><b>Museum showtimes:</b> a helper reads the public IMAX and Planetarium schedule once a day. On the Showtimes tab, pick a day and tap "Use these shows for my day". Your own shows are replaced, so the app asks you to tap twice.</p>
    <p><b>Museum hours:</b> a helper refreshes them once a day. The card shows when it last updated.</p></div></div>
 </div></div>
 
@@ -734,7 +736,7 @@ function renderDyn(){
  if(w){const d=Math.round(w.exit-n);$('kWave').textContent=m12(w.exit);$('kWaveSub').textContent=w.title.replace(EX,'')+(d>0?' • in '+d+' min':' • happening now')}else{$('kWave').textContent='All clear';$('kWaveSub').textContent='Add showtimes'}
  const dn=S.tasks.filter(t=>t.done).length,pc=S.tasks.length?Math.round(dn/S.tasks.length*100):0;$('kCheck').textContent=pc+'% ('+dn+'/'+S.tasks.length+')';$('kBar').style.width=pc+'%';
  const rs=S.restock.filter(r=>r.status!=='Restocked').length;$('kStock').textContent=rs+' restock alert'+(rs===1?'':'s');$('kStockSub').textContent=S.orders.length+' phone order'+(S.orders.length===1?'':'s')+' / holds';
- renderRadar();renderNow();renderMscHrs();
+ renderRadar();renderNow();renderMscHrs();if(typeof mscShowsTick==="function")mscShowsTick();
 }
 function renderRadar(){
  const n=nowMin(),ws=waves();
@@ -1378,6 +1380,37 @@ async function loadMscHours(){
  catch(e){try{const c=localStorage.getItem(KEY+'_msch');if(c)MSCH=JSON.parse(c)}catch(x){}}
  renderMscHrs()}
 loadMscHours();
+/* ===== Museum showtimes (daily robot -> showtimes.json). Same pattern as the hours card. ===== */
+var MSCS=null,mscsDay=null,mscsKey='';
+function mscsRows(){return (MSCS&&MSCS.days&&MSCS.days[mscsDay])||[]}
+function renderMscShows(){
+ const box=$('mscShows');if(!box)return;
+ const iso=todayISO(),days=MSCS&&MSCS.days?Object.keys(MSCS.days).filter(d=>d>=iso).sort():[];
+ mscsKey=iso+'|'+(MSCS&&MSCS.updated);
+ if(!days.length){box.style.display='none';return}
+ if(!mscsDay||!days.includes(mscsDay))mscsDay=days[0];
+ box.style.display='block';
+ const lbl=d=>(d===iso?'Today, ':'')+new Date(d+'T12:00:00').toLocaleDateString([],{weekday:'short',month:'short',day:'numeric'});
+ $('mscShowsMain').innerHTML='\u{1F3DB} <b>Shows from the museum:</b> <select id="mscsDay" aria-label="Day to show">'+days.map(d=>'<option value="'+d+'"'+(d===mscsDay?' selected':'')+'>'+esc(lbl(d))+'</option>').join('')+'</select>';
+ $('mscsDay').onchange=e=>{mscsDay=e.target.value;renderMscShows()};
+ const rows=mscsRows();
+ $('mscShowsList').innerHTML=rows.length?rows.map(r=>'<div>'+esc(m12(t2m(r.start)))+' &bull; '+esc(r.title)+' <span class="small">('+esc(r.venue)+')</span></div>').join(''):'No IMAX or Planetarium shows listed for this day.';
+ const age=Math.round((new Date(iso)-new Date(MSCS.updated))/864e5);
+ const d1=new Date(MSCS.updated+'T12:00:00').toLocaleDateString([],{month:'short',day:'numeric'});
+ const est=[...new Set(rows.filter(r=>r.est).map(r=>r.title))];
+ $('mscShowsSub').textContent='From mdsci.org, updated '+d1+'. Runtimes come from film listings.'+(est.length?' Estimated for: '+est.join(', ')+'.':'')+' Check before relying.'+(age>3?' \u26A0 This is '+age+' days old.':'');
+ $('mscShowsBtns').innerHTML=rows.length?'<button class="btn sm" type="button" id="mscsUse">Use these shows for my day</button>':'';
+ const u=$('mscsUse');if(u)u.onclick=()=>{
+  if(!u.dataset.arm){u.dataset.arm='1';u.textContent='Tap again: replace my show list';setTimeout(()=>{if(u.isConnected){u.dataset.arm='';u.textContent='Use these shows for my day'}},3500);return}
+  const tips={};S.shows.forEach(x=>{if(x.tip)tips[x.title.replace(EX,'').toLowerCase()]=x.tip});
+  S.shows=mscsRows().map(r=>({id:uid(),title:r.title,venue:r.venue,start:r.start,dur:r.dur,tip:tips[r.title.toLowerCase()]||''}));
+  save();renderShows();renderDyn();renderMscShows();toast('Show list replaced ('+S.shows.length+' shows)')}}
+function mscShowsTick(){if(mscsKey!==todayISO()+'|'+(MSCS&&MSCS.updated))renderMscShows()}
+async function loadMscShows(){
+ try{const r=await fetch('showtimes.json?'+Date.now(),{cache:'no-store'});if(!r.ok)throw 0;const d=await r.json();if(d&&d.days&&d.updated){MSCS=d;try{localStorage.setItem(KEY+'_mscs',JSON.stringify(d))}catch(e){}}}
+ catch(e){try{const c=localStorage.getItem(KEY+'_mscs');if(c)MSCS=JSON.parse(c)}catch(x){}}
+ renderMscShows()}
+loadMscShows();
 /* ===== end MSC hours ===== */
 
 /* ---- accessibility labels ---- */
