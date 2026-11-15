@@ -1474,7 +1474,9 @@ function renderAlarms(){
   return '<div class="item"><div class="tt"><b>'+esc(a.text)+'</b>'+ov+'<div class="small">'+esc(when)+'</div></div><div class="row">'+cal+st+'<button class="x" data-a="alD" data-id="'+a.id+'" aria-label="Delete alarm">&#10005;</button></div></div>'}).join(''):'<div class="empty">No alarms set.</div>'}
 function alCalUrl(a){const f=(d,t)=>d.replace(/-/g,'')+'T'+t.replace(':','')+'00',e=new Date(a.date+'T'+a.time),e2=new Date(e.getTime()+15*60000),p2=n=>String(n).padStart(2,'0'),ed=e2.getFullYear()+'-'+p2(e2.getMonth()+1)+'-'+p2(e2.getDate()),et=p2(e2.getHours())+':'+p2(e2.getMinutes());let tz='';try{tz=Intl.DateTimeFormat().resolvedOptions().timeZone||''}catch(x){}
  return 'https://calendar.google.com/calendar/render?action=TEMPLATE&text='+encodeURIComponent(a.text)+'&dates='+f(a.date,a.time)+'/'+f(ed,et)+(tz?'&ctz='+encodeURIComponent(tz):'')}
-function alBeep(){try{alCtx=alCtx||new (window.AudioContext||window.webkitAudioContext)();const o=alCtx.createOscillator(),g=alCtx.createGain();o.connect(g);g.connect(alCtx.destination);o.frequency.value=880;g.gain.value=.25;o.start();o.stop(alCtx.currentTime+.25)}catch(e){}try{navigator.vibrate&&navigator.vibrate([200,100,200])}catch(e){}}
+function alUnlock(){try{alCtx=alCtx||new (window.AudioContext||window.webkitAudioContext)();if(alCtx.state!=='running'&&alCtx.resume)alCtx.resume()}catch(e){}}
+['touchend','pointerdown','click','keydown'].forEach(function(ev){document.addEventListener(ev,alUnlock,{passive:true})});
+function alBeep(){try{alCtx=alCtx||new (window.AudioContext||window.webkitAudioContext)();if(alCtx.state!=='running'&&alCtx.resume)alCtx.resume();const o=alCtx.createOscillator(),g=alCtx.createGain();o.connect(g);g.connect(alCtx.destination);o.frequency.value=880;g.gain.value=.25;o.start();o.stop(alCtx.currentTime+.25)}catch(e){}try{navigator.vibrate&&navigator.vibrate([200,100,200])}catch(e){}}
 function alStopSound(){if(!S.alarms.some(a=>a.state==='ring')&&alSnd){clearInterval(alSnd);alSnd=null}}
 function alarmCheck(){
  const now=new Date();let ch=false;
