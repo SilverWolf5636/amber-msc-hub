@@ -1,0 +1,23 @@
+name: Update MSC hours
+on:
+  schedule:
+    - cron: "17 10 * * *"   # every day, about 5 AM Eastern
+  workflow_dispatch: {}      # lets you press "Run workflow" by hand
+permissions:
+  contents: write
+jobs:
+  hours:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Fetch and read the hours page
+        run: python scripts/fetch_hours.py
+      - name: Save hours.json if it changed
+        run: |
+          git config user.name "hours-robot"
+          git config user.email "hours-robot@users.noreply.github.com"
+          git add hours.json
+          git diff --cached --quiet || (git commit -m "Update MSC hours" && git push)

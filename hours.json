@@ -1,0 +1,81 @@
+{
+ "updated": "2026-11-15",
+ "source": "https://mdsci.org/visit/hours-schedule",
+ "weekly": {
+  "mon": {
+   "closed": true
+  },
+  "tuefri": {
+   "open": 600,
+   "close": 960
+  },
+  "satsun": {
+   "open": 600,
+   "close": 1020
+  }
+ },
+ "holidays": [
+  {
+   "date": "2026-11-26",
+   "label": "Thanksgiving",
+   "closed": true
+  },
+  {
+   "date": "2026-12-24",
+   "label": "Christmas Eve",
+   "open": 600,
+   "close": 900
+  },
+  {
+   "date": "2026-12-25",
+   "label": "Christmas",
+   "closed": true
+  },
+  {
+   "date": "2026-12-26",
+   "label": "Snow Days",
+   "open": 600,
+   "close": 1020
+  },
+  {
+   "date": "2026-12-27",
+   "open": 600,
+   "close": 1020
+  },
+  {
+   "date": "2026-12-28",
+   "open": 600,
+   "close": 1020
+  },
+  {
+   "date": "2026-12-29",
+   "open": 600,
+   "close": 1020
+  },
+  {
+   "date": "2026-12-30",
+   "open": 600,
+   "close": 1020
+  },
+  {
+   "date": "2026-12-31",
+   "open": 600,
+   "close": 960
+  },
+  {
+   "date": "2027-01-01",
+   "open": 600,
+   "close": 960
+  },
+  {
+   "date": "2027-01-02",
+   "open": 600,
+   "close": 1020
+  },
+  {
+   "date": "2027-01-03",
+   "open": 600,
+   "close": 1020
+  }
+ ]
+}
