@@ -233,6 +233,7 @@ body[data-mode=dark] .badge.hot{color:#fff}
 .x,.pill,.btn.sm,.gear,.hmore{position:relative}
 .x::after,.pill::after,.btn.sm::after,.gear::after,.hmore::after{content:"";position:absolute;inset:-.5rem -.3rem}
 input[type=checkbox]{width:1.35rem;height:1.35rem;flex:none}
+input[type=file]{max-width:100%;min-width:0;width:100%}
 .hmore{display:none;background:rgba(255,255,255,.22);color:#fff;border:1px solid rgba(255,255,255,.4);border-radius:99px;padding:.35rem .8rem;font-weight:700;font-size:.8rem}
 @media(max-width:700px){
  .hmore{display:inline-flex}
@@ -284,7 +285,7 @@ nav.tabs::after{content:"";position:absolute;right:0;top:0;bottom:2px;width:2.2r
  </div>
 </header>
 
-<nav class="tabs"><div class="tabs-in" id="tabs" tabindex="0" aria-label="Sections"></div></nav>
+<nav class="tabs"><div class="tabs-in" id="tabs" role="group" tabindex="0" aria-label="Sections"></div></nav>
 
 <main>
 <!-- TODAY -->
@@ -425,7 +426,7 @@ nav.tabs::after{content:"";position:absolute;right:0;top:0;bottom:2px;width:2.2r
     <div id="logList"></div>
     <label class="l" style="margin-top:.7rem">Notes for the next MOD</label>
     <textarea id="modHand" rows="4" placeholder="Anything the next manager on duty should know..."></textarea>
-    <div id="hoPreview" tabindex="0" aria-label="Hand-off preview" class="code" style="white-space:pre-wrap;font-size:.8rem;margin-top:.6rem;max-height:14rem;overflow:auto"></div>
+    <div id="hoPreview" role="region" tabindex="0" aria-label="Hand-off preview" class="code" style="white-space:pre-wrap;font-size:.8rem;margin-top:.6rem;max-height:14rem;overflow:auto"></div>
     <div class="row" style="margin-top:.6rem;gap:.5rem;flex-wrap:wrap"><button class="btn" style="flex:1" data-a="copyHandover">&#128203; Copy handover</button><button class="btn alt" style="flex:1" data-a="txtHand">&#128172; Text it to&hellip;</button><button class="btn alt mgr" style="flex:1" data-a="txtTeam">&#128101; Text whole team</button></div></div>
   </div>
  </div>
