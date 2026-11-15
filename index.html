@@ -7,6 +7,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Amber's Hub">
 <meta name="theme-color" content="#e8478b">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icon-192.png">
 <style>
 :root{--p:#e0397f;--s:#8b5cf6;--t:#38bdf8;--gold:#f5b83d;--ink:#2e1045;--soft:#5b4570;--muted:#85739a;
 --bg1:#fff0f6;--bg2:#fce7f3;--bg3:#f3e8ff;--card:rgba(255,255,255,.95);--line:rgba(139,92,246,.2);--r:16px;--fs:1;--tint:.4;--surface:#fff;--tintc:255,255,255;--grad:linear-gradient(120deg,var(--p),var(--s))}
@@ -1485,6 +1487,8 @@ function alarmCheck(){
 setInterval(alarmCheck,5000);
 alInit();alarmCheck();
 /* ===== end alarms ===== */
+/* ===== install-as-app helper (only on a real web address) ===== */
+try{if('serviceWorker'in navigator&&/^https?:$/.test(location.protocol))navigator.serviceWorker.register('sw.js').catch(()=>{})}catch(e){}
 
 /* ---- accessibility labels ---- */
 function a11y(){document.querySelectorAll('input[type=checkbox]:not([aria-label]),select:not([aria-label]),input:not([type=hidden]):not([type=checkbox]):not([aria-label])').forEach(e=>{
