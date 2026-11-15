@@ -135,7 +135,7 @@ label.l{display:block;font-size:.68rem;font-weight:800;text-transform:uppercase;
 .tag{display:inline-block;font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.4px;padding:.1rem .45rem;border-radius:6px;background:color-mix(in srgb,var(--s) 15%,var(--surface));color:var(--s);margin-bottom:.2rem}
 .ex{display:inline-block;font-size:.6rem;font-weight:800;text-transform:uppercase;background:#fff3c4;color:#7a5a00;border:1px solid #f0d37a;border-radius:6px;padding:0 .35rem;margin-right:.25rem;vertical-align:middle}
 .badge{font-size:.68rem;font-weight:800;padding:.12rem .55rem;border-radius:99px;background:color-mix(in srgb,var(--p) 14%,var(--surface));color:var(--p);white-space:nowrap}
-.badge.ok{background:#d9f7e8;color:#116b3d}.badge.warn{background:#fff0c9;color:#8a5a00}.badge.gray{background:#eee;color:#666}.badge.hot{background:var(--p);color:#fff;animation:pulse 1.2s infinite}
+.badge.ok{background:#d9f7e8;color:#116b3d}.badge.warn{background:#fff0c9;color:#8a5a00}.badge.gray{background:#eee;color:#666}.badge.hot{background:var(--pk,var(--p));color:#fff;animation:pulse 1.2s infinite}
 @keyframes pulse{50%{opacity:.6}}
 .wave{border:2px solid var(--line);background:var(--surface);border-radius:calc(var(--r) - 4px);padding:.7rem .8rem;margin-bottom:.6rem}
 .wave.now{border-color:var(--p);background:color-mix(in srgb,var(--p) 8%,var(--surface));box-shadow:0 0 0 3px color-mix(in srgb,var(--p) 20%,transparent)}
@@ -201,6 +201,32 @@ body[data-mode=dark] .badge.ok{background:#0f3a26;color:#b6f0d1}body[data-mode=d
 body[data-mode=dark] .btn.red{color:#ff9db8;border-color:#7a2a45}
 body[data-mode=dark] .x:hover{background:#4a1626;color:#ff9db8}
 body[data-mode=dark] header,body[data-mode=dark] .logo{color-scheme:light}
+
+/* ---- design fixes ---- */
+:root{--pk:color-mix(in srgb,var(--p) 72%,#000);--sk:color-mix(in srgb,var(--s) 72%,#000);--pd:var(--pk);--sd:var(--sk)}
+body[data-mode=dark]{--pd:color-mix(in srgb,var(--p) 40%,#fff);--sd:color-mix(in srgb,var(--s) 40%,#fff)}
+#radar .small b,.small b[style*="--p"]{color:var(--pd)!important}
+.role button.on{color:var(--pk)}
+.btn.alt{color:var(--pd)}
+.badge{color:var(--pd);font-size:.75rem}
+.tag{color:var(--sd);font-size:.7rem}
+.venue{font-size:.72rem;background:var(--sk)}
+.venue.pl{background:var(--pk)}.venue.ev{background:#0b6f66}
+body:not([data-mode=dark]) .small,body:not([data-mode=dark]) .x{color:color-mix(in srgb,var(--muted) 62%,#000)}
+body[data-mode=dark] .badge,body[data-mode=dark] .tag{color:var(--pd)}
+body[data-mode=dark] .tag{color:var(--sd)}
+body[data-mode=dark] .badge.hot{color:#fff}
+.x,.pill,.btn.sm,.gear,.hmore{position:relative}
+.x::after,.pill::after,.btn.sm::after,.gear::after,.hmore::after{content:"";position:absolute;inset:-.5rem -.3rem}
+input[type=checkbox]{width:1.35rem;height:1.35rem;flex:none}
+.hmore{display:none;background:rgba(255,255,255,.22);color:#fff;border:1px solid rgba(255,255,255,.4);border-radius:99px;padding:.35rem .8rem;font-weight:700;font-size:.8rem}
+@media(max-width:700px){
+ .hmore{display:inline-flex}
+ header:not(.hopen) .hrow>.hchip,header:not(.hopen) .hrow>.hsel{display:none}
+ .htop .gear{padding:.35rem .6rem;font-size:.8rem}
+}
+main{padding-bottom:7.5rem}
+nav.tabs::after{content:"";position:absolute;right:0;top:0;bottom:2px;width:2.2rem;background:linear-gradient(90deg,transparent,var(--surface));pointer-events:none}
 </style>
 </head>
 <body data-look="lover">
@@ -219,6 +245,7 @@ body[data-mode=dark] header,body[data-mode=dark] .logo{color-scheme:light}
    <button class="gear" data-a="mode" id="modeBtn">&#127763; Auto</button>
   </div>
   <div class="hrow">
+   <button class="hmore" id="hmoreBtn" data-a="hmore" aria-expanded="false">&#9776; Store info</button>
    <a class="hchip" href="tel:4105455924">&#128222; Store 410-545-5924</a>
    <a class="hchip" href="tel:4106852370">&#9742; Operator 410-685-2370</a>
    <div class="hsel mgr"><label for="preset">Hours:</label>
@@ -242,7 +269,7 @@ body[data-mode=dark] header,body[data-mode=dark] .logo{color-scheme:light}
  </div>
 </header>
 
-<nav class="tabs"><div class="tabs-in" id="tabs"></div></nav>
+<nav class="tabs"><div class="tabs-in" id="tabs" tabindex="0" aria-label="Sections"></div></nav>
 
 <main>
 <!-- TODAY -->
@@ -370,7 +397,7 @@ body[data-mode=dark] header,body[data-mode=dark] .logo{color-scheme:light}
     <div id="logList"></div>
     <label class="l" style="margin-top:.7rem">Notes for the next MOD</label>
     <textarea id="modHand" rows="4" placeholder="Anything the next manager on duty should know..."></textarea>
-    <div id="hoPreview" class="code" style="white-space:pre-wrap;font-size:.8rem;margin-top:.6rem;max-height:14rem;overflow:auto"></div>
+    <div id="hoPreview" tabindex="0" aria-label="Hand-off preview" class="code" style="white-space:pre-wrap;font-size:.8rem;margin-top:.6rem;max-height:14rem;overflow:auto"></div>
     <div class="row" style="margin-top:.6rem;gap:.5rem;flex-wrap:wrap"><button class="btn" style="flex:1" data-a="copyHandover">&#128203; Copy handover</button><button class="btn alt" style="flex:1" data-a="txtHand">&#128172; Text it to&hellip;</button><button class="btn alt mgr" style="flex:1" data-a="txtTeam">&#128101; Text whole team</button></div></div>
   </div>
  </div>
@@ -991,6 +1018,7 @@ function act(a,el){const id=el.dataset.id,v=el.dataset.v,k=el.dataset.k;
  case'sopD':if(el.dataset.arm){del(S.sops,id);if(S.editSop===id)S.editSop=null;renderSop()}else{el.dataset.arm='1';el.textContent='Tap again to delete';setTimeout(()=>{el.dataset.arm='';el.textContent='Delete'},3000);return}break;
  case'ctE':{const c=find(S.contacts,id);if(!c)break;S.editCt=id;$('kName').value=c.name.replace(EX,'');$('kRole').value=c.role||'';$('kPhone').value=c.phone||'';ctEditUI();$('kName').scrollIntoView({behavior:'smooth',block:'center'});break}
  case'ctCancel':S.editCt=null;$('kName').value='';$('kRole').value='';$('kPhone').value='';ctEditUI();break;
+ case'hmore':{const h=document.querySelector('header');const o=h.classList.toggle('hopen');el.setAttribute('aria-expanded',o);el.innerHTML=o?'&#10005; Hide info':'&#9776; Store info';break}
  case'mode':S.mode=S.mode==='auto'||!S.mode?'dark':S.mode==='dark'?'light':'auto';applyMode();renderLook();toast('Mode: '+S.mode);break;
  case'closeLook':$('look').classList.remove('show');break;
  case'closeCopy':$('copyModal').classList.remove('show');break;
@@ -1346,6 +1374,15 @@ async function loadMscHours(){
  renderMscHrs()}
 loadMscHours();
 /* ===== end MSC hours ===== */
+
+/* ---- accessibility labels ---- */
+function a11y(){document.querySelectorAll('input[type=checkbox]:not([aria-label]),select:not([aria-label]),input:not([type=hidden]):not([type=checkbox]):not([aria-label])').forEach(e=>{
+ if(e.id&&document.querySelector('label[for="'+e.id+'"]'))return;
+ let t='';
+ if(e.type==='checkbox'){const it=e.closest('.item');const tt=it&&it.querySelector('.tt');t='Done: '+(tt?tt.textContent.trim().slice(0,60):'item')}
+ else{const w=e.parentElement;const l=w&&w.querySelector(':scope>label');t=(l&&l.textContent.trim())||e.placeholder||e.title||(e.tagName==='SELECT'?'Choose an option':'Text')}
+ e.setAttribute('aria-label',t)})}
+a11y();var _a11yT;new MutationObserver(()=>{clearTimeout(_a11yT);_a11yT=setTimeout(a11y,150)}).observe(document.body,{childList:true,subtree:true});
 </script>
 </body>
 </html>
