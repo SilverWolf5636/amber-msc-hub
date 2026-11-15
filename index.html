@@ -564,6 +564,11 @@ body[data-edge=era] .card::after,body[data-edge=era] #menuPanel::after{content:"
   </div>
   <div id="pkBox"></div>
   <div class="row" id="pkSaveRow" style="margin-top:.6rem;display:none"><input type="text" id="pkName" placeholder="Name it (example: Quiet morning)" aria-label="Playlist name" style="flex:1"><button class="btn" id="pkSaveBtn" data-a="pkSave">Save playlist</button></div></div>
+ <div class="card c2" id="spCard" style="display:none"><div class="hd"><h2>&#127925; Spotify Player</h2><button class="btn sm alt" data-a="spClose">Close</button></div>
+  <div id="spWrap" style="min-height:152px"><div id="spHost"></div></div>
+  <div id="spNow" aria-live="polite" style="font-weight:800;margin:.4rem 0">Tap a song's play button</div>
+  <div class="row" style="justify-content:center;gap:.4rem;flex-wrap:wrap;margin:.4rem 0"><button class="btn" data-a="spPrev" aria-label="Previous song">&#9198;</button><button class="btn" data-a="spBack" aria-label="Back 10 seconds">&#9194; 10</button><button class="btn" id="spPP" data-a="spPP" aria-label="Play">&#9654;</button><button class="btn" data-a="spFwd" aria-label="Forward 10 seconds">10 &#9193;</button><button class="btn" data-a="spNext" aria-label="Next song">&#9197;</button></div>
+  <div class="small" id="spMsg" aria-live="polite">Plays the songs from this playlist one after another. Full songs play only if you are logged in to Spotify in this browser.</div></div>
  <div class="card c2" id="mpCard"><div class="hd"><h2>&#128229; Import a Playlist</h2></div>
   <div class="sub">Pick a playlist file (a CSV from Exportify, a JSON from Spotify) or a music file from another phone. Or paste a song list below. It is read on this device only. You can tick the songs you want.</div>
   <div class="row"><input type="file" id="mpFile" accept=".csv,.txt,.json,application/json,text/csv,text/plain" style="flex:1" aria-label="Pick a playlist or music file"></div>
@@ -947,7 +952,7 @@ function renderEvents(){
 }
 function renderMusic(){
  $('musicUrl').value=S.musicUrl||'';
- $('trackList').innerHTML=S.tracks.length?S.tracks.map(t=>`<div class="item"><div class="tt"><b>${esc(t.title)}</b><div class="small">${esc(t.note)}</div></div><button class="x" data-a="trD" data-id="${t.id}">✕</button></div>`).join(''):'<div class="empty">No tracks saved yet.</div>';
+ $('trackList').innerHTML=S.tracks.length?S.tracks.map(t=>`<div class="item"><div class="tt"><b>${esc(t.title)}</b><div class="small">${esc(t.note)}</div></div>${t.sp?`<button class="btn sm" data-a="spGo" data-id="${t.id}" aria-label="Play ${esc(t.title)}">&#9654;</button>`:''}<button class="x" data-a="trD" data-id="${t.id}">✕</button></div>`).join(''):'<div class="empty">No tracks saved yet.</div>';
  if(S.musicUrl)buildPlayer(S.musicUrl,true);renderPlaylists()
 }
 const plOk=u=>/spotify\.com|youtu\.be\/|youtube\.com/.test(u||'');
@@ -977,10 +982,12 @@ let MP=null;
 function csvRows(t){const rows=[];let r=[],c='',q=false;for(let i=0;i<t.length;i++){const ch=t[i];if(q){if(ch==='"'){if(t[i+1]==='"'){c+='"';i++}else q=false}else c+=ch}else if(ch==='"')q=true;else if(ch===','){r.push(c);c=''}else if(ch==='\n'||ch==='\r'){if(ch==='\r'&&t[i+1]==='\n')i++;r.push(c);c='';if(r.some(x=>x.trim()))rows.push(r);r=[]}else c+=ch}
  r.push(c);if(r.some(x=>x.trim()))rows.push(r);return rows}
 function mpSong(t,a){t=String(t||'').trim();a=String(a||'').trim();return t?(a?t+' - '+a:t):''}
+let SPM={};
+const spId=v=>{const m=String(v||'').match(/([A-Za-z0-9]{22})\s*$/);return m?m[1]:''};
 function mpOne(x){if(!x||typeof x!=='object')return '';const tr=x.track&&typeof x.track==='object'?x.track:x;
  const t=tr.trackName||tr.track_name||(typeof tr.track==='string'?tr.track:'')||tr.name||tr.title||'';
  const a=tr.artistName||tr.artist_name||(typeof tr.artist==='string'?tr.artist:'')||(Array.isArray(tr.artists)?tr.artists.map(z=>(z&&z.name)||z).join(', '):'')||'';
- return mpSong(t,a)}
+ const out=mpSong(t,a),id=spId(tr.trackUri||tr.track_uri||tr.uri||x.trackUri)||spId(tr.id);if(out&&id)SPM[out.slice(0,160)]=id;return out}
 const mpUniq=a=>[...new Set(a.filter(Boolean).map(x=>x.slice(0,160)))].slice(0,3000);
 function mpJson(o,fname){const nm=(fname||'').replace(/\.[^.]+$/,'');let songs=[];
  if(o&&Array.isArray(o.playlists)){const pl=o.playlists.filter(p=>p&&Array.isArray(p.items));
@@ -990,15 +997,16 @@ function mpJson(o,fname){const nm=(fname||'').replace(/\.[^.]+$/,'');let songs=[
  else if(o&&Array.isArray(o.items))songs=o.items.map(mpOne);
  else if(Array.isArray(o))songs=o.map(mpOne);
  songs=mpUniq(songs);return songs.length?{kind:'songs',songs,name:nm}:null}
-function mpParse(text,fname){
+function mpParse(text,fname){SPM={};const r=mpParse0(text,fname);if(r)r.sp=Object.assign({},SPM);return r}
+function mpParse0(text,fname){
  text=String(text||'').replace(/^﻿/,'').trim();if(!text)return null;
  if(text[0]==='['||text[0]==='{'){try{const o=JSON.parse(text);if(!(o&&o.app==='msc-hub-music'))return mpJson(o,fname);if(o&&o.app==='msc-hub-music'){
   const pls=(Array.isArray(o.playlists)?o.playlists:[]).filter(x=>x&&typeof x.name==='string'&&typeof x.url==='string'&&plOk(x.url)).slice(0,200).map(x=>({name:x.name.slice(0,80),url:x.url.slice(0,2200)}));
-  const trs=(Array.isArray(o.tracks)?o.tracks:[]).filter(x=>x&&typeof x.title==='string'&&x.title.trim()).slice(0,3000).map(x=>({title:x.title.slice(0,160),note:String(x.note||'').slice(0,200),pl:x.pl?String(x.pl).slice(0,80):''}));
+  const trs=(Array.isArray(o.tracks)?o.tracks:[]).filter(x=>x&&typeof x.title==='string'&&x.title.trim()).slice(0,3000).map(x=>({title:x.title.slice(0,160),note:String(x.note||'').slice(0,200),pl:x.pl?String(x.pl).slice(0,80):'',sp:spId(x.sp)}));
   return {kind:'pack',pls,trs}}}catch(e){}return null}
  let songs=[];const rows=text.indexOf(',')>=0?csvRows(text):[],hdr=rows.length?rows[0].map(x=>x.trim().toLowerCase()):[];
- const ti=hdr.findIndex(h=>h==='track name'||h==='title'||h==='song'||h==='name'),ai=hdr.findIndex(h=>h.indexOf('artist')===0);
- if(ti>=0){rows.slice(1).forEach(r=>{const t=(r[ti]||'').trim(),a=ai>=0?(r[ai]||'').trim().replace(/;\s*/g,', '):'';if(t)songs.push(a?t+' - '+a:t)})}
+ const ti=hdr.findIndex(h=>h==='track name'||h==='title'||h==='song'||h==='name'),ai=hdr.findIndex(h=>h.indexOf('artist')===0),ui=hdr.findIndex(h=>h==='track uri'||h==='spotify uri'||h==='uri'||h==='spotify id'||h==='track id');
+ if(ti>=0){rows.slice(1).forEach(r=>{const t=(r[ti]||'').trim(),a=ai>=0?(r[ai]||'').trim().replace(/;\s*/g,', '):'';if(t){const sg=a?t+' - '+a:t;songs.push(sg);const id=ui>=0?spId(r[ui]):'';if(id)SPM[sg.slice(0,160)]=id}})}
  else songs=text.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
  songs=[...new Set(songs.map(x=>x.slice(0,160)))].slice(0,3000);
  return songs.length?{kind:'songs',songs,name:(fname||'').replace(/\.[^.]+$/,'')}:null}
@@ -1008,8 +1016,28 @@ function mpPreview(r){MP=r;const e=$('mpPrev');$('mpPick').innerHTML='';if(r&&r.
  if(r.kind==='pack'){e.textContent='Found '+r.pls.length+' saved playlist'+(r.pls.length===1?'':'s')+' and '+r.trs.length+' song'+(r.trs.length===1?'':'s')+'. Tap Add to the approved list to bring them in.';return}
  if(!$('mpName').value.trim()&&r.name)$('mpName').value=r.name;
  e.textContent='Found '+r.songs.length+' song'+(r.songs.length===1?'':'s')+'. Untick any you do not want, name the playlist, then tap Add to the approved list.';$('mpPick').innerHTML=pkList(r,'m')}
-function mpPack(){return JSON.stringify({app:'msc-hub-music',v:1,playlists:(S.playlists||[]).map(p=>({name:p.name,url:p.url})),tracks:S.tracks.filter(t=>!String(t.title).startsWith(EX)).map(t=>({title:t.title,note:t.note||'',pl:t.pl||''}))})}
+function mpPack(){return JSON.stringify({app:'msc-hub-music',v:1,playlists:(S.playlists||[]).map(p=>({name:p.name,url:p.url})),tracks:S.tracks.filter(t=>!String(t.title).startsWith(EX)).map(t=>({title:t.title,note:t.note||'',pl:t.pl||'',sp:t.sp||''}))})}
 const YT_KEY='AIzaSyDvE3JOb8l1q2irtAqurPMBiAwsjspU6nI';/*YTKEY*/
+const SP={c:null,api:null,mk:0,ld:0,list:[],idx:-1,pend:null,paused:true,pos:0,dur:0,end:''};
+function spApi(cb){if(SP.api){cb();return}(SP.cb=SP.cb||[]).push(cb);if(SP.ld)return;SP.ld=1;
+ window.onSpotifyIframeApiReady=a=>{SP.api=a;(SP.cb||[]).splice(0).forEach(f=>f())};
+ const sc=document.createElement('script');sc.src='https://open.spotify.com/embed/iframe-api/v1';sc.async=true;sc.onerror=()=>{SP.ld=0;SP.mk=0;$('spMsg').textContent='Could not reach Spotify. This needs the internet.'};document.head.appendChild(sc)}
+function spUI(){const t=SP.list[SP.idx];$('spNow').textContent=t?t.title:"Tap a song's play button";const b=$('spPP');b.innerHTML=SP.paused?'&#9654;':'&#9208;';b.setAttribute('aria-label',SP.paused?'Play':'Pause')}
+function spUpd(e){const d=(e&&e.data)||{};SP.paused=!!d.isPaused;SP.pos=d.position||0;SP.dur=d.duration||0;spUI();const t=SP.list[SP.idx];
+ if(t&&SP.dur>0&&SP.pos>=SP.dur-600&&SP.end!==t.sp){SP.end=t.sp;spNext()}}
+function spLoad(i){const t=SP.list[i];if(!t)return;SP.idx=i;SP.end='';SP.paused=true;SP.pos=0;$('spCard').style.display='';
+ try{if(YP.ok)YP.pl.pauseVideo()}catch(e){}
+ const uri='spotify:track:'+t.sp;
+ if(SP.c){SP.c.loadUri(uri);setTimeout(()=>{try{SP.c.play()}catch(e){}},500);spUI();return}
+ SP.pend=uri;if(!SP.mk){SP.mk=1;
+  spApi(()=>{SP.api.createController($('spHost'),{uri:SP.pend,width:'100%',height:152},c=>{SP.c=c;c.addListener('playback_update',spUpd);const u=SP.pend;if(u!=='spotify:track:'+(SP.list[SP.idx]||{}).sp)c.loadUri('spotify:track:'+SP.list[SP.idx].sp);setTimeout(()=>{try{c.play()}catch(e){}},600)})})}
+ spUI();try{$('spCard').scrollIntoView({block:'nearest'})}catch(e){}}
+function spGo(id){const t=find(S.tracks,id);if(!t||!t.sp)return;const pl=t.pl||'';SP.list=S.tracks.filter(x=>x.sp&&(x.pl||'')===pl);spLoad(SP.list.findIndex(x=>x.id===id))}
+function spNext(){if(SP.idx<SP.list.length-1)spLoad(SP.idx+1)}
+function spPrev(){if(SP.c&&SP.pos>3000){SP.c.seek(0);return}if(SP.idx>0)spLoad(SP.idx-1);else if(SP.c)SP.c.seek(0)}
+function spPP(){if(!SP.c){spLoad(Math.max(0,SP.idx));return}SP.c.togglePlay()}
+function spSeek(d){if(SP.c)SP.c.seek(Math.max(0,SP.pos/1000+d))}
+function spStop(){try{if(SP.c)SP.c.pause()}catch(e){}$('spCard').style.display='none'}
 let PK=null;
 const YP={list:[],idx:-1,q:[],pl:null,ok:0,mk:0,pend:null,shuf:false,rep:false,src:'',drag:false,st:-1,err:0,tmr:0};
 const fmtT=t=>{t=Math.max(0,Math.floor(t||0));return Math.floor(t/60)+':'+String(t%60).padStart(2,'0')};
@@ -1039,7 +1067,7 @@ function ypEnsure(id,auto){YP.pend={id,auto};
  if(YP.mk)return;YP.mk=1;
  ypApi(()=>{YP.pl=new YT.Player('ypHost',{width:'100%',height:'100%',playerVars:{playsinline:1,rel:0},events:{onReady:()=>{YP.ok=1;const q=YP.pend;YP.pend=null;if(q)q.auto?YP.pl.loadVideoById(q.id):YP.pl.cueVideoById(q.id);if(!YP.tmr)YP.tmr=setInterval(ypTick,500)},onStateChange:ypState,onError:ypErr}})})}
 function ypUI(){const it=YP.list[YP.idx];if($('ypNow'))$('ypNow').textContent=it?it.t:'Tap a song to play it';document.querySelectorAll('#pkBox .item').forEach((e,i)=>e.classList.toggle('now',i===YP.idx));const b=$('ypPP');if(b){const pl=YP.st===1||YP.st===3;b.innerHTML=pl?'&#9208;':'&#9654;';b.setAttribute('aria-label',pl?'Pause':'Play')}}
-function ypPlay(i){if(i<0||i>=YP.list.length)return;YP.idx=i;ypEnsure(YP.list[i].id,true);ypUI()}
+function ypPlay(i){if(i<0||i>=YP.list.length)return;try{if(SP.c)SP.c.pause()}catch(e){}YP.idx=i;ypEnsure(YP.list[i].id,true);ypUI()}
 function ypState(e){YP.st=e.data;if(e.data===1)YP.err=0;if(e.data===0)ypNext();ypUI()}
 function ypErr(){YP.err++;toast('That song cannot be played here. Skipping it.');if(YP.err<5)setTimeout(ypNext,700)}
 function ypTick(){if(!YP.ok||YP.drag)return;try{const d=YP.pl.getDuration(),c=YP.pl.getCurrentTime();$('ypBar').value=d?Math.round(c/d*1000):0;$('ypCur').textContent=fmtT(c);$('ypDur').textContent=fmtT(d)}catch(e){}}
@@ -1080,9 +1108,9 @@ function pkSave(){if(!PK)return;const nm=($('pkName').value||'').trim().slice(0,
  (S.playlists=S.playlists||[]).push({id:uid(),name:nm,url});S.musicUrl=url;$('musicUrl').value=url;$('pkName').value='';save();renderPlaylists();toast('Saved "'+nm+'" with '+ids.length+' song'+(ids.length===1?'':'s'));buildPlayer(url)}
 function mpAdd(){if(!MP){toast('Pick a file or paste songs first');return}
  const have=new Set(S.tracks.map(t=>t.title.toLowerCase()+'|'+(t.pl||'')));let add=0,addP=0;
- if(MP.kind==='pack'){MP.trs.forEach(t=>{const k=t.title.toLowerCase()+'|'+t.pl;if(have.has(k))return;have.add(k);S.tracks.push({id:uid(),title:t.title,note:t.note,pl:t.pl});add++});
+ if(MP.kind==='pack'){MP.trs.forEach(t=>{const k=t.title.toLowerCase()+'|'+t.pl;if(have.has(k))return;have.add(k);S.tracks.push({id:uid(),title:t.title,note:t.note,pl:t.pl,sp:t.sp||''});add++});
   S.playlists=S.playlists||[];MP.pls.forEach(p=>{if(S.playlists.some(x=>x.url===p.url))return;S.playlists.push({id:uid(),name:p.name,url:p.url});addP++})}
- else{const nm=($('mpName').value||'').trim().slice(0,80)||'My playlist';const pick=MP.items?MP.items.filter(x=>x.on).map(x=>x.t):MP.songs;if(!pick.length){toast('Tick at least one song');return}pick.forEach(sg=>{const k=sg.toLowerCase()+'|'+nm;if(have.has(k))return;have.add(k);S.tracks.push({id:uid(),title:sg,note:'Approved by Amber - from "'+nm+'"',pl:nm});add++})}
+ else{const nm=($('mpName').value||'').trim().slice(0,80)||'My playlist';const pick=MP.items?MP.items.filter(x=>x.on).map(x=>x.t):MP.songs;if(!pick.length){toast('Tick at least one song');return}pick.forEach(sg=>{const k=sg.toLowerCase()+'|'+nm;if(have.has(k))return;have.add(k);S.tracks.push({id:uid(),title:sg,note:'Approved by Amber - from "'+nm+'"',pl:nm,sp:(MP.sp||{})[sg.slice(0,160)]||''});add++})}
  const msg=add+' song'+(add===1?'':'s')+' added'+(addP?', '+addP+' playlist'+(addP===1?'':'s'):'');
  MP=null;$('mpPick').innerHTML='';$('mpText').value='';$('mpName').value='';$('mpFile').value='';$('mpPrev').textContent='';save();renderMusic();toast(msg)}
 function renderDocs(){
@@ -1385,7 +1413,14 @@ function act(a,el){const id=el.dataset.id,v=el.dataset.v,k=el.dataset.k;
  case'music':{const u=$('musicUrl').value.trim();if(!u)return;S.musicUrl=u;buildPlayer(u);renderPlaylists();break}
  case'updGo':location.reload();break
  case'updLater':$('updBar').classList.remove('show');break
- case'mpPickPl':{const pp=MP&&MP.kind==='multi'&&MP.pls[+id];if(pp){const q=MP.pls;$('mpName').value=pp.name;mpPreview({kind:'songs',songs:pp.songs,name:pp.name})}break}
+ case'mpPickPl':{const pp=MP&&MP.kind==='multi'&&MP.pls[+id];if(pp){const spm=MP.sp;$('mpName').value=pp.name;mpPreview({kind:'songs',songs:pp.songs,name:pp.name,sp:spm})}break}
+ case'spGo':spGo(id);break
+ case'spClose':spStop();break
+ case'spPrev':spPrev();break
+ case'spBack':spSeek(-10);break
+ case'spPP':spPP();break
+ case'spFwd':spSeek(10);break
+ case'spNext':spNext();break
  case'pkOpen':pkOpen();break
  case'pkClose':ypStop();break
  case'ypGo':ypPlay(+id);break
@@ -1534,6 +1569,7 @@ const TOUR=/*TOUR*/[
 {t:'events',since:1,h:"Events",x:"Event details, the event schedule, and setup and breakdown."},
 {t:'music',since:1,h:"Music",x:"A family-friendly store player. Save your playlists as buttons so one tap loads them. Import a playlist file to fill the approved list, and send your music to another phone."},
 {t:'music',since:5,w:'#mpCard',h:"Pick Songs",x:"Load a YouTube playlist and every song shows in a list. Tap a song to play it. Tap + Queue to line songs up. Use the buttons to skip, go back or rewind. You can also import a song list and tick the songs you want."},
+{t:'music',since:6,w:'#trackList',h:"Play Spotify songs",x:"Songs that came from a Spotify file have a play button. Tap it to play. The Spotify Player card has buttons to skip, go back and rewind.",},
 {t:'docs',since:1,h:"Docs",x:"Handover notes and the policy vault. You can also import a Word, Excel, PDF or text file and the app sorts it for you."},
 {t:'dials',since:1,h:"Dials",x:"One-tap phone numbers. Tap a number to call it."},
 {t:'today',k:'e',since:1,h:"That is it!",x:"Tap the Help button any time to replay this tour, hear about one tab, or see what is new. A small ? next to a card title tells you what that card is for."}
@@ -1557,6 +1593,7 @@ const HINTS=/*HINTS*/[
 ['MOD Building Sweeps',"Tick off building sweeps during your Manager on Duty shift."],
 ['Radio Channels',"Radio channels and ready-made prompts."],
 ['MOD Shift Log',"Write down what happened during your Manager on Duty shift."],
+['Spotify Player',"Plays the songs from a Spotify file one after another. Tap the play button next to a song in the approved list. Full songs play only if you are logged in to Spotify in this browser."],
 ['Songs & Player',"Shows every song from the loaded YouTube playlist. Tap a song to play it, tap + Queue to line it up, and use the buttons to skip or rewind. Tick songs to save your own playlist."],
 ['Import a Playlist',"Pick a playlist file or paste a song list. Tick the songs you want. The ticked songs join the approved list. Send my music shares your playlists and approved songs with another phone."],
 ['Family-Friendly Store Player',"Paste a Spotify or YouTube playlist link you have checked is clean. Then name it and tap Save playlist. Next time, one tap loads it."],
