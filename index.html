@@ -297,7 +297,7 @@ body.glass input[type=text],body.glass input[type=tel],body.glass input[type=tim
 body.glass .tbox::before{background:var(--solid)}
 body.glass .btn.alt,body.glass .btn.red,body.glass .qh{background-color:var(--solid)}
 /* ===== frosted-glass 3D look ===== */
-.btn,.menu-btn{background:linear-gradient(180deg,rgba(255,255,255,.32),rgba(255,255,255,0) 50%,rgba(0,0,0,.16)),var(--grad);border:1px solid rgba(255,255,255,.4);box-shadow:inset 0 1.5px 0 rgba(255,255,255,.7),inset 0 -3px 6px rgba(0,0,0,.2),0 7px 14px -6px rgba(0,0,0,.45);text-shadow:0 1px 2px rgba(0,0,0,.28)}
+.btn,.menu-btn,.aplus{background:linear-gradient(180deg,rgba(255,255,255,.32),rgba(255,255,255,0) 50%,rgba(0,0,0,.16)),var(--grad);border:1px solid rgba(255,255,255,.4);box-shadow:inset 0 1.5px 0 rgba(255,255,255,.7),inset 0 -3px 6px rgba(0,0,0,.2),0 7px 14px -6px rgba(0,0,0,.45);text-shadow:0 1px 2px rgba(0,0,0,.28)}
 .btn.gold{background:linear-gradient(180deg,rgba(255,255,255,.45),rgba(255,255,255,0) 50%,rgba(0,0,0,.12)),var(--gold);text-shadow:none}
 .btn.alt,.btn.red{background:linear-gradient(180deg,rgba(255,255,255,.75),rgba(255,255,255,.08) 55%,rgba(0,0,0,.06)),var(--surface);box-shadow:inset 0 1.5px 0 rgba(255,255,255,.9),inset 0 -3px 6px rgba(0,0,0,.08),0 6px 12px -6px rgba(0,0,0,.35);text-shadow:none}
 /* menu tab on the right edge, same side the panel slides from */
@@ -305,7 +305,12 @@ body.glass .btn.alt,body.glass .btn.red,body.glass .qh{background-color:var(--so
 .menu-btn span:last-child{writing-mode:vertical-rl;text-orientation:mixed}
 body.menu-open .menu-btn{visibility:hidden}
 nav.tabs{min-height:0;padding:.25rem .8rem}
-.btn:active,.menu-btn:active{transform:translateY(1px) scale(.98);box-shadow:inset 0 2px 6px rgba(0,0,0,.3),0 2px 4px -2px rgba(0,0,0,.4)}
+.aplus{margin-left:auto;flex:none;min-width:60px;min-height:48px;padding:0 .9rem;border-radius:99px;font-family:inherit;font-weight:900;font-size:1.35rem;line-height:1;color:#fff;background:var(--grad);border:0}
+.mp-mode{display:flex;align-items:center;flex-wrap:wrap;gap:.4rem;padding:.7rem .9rem 0}
+.mp-mode .pill{min-height:44px;padding:0 1.1rem;font-size:.95rem}
+.mp-mode .small{flex:1 1 100%;color:var(--soft)}
+.mp-list .tab.more{border-style:dashed;justify-content:center;font-weight:800}
+.btn:active,.menu-btn:active,.aplus:active{transform:translateY(1px) scale(.98);box-shadow:inset 0 2px 6px rgba(0,0,0,.3),0 2px 4px -2px rgba(0,0,0,.4)}
 .tab,.pill,.look{background-image:linear-gradient(180deg,rgba(255,255,255,.6),rgba(255,255,255,.04) 55%);box-shadow:inset 0 1.5px 0 rgba(255,255,255,.85),inset 0 -2px 5px rgba(0,0,0,.07),0 4px 10px -5px rgba(0,0,0,.3)}
 .tab.on,.pill.on{background-image:linear-gradient(180deg,rgba(255,255,255,.3),rgba(255,255,255,0) 50%,rgba(0,0,0,.15)),var(--grad);box-shadow:inset 0 1.5px 0 rgba(255,255,255,.65),inset 0 -3px 6px rgba(0,0,0,.2),0 6px 12px -5px rgba(0,0,0,.4)}
 .look.on{box-shadow:inset 0 1.5px 0 rgba(255,255,255,.85),0 0 0 3px color-mix(in srgb,var(--p) 25%,transparent),0 4px 10px -5px rgba(0,0,0,.3)}
@@ -367,12 +372,13 @@ body[data-edge=era] .card::after,body[data-edge=era] #menuPanel::after{content:"
  </div>
 </header>
 
-<nav class="tabs"><button class="menu-btn" id="menuBtn" data-a="menuOpen" aria-haspopup="dialog" aria-expanded="false" aria-controls="menuPanel"><span class="mb-ico" aria-hidden="true">☰</span><span>Menu</span></button><span class="menu-cur" id="menuCur" aria-live="polite"></span></nav>
+<nav class="tabs"><button class="menu-btn" id="menuBtn" data-a="menuOpen" aria-haspopup="dialog" aria-expanded="false" aria-controls="menuPanel"><span class="mb-ico" aria-hidden="true">☰</span><span>Menu</span></button><span class="menu-cur" id="menuCur" aria-live="polite"></span><button class="aplus" id="aPlus" type="button" data-a="aplus" aria-label="A+ Make the text bigger"><span id="aPlusT" aria-hidden="true">A+</span></button></nav>
 <div id="menuBack" data-a="menuClose"></div>
-<aside id="menuPanel" role="dialog" aria-modal="true" aria-labelledby="menuTtl" aria-hidden="true">
+<div id="menuPanel" role="dialog" aria-modal="true" aria-labelledby="menuTtl" aria-hidden="true">
  <div class="mp-head"><div><h2 id="menuTtl">Menu</h2><p>Pick where to go</p></div><button class="mp-close" data-a="menuClose">✕ Close</button></div>
+ <div class="mp-mode" role="group" aria-label="How many sections to show"><button class="pill" type="button" id="mEasy" data-a="easy" data-v="1" aria-pressed="false">Easy</button><button class="pill" type="button" id="mFull" data-a="easy" data-v="0" aria-pressed="true">Full</button><span class="small" id="mpNote">Easy shows only the daily sections.</span></div>
  <div class="mp-list" id="tabs" role="group" aria-label="Sections"></div>
-</aside>
+</div>
 
 <main>
 <!-- TODAY -->
@@ -715,7 +721,7 @@ body[data-edge=era] .card::after,body[data-edge=era] #menuPanel::after{content:"
  <div id="fSample" class="small" style="margin:.3rem 0 .5rem"><b style="font-family:var(--ft,inherit);font-size:1.2rem">Amber's Science Store</b><br>Sample text: the quick brown fox rings up a sale. 0123456789</div>
  <div style="margin-bottom:.8rem"><label class="btn ghost" style="display:inline-block;cursor:pointer">+ Add my own font<input type="file" id="fontFile" accept=".ttf,.otf,.woff,.woff2" style="display:none"></label> <button class="pill" data-a="fontDel" id="fontDelBtn" style="display:none">Remove my fonts</button><div class="small">Use a font file you already have (.ttf .otf .woff .woff2). It stays on this device only.</div></div>
  <div style="margin-bottom:.8rem"><label class="l" for="fSearch">Search fonts</label><input type="text" id="fSearch" placeholder="Type a font name, like Lobster" autocomplete="off" autocapitalize="off"><div class="pills" id="fResults" style="margin-top:.4rem"></div><div id="fPick" class="small" style="display:none;margin-bottom:.4rem"></div><div class="small">Font search asks Google Fonts for the font, so it needs the internet. The fonts you pick are remembered on this device.</div></div>
- <label class="l">Text size</label><div class="pills"><button class="pill" data-a="size" data-v="cozy" id="szCozy">Cozy</button><button class="pill" data-a="size" data-v="roomy" id="szRoomy">Roomy (bigger)</button></div>
+ <label class="l">Text size</label><div class="pills"><button class="pill" data-a="size" data-v="cozy" id="szCozy">Cozy</button><button class="pill" data-a="size" data-v="roomy" id="szRoomy">Roomy (bigger)</button><button class="pill" data-a="size" data-v="big" id="szBig">Big</button><button class="pill" data-a="size" data-v="huge" id="szHuge">Biggest</button></div>
  <label class="l">Background style</label><div class="pills" id="bgStyles"></div>
  <label class="l">My background photos</label>
  <div class="small" style="margin-bottom:.4rem">Add as many as you like (the last 8 stay saved on this device). Tap one to use it.</div>
@@ -767,6 +773,8 @@ const m12=m=>{m=((Math.floor(m)%1440)+1440)%1440;const h=Math.floor(m/60),mm=m%6
 const money=n=>(n<0?'-':'')+'$'+Math.abs(n).toFixed(2);
 const PRESETS={weekday:{open:'10:00',close:'16:00',on:true,label:'Today: 10:00 AM - 4:00 PM'},weekend:{open:'10:00',close:'17:00',on:true,label:'Today: 10:00 AM - 5:00 PM'},late:{open:'11:00',close:'17:00',on:true,label:'Today: 11:00 AM - 5:00 PM'},early:{open:'10:00',close:'15:00',on:true,label:'Today: 10:00 AM - 3:00 PM'},closed:{open:'00:00',close:'00:00',on:false,label:'Closed today (prep day)'}};
 const DAYS=['Tue','Wed','Thu','Fri','Sat','Sun'];
+const FS={cozy:1,roomy:1.12,big:1.28,huge:1.45},SIZES=['cozy','roomy','big','huge'];
+const EASY=['today','staff','shows','tasks','lists','stock'];
 const TABS=[['today','\u{1F3E0}','Today'],['staff','\u{1F469}‍\u{1F4BC}','Staff'],['shows','\u{1F3AC}','Showtimes'],['groups','\u{1F68C}','Groups & Wristbands'],['tasks','✅','Checklists & Register'],['lists','\u{1F319}','Closing & Walks'],['sop','\u{1F4DC}','Procedures'],['stock','\u{1F4E6}','Stock & Orders'],['mod','\u{1F3DB}️','Manager on Duty'],['events','\u{1F389}','Events'],['music','\u{1F3B5}','Music'],['docs','\u{1F4D6}','Docs'],['dials','\u{1F4DE}','Dials']];
 const LOOKS=[['lover','Lover','\u{1F496}','#e0397f','#8b5cf6'],['debut','Taylor Swift','\u{1F3B8}','#0a8591','#3d9b5a'],['fearless','Fearless','\u{1F49B}','#b07300','#f2c94c'],['speaknow','Speak Now','\u{1F49C}','#8e44ad','#c06bd6'],['red','Red','\u{1F9E3}','#b3122e','#d9a066'],['e1989','1989','\u{1F54A}️','#0b84c6','#f7d56b'],['rep','reputation','\u{1F40D}','#334155','#22a06b'],['folklore','folklore','\u{1F332}','#5b6b5a','#c9b99a'],['evermore','evermore','\u{1F342}','#9a4a1f','#d9a441'],['midnights','Midnights','\u{1F319}','#4338ca','#f59e0b'],['ttpd','The Tortured Poets Department','\u{1F58B}️','#3d3d3d','#b0a59a'],['showgirl','The Life of a Showgirl','\u{1F9E1}','#d9480f','#0f9d8a'],['mint','Science Center Mint','\u{1F9EA}','#0f8f82','#2b6fd6']];
 const CUSTOM_VARS=['--p','--s','--t','--ink','--soft','--muted','--bg1','--bg2','--bg3','--line'];
@@ -838,8 +846,9 @@ function menuSet(o){document.body.classList.toggle('menu-open',o);$('menuBtn').s
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&document.body.classList.contains('menu-open'))menuSet(false)});
 function renderTabs(){
  if(!S.invOn&&S.tab==='stock')S.tab='today';{const kk=$('kStock'),kp=kk&&kk.closest('.kpi');if(kp)kp.style.display=S.invOn?'':'none'}
- const vt=TABS.filter(t=>!(S.role==='floor'&&t[0]==='mod')&&!(t[0]==='stock'&&!S.invOn));
- $('tabs').innerHTML=vt.map(t=>`<button class="tab ${S.tab===t[0]?'on':''}" data-a="tab" data-v="${t[0]}"${S.tab===t[0]?' aria-current="page"':''}><span class="mr-ico" aria-hidden="true">${t[1]}</span><span class="mr-t">${t[2]}</span>${S.tab===t[0]?'<span class="mr-ok" aria-hidden="true">✓</span>':''}</button>`).join('');
+ const vt=TABS.filter(t=>!(S.role==='floor'&&t[0]==='mod')&&!(t[0]==='stock'&&!S.invOn)&&!(S.easy&&!EASY.includes(t[0])&&t[0]!==S.tab));
+ $('mEasy').setAttribute('aria-pressed',S.easy?'true':'false');$('mFull').setAttribute('aria-pressed',S.easy?'false':'true');$('mEasy').classList.toggle('on',!!S.easy);$('mFull').classList.toggle('on',!S.easy);$('mpNote').textContent=S.easy?'Easy shows only the daily sections.':'Full shows every section.';
+ $('tabs').innerHTML=vt.map(t=>`<button class="tab ${S.tab===t[0]?'on':''}" data-a="tab" data-v="${t[0]}"${S.tab===t[0]?' aria-current="page"':''}><span class="mr-ico" aria-hidden="true">${t[1]}</span><span class="mr-t">${t[2]}</span>${S.tab===t[0]?'<span class="mr-ok" aria-hidden="true">✓</span>':''}</button>`).join('')+(S.easy?'<button class="tab more" type="button" data-a="easy" data-v="0">More sections (switch to Full)</button>':'');
  {const c=vt.find(t=>t[0]===S.tab);$('menuCur').textContent=c?c[1]+' '+c[2]:''}
  document.querySelectorAll('.pane').forEach(p=>p.classList.toggle('on',p.id==='p-'+S.tab));
 }
@@ -1193,14 +1202,14 @@ function renderLook(){
  if(cu){st.setProperty('--p',ensureDark(cu.c1));st.setProperty('--s',ensureDark(cu.c2));st.setProperty('--t','color-mix(in srgb,var(--s) 55%,#fff)');st.setProperty('--ink','color-mix(in srgb,var(--p) 25%,#000)');st.setProperty('--soft','color-mix(in srgb,var(--p) 55%,#222)');st.setProperty('--muted','color-mix(in srgb,var(--p) 40%,#888)');st.setProperty('--bg1','color-mix(in srgb,var(--p) 8%,#fff)');st.setProperty('--bg2','color-mix(in srgb,var(--s) 12%,#fff)');st.setProperty('--bg3','color-mix(in srgb,var(--t) 20%,#fff)');st.setProperty('--line','color-mix(in srgb,var(--p) 25%,transparent)')}
  st.setProperty('--grad','linear-gradient(120deg,'+ensureDark(L[3])+','+ensureDark(L[4])+')');
  if(document.body.dataset.mode==='dark')['--ink','--soft','--muted','--bg1','--bg2','--bg3','--line'].forEach(k=>st.removeProperty(k));
- const rs=document.documentElement.style;rs.setProperty('--r',S.radius+'px');rs.setProperty('--fs',S.size==='roomy'?1.12:1);rs.setProperty('--tint',S.tint/100);{const g=S.glass||0;document.body.classList.toggle('glass',!!S.wall&&g>0);rs.setProperty('--gp',(100-g*.7)+'%');rs.setProperty('--gb',(2+g*.12)+'px')}
+ const rs=document.documentElement.style;rs.setProperty('--r',S.radius+'px');rs.setProperty('--fs',FS[S.size]||1);rs.setProperty('--tint',S.tint/100);{const g=S.glass||0;document.body.classList.toggle('glass',!!S.wall&&g>0);rs.setProperty('--gp',(100-g*.7)+'%');rs.setProperty('--gb',(2+g*.12)+'px')}
  $('wall').style.backgroundImage=S.wall?`url(${S.wall})`:'none';$('wallTint').style.display=S.wall?'block':'none';
  $('lookEmoji').textContent=L[2];renderFonts();
  $('lookGrid').innerHTML=allLooks().map(l=>`<div style="position:relative"><button class="look ${S.look===l[0]?'on':''}" style="width:100%" data-a="look" data-v="${l[0]}"><i style="background:linear-gradient(90deg,${l[3]},${l[4]})"></i>${l[2]} ${esc(l[1])}</button>${l[5]?`<button class="x" data-a="clDel" data-id="${l[0]}" style="position:absolute;top:2px;right:2px;background:var(--surface);padding:0 .35rem" aria-label="Delete this look">\u2715</button>`:''}</div>`).join('');
  $('bgStyles').innerHTML=BGS.map(b=>`<button class="pill ${(S.bgStyle||'none')===b[0]?'on':''}" data-a="bg" data-v="${b[0]}">${b[1]}</button>`).join('');
  $('rad').value=S.radius;$('rVal').textContent=S.radius+'px';$('tint').value=S.tint;$('tVal').textContent=S.tint+'%';$('glass').value=S.glass||0;$('gVal').textContent=(S.glass||0)+'%';
  edgeApply();$('edgePills').innerHTML=EDGES.map(e=>`<button class="pill ${(S.edge||'none')===e[0]?'on':''}" data-a="edge" data-v="${e[0]}">${e[1]}</button>`).join('');
- $('szCozy').classList.toggle('on',S.size==='cozy');$('szRoomy').classList.toggle('on',S.size==='roomy');
+ ['Cozy','Roomy','Big','Huge'].forEach(n=>{const e=$('sz'+n);if(e)e.classList.toggle('on',(S.size||'cozy')===n.toLowerCase())});{const mx=(S.size==='huge');const b=$('aPlus');$('aPlusT').textContent=mx?'A\u2212':'A+';b.setAttribute('aria-label',mx?'A\u2212 Back to normal text size':'A+ Make the text bigger')}
 }
 function renderRole(){document.body.classList.toggle('floor',S.role==='floor');$('rM').classList.toggle('on',S.role==='manager');$('rF').classList.toggle('on',S.role==='floor');if(S.role==='floor'&&S.tab==='mod')S.tab='today'}
 function renderHeaderInputs(){$('preset').value=S.preset;$('customHrs').style.display=S.preset==='custom'?'inline':'none';$('cOpen').value=S.cOpen;$('cClose').value=S.cClose;$('sim').value=S.live?m12x():S.sim}
@@ -1321,6 +1330,8 @@ function act(a,el){const id=el.dataset.id,v=el.dataset.v,k=el.dataset.k;
  switch(a){
  case'tab':S.tab=v;renderTabs();menuSet(false);scrollTo(0,0);tourBanner();break;
  case'menuOpen':menuSet(true);break;
+ case'aplus':{const i=SIZES.indexOf(S.size||'cozy');S.size=SIZES[(i+1)%SIZES.length];renderLook();toast(S.size==='cozy'?'Normal text':'Bigger text');break}
+ case'easy':S.easy=(v==='1');if(S.easy&&!EASY.includes(S.tab))S.tab='today';renderTabs();toast(S.easy?'Easy menu is on':'Full menu is on');break;
  case'menuClose':menuSet(false);break;
  case'role':S.role=v;renderRole();renderTabs();break;
  case'sync':S.live=true;renderHeaderInputs();lastMin=-1;tick();toast('Back to live time');break;
@@ -1570,6 +1581,8 @@ const TOUR=/*TOUR*/[
 {t:'music',since:1,h:"Music",x:"A family-friendly store player. Save your playlists as buttons so one tap loads them. Import a playlist file to fill the approved list, and send your music to another phone."},
 {t:'music',since:5,w:'#mpCard',h:"Pick Songs",x:"Load a YouTube playlist and every song shows in a list. Tap a song to play it. Tap + Queue to line songs up. Use the buttons to skip, go back or rewind. You can also import a song list and tick the songs you want."},
 {t:'music',since:6,w:'#trackList',h:"Play Spotify songs",x:"Songs that came from a Spotify file have a play button. Tap it to play. The Spotify Player card has buttons to skip, go back and rewind.",},
+{t:'today',since:7,w:'#aPlus',h:"Bigger text",x:"Tap the big A+ button to make the words bigger. Tap it again for even bigger. At the biggest size it turns into A−, and one tap puts the text back to normal."},
+{t:'today',since:7,w:'#menuBtn',h:"Easy menu",x:"Open the Menu and tap Easy to see only the daily sections. Tap Full any time to see everything again."},
 {t:'docs',since:1,h:"Docs",x:"Handover notes and the policy vault. You can also import a Word, Excel, PDF or text file and the app sorts it for you."},
 {t:'dials',since:1,h:"Dials",x:"One-tap phone numbers. Tap a number to call it."},
 {t:'today',k:'e',since:1,h:"That is it!",x:"Tap the Help button any time to replay this tour, hear about one tab, or see what is new. A small ? next to a card title tells you what that card is for."}
@@ -1577,7 +1590,7 @@ const TOUR=/*TOUR*/[
 const HINTS=/*HINTS*/[
 ['Rush Radar',"Shows when IMAX, Planetarium and school groups let out toward the store, so you can see a rush coming."],
 ['Manager Notes',"Write notes for yourself or the team. They are saved on this device."],
-['Menu',"Slide-out list of every section. Tap a section to go there."],
+['Menu',"Slide-out list of the sections. Tap a section to go there. Easy shows only the daily ones. Full shows all of them."],
 ['Break Check',"Tells you if now is a good time for a 30-minute break. It watches the exit rushes from the showtimes."],
 ['Team Update',"Builds one message for your team from what is in the app. Add your own line, then copy it or text it. Texting the whole team uses the cell numbers on the Staff tab."],
 ['Alarms',"Pick a day and time and the app rings while it is open. Tap + Google Calendar to get a ring even when the app is closed."],
