@@ -305,7 +305,7 @@ body.glass .btn.alt,body.glass .btn.red,body.glass .qh{background-color:var(--so
 .menu-btn span:last-child{writing-mode:vertical-rl;text-orientation:mixed}
 body.menu-open .menu-btn{visibility:hidden}
 nav.tabs{min-height:0;padding:.25rem .8rem}
-.aplus{margin-left:auto;flex:none;min-width:60px;min-height:48px;padding:0 .9rem;border-radius:99px;font-family:inherit;font-weight:900;font-size:1.35rem;line-height:1;color:#fff;background:var(--grad);border:0}
+.aplus{margin-left:auto;margin-right:44px;flex:none;min-width:60px;min-height:48px;padding:0 .9rem;border-radius:99px;font-family:inherit;font-weight:900;font-size:1.35rem;line-height:1;color:#fff;background:var(--grad);border:0}
 .mp-mode{display:flex;align-items:center;flex-wrap:wrap;gap:.4rem;padding:.7rem .9rem 0}
 .mp-mode .pill{min-height:44px;padding:0 1.1rem;font-size:.95rem}
 .mp-mode .small{flex:1 1 100%;color:var(--soft)}
@@ -1982,10 +1982,10 @@ function renderMscEv(){
  $('mscEvList').innerHTML=ev.map((e,i)=>'<div class="item"><div class="tt"><b>'+esc(e.title)+'</b><div class="small">'+esc(e.dates)+(e.times?' &bull; '+esc(e.times):'')+' &bull; '+esc(e.type)+'</div></div><button class="btn sm mgr" type="button" data-evi="'+i+'">Use this event</button></div>').join('');
  const age=Math.round((new Date(iso)-new Date(MSCE.updated))/864e5);
  const d1=new Date(MSCE.updated+'T12:00:00').toLocaleDateString([],{month:'short',day:'numeric'});
- $('mscEvSub').textContent='From mdsci.org, updated '+d1+'. Check before relying.'+(age>3?' \u26A0 This is '+age+' days old.':'');
+ $('mscEvSub').textContent='Tap Use this event to copy its name and time into the Active Event Profile below. From mdsci.org, updated '+d1+'. Check before relying.'+(age>3?' \u26A0 This is '+age+' days old.':'');
  box.querySelectorAll('[data-evi]').forEach(b=>b.onclick=()=>{
-  if(!b.dataset.arm){b.dataset.arm='1';b.textContent='Tap again: replace name and hours';setTimeout(()=>{if(b.isConnected){b.dataset.arm='';b.textContent='Use this event'}},3500);return}
-  const e=ev[+b.dataset.evi];S.ev.title=e.title;S.ev.hours=e.dates+(e.times?' \u00B7 '+e.times:'');save();renderEvents();renderMscEv();toast('Event name and hours filled in')})}
+  if(!b.dataset.arm){b.dataset.arm='1';b.textContent='Tap again to fill in';setTimeout(()=>{if(b.isConnected){b.dataset.arm='';b.textContent='Use this event'}},3500);return}
+  const e=ev[+b.dataset.evi];S.ev.title=e.title;S.ev.hours=e.dates+(e.times?' \u00B7 '+e.times:'');save();renderEvents();renderMscEv();try{$('evTitle').scrollIntoView({block:'center',behavior:'smooth'})}catch(x){}toast('Filled in below: '+e.title)})}
 async function loadMscEv(){
  try{const r=await fetch('events.json?'+Date.now(),{cache:'no-store'});if(!r.ok)throw 0;const d=await r.json();if(d&&Array.isArray(d.events)&&d.updated){MSCE=d;try{localStorage.setItem(KEY+'_msce',JSON.stringify(d))}catch(e){}}}
  catch(e){try{const c=localStorage.getItem(KEY+'_msce');if(c)MSCE=JSON.parse(c)}catch(x){}}
