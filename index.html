@@ -1390,7 +1390,7 @@ function renderMscHrs(){
 async function loadMscHours(){
  try{const r=await fetch('hours.json?'+Date.now(),{cache:'no-store'});if(!r.ok)throw 0;const d=await r.json();if(d&&d.weekly&&d.updated){MSCH=d;try{localStorage.setItem(KEY+'_msch',JSON.stringify(d))}catch(e){}}}
  catch(e){try{const c=localStorage.getItem(KEY+'_msch');if(c)MSCH=JSON.parse(c)}catch(x){}}
- renderMscHrs()}
+ renderMscHrs();if(typeof alInit==='function')alInit()}
 loadMscHours();
 /* ===== Museum showtimes (daily robot -> showtimes.json). Same pattern as the hours card. ===== */
 var MSCS=null,mscsDay=null,mscsKey='';
@@ -1430,7 +1430,7 @@ var AL_PAD=120,alSnd=null,alCtx=null;
 function alWin(iso){
  const dow=new Date(iso+'T12:00:00').getDay();let r=null;
  if(MSCH){const hol=(MSCH.holidays||[]).find(x=>x.date===iso),w=MSCH.weekly||{};r=hol||(dow===1?w.mon:(dow>=2&&dow<=5)?w.tuefri:w.satsun)}
- else if(dow!==1)r=dow<=5?{open:600,close:960}:{open:600,close:1020};
+ else if(dow!==1)r=(dow>=2&&dow<=5)?{open:600,close:960}:{open:600,close:1020};
  if(!r||r.closed||r.open==null)return[480,1080];
  return[Math.max(0,r.open-AL_PAD),Math.min(1439,r.close+AL_PAD)]}
 var alArm='';
