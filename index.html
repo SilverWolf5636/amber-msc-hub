@@ -534,6 +534,7 @@ body[data-edge=era] .card::after,body[data-edge=era] #menuPanel::after{content:"
 
 <!-- EVENTS -->
 <section class="pane" id="p-events">
+ <div class="card c4" id="mscEv" style="display:none;border-left:5px solid var(--gold)"><div class="hd"><h2>&#127963; Coming up at the museum</h2></div><div id="mscEvList"></div><div class="small" id="mscEvSub" style="margin-top:.35rem"></div></div>
  <div class="card c2"><div class="hd"><h2>&#127881; Active Event Profile</h2></div>
   <input type="text" id="evTitle" style="font-weight:800;margin-bottom:.5rem" placeholder="Event name">
   <div class="grid" style="grid-template-columns:1fr 1fr;gap:.5rem"><div><label class="l">Hours</label><input type="text" id="evHours"></div><div><label class="l">Floor / zone</label><input type="text" id="evZone"></div></div></div>
@@ -1583,6 +1584,7 @@ const TOUR=/*TOUR*/[
 {t:'music',since:6,w:'#trackList',h:"Play Spotify songs",x:"Songs that came from a Spotify file have a play button. Tap it to play. The Spotify Player card has buttons to skip, go back and rewind.",},
 {t:'today',since:7,w:'#aPlus',h:"Bigger text",x:"Tap the big A+ button to make the words bigger. Tap it again for even bigger. At the biggest size it turns into A−, and one tap puts the text back to normal."},
 {t:'today',since:7,w:'#menuBtn',h:"Easy menu",x:"Open the Menu and tap Easy to see only the daily sections. Tap Full any time to see everything again."},
+{t:'events',since:8,w:'#mscEv',h:"Coming up at the museum",x:"Shows the museum's own list of coming events, with dates and times. Tap Use this event to fill in the name and hours of your Active Event Profile. Always check the museum's page before you rely on a date."},
 {t:'docs',since:1,h:"Docs",x:"Handover notes and the policy vault. You can also import a Word, Excel, PDF or text file and the app sorts it for you."},
 {t:'dials',since:1,h:"Dials",x:"One-tap phone numbers. Tap a number to call it."},
 {t:'today',k:'e',since:1,h:"That is it!",x:"Tap the Help button any time to replay this tour, hear about one tab, or see what is new. A small ? next to a card title tells you what that card is for."}
@@ -1590,6 +1592,7 @@ const TOUR=/*TOUR*/[
 const HINTS=/*HINTS*/[
 ['Rush Radar',"Shows when IMAX, Planetarium and school groups let out toward the store, so you can see a rush coming."],
 ['Manager Notes',"Write notes for yourself or the team. They are saved on this device."],
+['Coming up',"Events the museum has listed for the next few weeks. Tap Use this event to fill in the name and hours below. Check the museum's page before relying on it."],
 ['Menu',"Slide-out list of the sections. Tap a section to go there. Easy shows only the daily ones. Full shows all of them."],
 ['Break Check',"Tells you if now is a good time for a 30-minute break. It watches the exit rushes from the showtimes."],
 ['Team Update',"Builds one message for your team from what is in the app. Add your own line, then copy it or text it. Texting the whole team uses the cell numbers on the Staff tab."],
@@ -1969,6 +1972,25 @@ async function loadMscShows(){
  catch(e){try{const c=localStorage.getItem(KEY+'_mscs');if(c)MSCS=JSON.parse(c)}catch(x){}}
  renderMscShows()}
 loadMscShows();
+/* ===== Coming-up events (daily robot -> events.json). Same pattern as the showtimes card. ===== */
+var MSCE=null;
+function renderMscEv(){
+ const box=$('mscEv');if(!box)return;
+ const iso=todayISO(),ev=((MSCE&&MSCE.events)||[]).filter(e=>e.last>=iso).slice(0,8);
+ if(!ev.length){box.style.display='none';return}
+ box.style.display='block';
+ $('mscEvList').innerHTML=ev.map((e,i)=>'<div class="item"><div class="tt"><b>'+esc(e.title)+'</b><div class="small">'+esc(e.dates)+(e.times?' &bull; '+esc(e.times):'')+' &bull; '+esc(e.type)+'</div></div><button class="btn sm mgr" type="button" data-evi="'+i+'">Use this event</button></div>').join('');
+ const age=Math.round((new Date(iso)-new Date(MSCE.updated))/864e5);
+ const d1=new Date(MSCE.updated+'T12:00:00').toLocaleDateString([],{month:'short',day:'numeric'});
+ $('mscEvSub').textContent='From mdsci.org, updated '+d1+'. Check before relying.'+(age>3?' \u26A0 This is '+age+' days old.':'');
+ box.querySelectorAll('[data-evi]').forEach(b=>b.onclick=()=>{
+  if(!b.dataset.arm){b.dataset.arm='1';b.textContent='Tap again: replace name and hours';setTimeout(()=>{if(b.isConnected){b.dataset.arm='';b.textContent='Use this event'}},3500);return}
+  const e=ev[+b.dataset.evi];S.ev.title=e.title;S.ev.hours=e.dates+(e.times?' \u00B7 '+e.times:'');save();renderEvents();renderMscEv();toast('Event name and hours filled in')})}
+async function loadMscEv(){
+ try{const r=await fetch('events.json?'+Date.now(),{cache:'no-store'});if(!r.ok)throw 0;const d=await r.json();if(d&&Array.isArray(d.events)&&d.updated){MSCE=d;try{localStorage.setItem(KEY+'_msce',JSON.stringify(d))}catch(e){}}}
+ catch(e){try{const c=localStorage.getItem(KEY+'_msce');if(c)MSCE=JSON.parse(c)}catch(x){}}
+ renderMscEv()}
+loadMscEv();
 /* ===== end MSC hours ===== */
 
 /* ===== Alarms: only inside museum hours +/- 2 hours (closed days use 8 AM - 6 PM). Rings only while the app is open. ===== */

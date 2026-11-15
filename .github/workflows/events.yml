@@ -1,0 +1,26 @@
+name: Update MSC coming-up events
+on:
+  schedule:
+    - cron: "23 11 * * *"   # every day, about 6:23 AM Eastern (after the showtimes robot)
+  workflow_dispatch: {}      # lets you press "Run workflow" by hand
+permissions:
+  contents: write
+concurrency:
+  group: msc-robots
+  cancel-in-progress: false
+jobs:
+  events:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Read the public Calendar of Events (one page load)
+        run: python scripts/fetch_events.py
+      - name: Save events.json if it changed
+        run: |
+          git config user.name "events-robot"
+          git config user.email "events-robot@users.noreply.github.com"
+          git add events.json events-debug.txt 2>/dev/null || true
+          git diff --cached --quiet || (git commit -m "Update MSC events" && git pull --rebase && git push)
