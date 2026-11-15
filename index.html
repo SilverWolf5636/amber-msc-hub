@@ -367,12 +367,15 @@ nav.tabs::after{content:"";position:absolute;right:0;top:0;bottom:2px;width:2.2r
 <!-- STOCK -->
 <section class="pane" id="p-stock">
  <div class="grid g2">
+  <div class="card c2"><div class="hd"><div><h2>&#128451; Import a Lightspeed stock file</h2><div class="sub">In Lightspeed, export your inventory as CSV or Excel. Pick that file here. It is read on this device only. Nothing is uploaded.</div></div></div>
+   <div class="row"><input type="file" id="lsFile" accept=".csv,.xlsx,.txt" style="flex:1"></div>
+   <div id="lsOpts"></div><div id="lsOut"></div><div class="small" id="lsCat" style="margin-top:.5rem"></div></div>
   <div class="card"><div class="hd"><div><h2>&#129430; Hot-Seller Restock Queue</h2><div class="sub">Keep the displays full before each exit wave.</div></div></div>
-   <form class="form mgr" data-f="restock"><input type="text" id="rItem" placeholder="Item name" required><div class="row"><select id="rCat" style="flex:1"><option>Space &amp; Planetarium</option><option>IMAX Feature Tie-In</option><option>Dino &amp; Fossils</option><option>STEM &amp; Chemistry Kits</option><option>Plush &amp; Apparel</option></select><button class="btn" type="submit">+ Flag</button></div></form>
+   <form class="form mgr" data-f="restock"><input type="text" id="rItem" placeholder="Item name (pick from the list or type)" list="itemList" autocomplete="off" required><datalist id="itemList"></datalist><div class="row"><select id="rCat" style="flex:1"><option>Space &amp; Planetarium</option><option>IMAX Feature Tie-In</option><option>Dino &amp; Fossils</option><option>STEM &amp; Chemistry Kits</option><option>Plush &amp; Apparel</option><option>Other</option></select><button class="btn" type="submit">+ Flag</button></div></form>
    <div id="restockList"></div></div>
   <div class="card c2"><div class="hd"><div><h2>&#128230; Phone Orders &amp; Guest Holds</h2><div class="sub">Store line 410-545-5924. Tap a status to move it along.</div></div></div>
    <form class="form" data-f="order"><div class="grid" style="grid-template-columns:1fr 1fr;gap:.5rem"><input type="text" id="oGuest" placeholder="Guest name" required><input type="tel" id="oPhone" placeholder="Phone" required></div>
-    <div class="grid" style="grid-template-columns:2fr 1fr;gap:.5rem"><input type="text" id="oItems" placeholder="Items ordered / held" required><select id="oType"><option>Ship Order</option><option>Lobby Pickup</option></select></div>
+    <div class="grid" style="grid-template-columns:2fr 1fr;gap:.5rem"><input type="text" id="oItems" placeholder="Items ordered / held (pick or type)" list="itemList" autocomplete="off" required><select id="oType"><option>Ship Order</option><option>Lobby Pickup</option></select></div>
     <button class="btn" type="submit">+ Log order / hold</button></form>
    <div id="orderList"></div></div>
  </div>
@@ -692,7 +695,7 @@ function defaults(){
  ['Sat','Sun'].forEach(d=>{staff[d]=[mk('Amber (Manager)','Gift Shop Manager','Manager Float / POS','9:30 AM - 5:30 PM','1:30 PM'),mk(EX+'Maya L.','Lead Cashier','Register 1 (Main)','9:45 AM - 5:15 PM','12:30 PM'),mk(EX+'Devon K.','Sales Associate','Register 2 (Express)','10:00 AM - 5:15 PM','2:00 PM'),mk(EX+'Elena R.','Floor & Demo Helper','Floor / Dino & Space','10:30 AM - 5:00 PM','1:00 PM')]});
  const ck=(a,p)=>a.map(x=>({id:uid(),text:x,phase:p,done:false}));
  const ck2=a=>a.map(x=>({id:uid(),text:x,done:false}));
- return {invOn:false,mission:'',missionEdit:false,sops:[],closeList:ck2([EX+'Count and bag the register drawers',EX+'Turn off the store lights']),walk:{Opening:ck2([EX+'Walk the floor and check displays']),Midday:ck2([EX+'Re-front displays after an exit rush']),Closing:ck2([EX+'Walk the floor before leaving'])},walkSel:'Opening',listDate:'',groups:[],wrist:{date:'',items:[]},editCt:null,editSop:null,editGrp:null,tab:'today',look:'lover',hrs:{wd:[600,960],we:[600,1020]},team:[],customLooks:[],titleFont:'auto',textFont:'system',myFonts:[],walls:[],bgStyle:'sparkle',radius:16,size:'cozy',tint:40,wall:null,role:'manager',preset:todayPreset(),cOpen:'10:00',cClose:'16:00',live:true,sim:'11:30',day:todayDay(),showFilter:'ALL',phase:'ALL',
+ return {catalog:[],invOn:true,mission:'',missionEdit:false,sops:[],closeList:ck2([EX+'Count and bag the register drawers',EX+'Turn off the store lights']),walk:{Opening:ck2([EX+'Walk the floor and check displays']),Midday:ck2([EX+'Re-front displays after an exit rush']),Closing:ck2([EX+'Walk the floor before leaving'])},walkSel:'Opening',listDate:'',groups:[],wrist:{date:'',items:[]},editCt:null,editSop:null,editGrp:null,tab:'today',look:'lover',hrs:{wd:[600,960],we:[600,1020]},team:[],customLooks:[],titleFont:'auto',textFont:'system',myFonts:[],walls:[],bgStyle:'sparkle',radius:16,size:'cozy',tint:40,wall:null,role:'manager',preset:todayPreset(),cOpen:'10:00',cClose:'16:00',live:true,sim:'11:30',day:todayDay(),showFilter:'ALL',phase:'ALL',
  notes:[{id:uid(),text:EX+'Front the feature displays before the next exit rush.',tag:'Merch / Display',done:false},{id:uid(),text:EX+'Remind cashiers: MSC Members get 10% off.',tag:'Cashier Info',done:false}],
  staff,live_tasks:[{id:uid(),text:EX+'Pull 12 astronaut ice creams for Register 1',who:'Floor Team',pri:'Urgent',done:false}],
  shows:[{id:uid(),title:EX+'Colors of the Solar System',venue:'Planetarium',start:'11:30',dur:35,tip:'Glow planets, astronaut ice cream, star maps'},{id:uid(),title:EX+'Deep Sky',venue:'IMAX',start:'12:15',dur:40,tip:'Telescopes, space kits, posters'},{id:uid(),title:EX+'School Field Trip Bus Departure',venue:'Group / Event',start:'13:00',dur:35,tip:'Under-$10 souvenirs, rock candy'},{id:uid(),title:EX+'Flight of the Butterflies 3D',venue:'IMAX',start:'13:30',dur:45,tip:'Butterfly kits, bug viewers, plush'}],
@@ -708,7 +711,7 @@ function defaults(){
  stickies:[],alarms:[]};
 }
 let S=load();
-function load(){const d=defaults();try{const r=localStorage.getItem(KEY);if(r){const p=JSON.parse(r);return Object.assign(d,p)}}catch(e){}return d}
+function load(){const d=defaults();try{const r=localStorage.getItem(KEY);if(r){const p=JSON.parse(r);const o=Object.assign(d,p);o.invOn=true;if(!Array.isArray(o.catalog))o.catalog=[];return o}}catch(e){}return d}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S));return true}catch(e){return false}}
 let tTimer;function toast(m){const t=$('toast');t.textContent=m;t.classList.add('show');clearTimeout(tTimer);tTimer=setTimeout(()=>t.classList.remove('show'),2200)}
 function copyText(txt,msg){const done=()=>toast(msg||'Copied');try{navigator.clipboard.writeText(txt).then(done,()=>fb())}catch(e){fb()}
@@ -787,8 +790,9 @@ function renderTasks(){
 }
 const CKL={tasks:()=>S.tasks,mod:()=>S.mod.walk,event:()=>S.ev.tasks,close:()=>S.closeList,walk:()=>S.walk[S.walkSel]};
 function renderStock(){
+ lsLists();
  const sts=['Need on Floor','Pulled from Back','Restocked'];
- $('restockList').innerHTML=S.restock.length?S.restock.map(r=>`<div class="item"><div class="tt"><b>${tx(r.item)}</b><div class="small">${esc(r.cat)}</div><div class="pills" style="margin:.4rem 0 0">${sts.map(s=>`<button class="pill ${r.status===s?'on':''}" data-a="rsS" data-id="${r.id}" data-v="${s}">${s}</button>`).join('')}</div></div><button class="x mgr" data-a="rsD" data-id="${r.id}">✕</button></div>`).join(''):'<div class="empty">Nothing flagged.</div>';
+ $('restockList').innerHTML=S.restock.length?S.restock.map(r=>`<div class="item"><div class="tt"><b>${tx(r.item)}</b><div class="small">${esc(r.cat)}${r.sku?' &bull; SKU '+esc(r.sku):''}${r.qty!=null?' &bull; '+r.qty+' in stock':''}</div><div class="pills" style="margin:.4rem 0 0">${sts.map(s=>`<button class="pill ${r.status===s?'on':''}" data-a="rsS" data-id="${r.id}" data-v="${s}">${s}</button>`).join('')}</div></div><button class="x mgr" data-a="rsD" data-id="${r.id}">✕</button></div>`).join(''):'<div class="empty">Nothing flagged.</div>';
  $('orderList').innerHTML=S.orders.length?S.orders.map(o=>`<div class="item"><div class="tt"><b>${tx(o.guest)}</b> <span class="badge">${esc(o.type)}</span><div class="small">${esc(o.items)} &bull; ${esc(o.phone)}</div><button class="pill" style="margin-top:.4rem" data-a="orN" data-id="${o.id}">Status: <b>${esc(o.status)}</b> &rarr;</button></div><button class="x" data-a="orD" data-id="${o.id}">✕</button></div>`).join(''):'<div class="empty">No orders or holds.</div>'
 }
 function renderMod(){
@@ -1063,6 +1067,10 @@ function act(a,el){const id=el.dataset.id,v=el.dataset.v,k=el.dataset.k;
  case'ckD':del(CKL[k](),id);renderTasks();renderLists();renderDyn();break;
  case'ckReset':CKL[k]().forEach(t=>t.done=false);renderTasks();renderLists();renderDyn();toast('All unchecked');break;
  case'tillClear':Object.keys(S.till).forEach(x=>S.till[x]=x==='start'?S.till.start:'');buildTill();break;
+ case'lsAdd':lsAdd([+el.dataset.id]);break;
+ case'lsSave':S.catalog=LS.cat||[];save();renderStock();toast(S.catalog.length+' items saved as pick-lists');break;
+ case'lsClear':S.catalog=[];save();renderStock();toast('Imported item list cleared');break;
+ case'lsAll':lsAdd(LS.low.map((x,i)=>i));break;
  case'rsS':find(S.restock,id).status=v;renderStock();renderDyn();break;
  case'rsD':del(S.restock,id);renderStock();renderDyn();break;
  case'orN':{const o=find(S.orders,id);const st=o.type==='Ship Order'?['Paid - Needs Packing','Packed','Shipped']:['Holding at Register 1','Picked Up'];o.status=st[(st.indexOf(o.status)+1)%st.length];renderStock();break}
@@ -1160,7 +1168,7 @@ document.addEventListener('submit',e=>{e.preventDefault();const f=e.target.datas
  case'live':S.live_tasks.unshift({id:uid(),text:v('lText'),who:v('lWho'),pri:$('lPri').value,done:false});renderStaff();break;
  case'show':S.shows.push({id:uid(),title:v('shTitle'),venue:$('shVenue').value,start:$('shStart').value,dur:+$('shDur').value||40,tip:v('shTip')});renderShows();renderDyn();break;
  case'task':S.tasks.push({id:uid(),text:v('tText'),phase:$('tPhase').value,done:false});renderTasks();renderDyn();break;
- case'restock':S.restock.unshift({id:uid(),item:v('rItem'),cat:$('rCat').value,status:'Need on Floor'});renderStock();renderDyn();break;
+ case'restock':S.restock.unshift({id:uid(),item:v('rItem'),cat:$('rCat').value,sku:(lsFind(v('rItem'))||{}).sku||'',status:'Need on Floor'});renderStock();renderDyn();break;
  case'order':{const ty=$('oType').value;S.orders.unshift({id:uid(),guest:v('oGuest'),phone:v('oPhone'),items:v('oItems'),type:ty,status:ty==='Ship Order'?'Paid - Needs Packing':'Holding at Register 1'});renderStock();renderDyn();break}
  case'modtask':S.mod.walk.push({id:uid(),text:v('mText'),done:false});renderTasks();break;
  case'log':{const d=new Date();S.mod.log.push({id:uid(),time:d.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'}),place:v('gPlace'),type:$('gType').value,text:v('gText'),status:'Open'});renderLog();break}
@@ -1244,6 +1252,58 @@ async function impReadFile(file){
 }
 function impTitle(){const f=$('impFile').files[0];return f?f.name.replace(/\.[^.]+$/,''):'Imported document'}
 function impOpts(h){$('impOpts').innerHTML=h}
+
+/* ---- Lightspeed stock file import ---- */
+let LS={rows:[],head:[],low:[]};
+function csvRows(t){const o=[];let r=[],c='',q=false;t=t.replace(/^﻿/,'');
+ const l1=t.split('\n',1)[0],d=(l1.match(/\t/g)||[]).length>(l1.match(/,/g)||[]).length?'\t':',';
+ for(let i=0;i<t.length;i++){const ch=t[i];
+  if(q){if(ch==='"'){if(t[i+1]==='"'){c+='"';i++}else q=false}else c+=ch}
+  else if(ch==='"')q=true;
+  else if(ch===d){r.push(c);c=''}
+  else if(ch==='\n'||ch==='\r'){if(ch==='\r'&&t[i+1]==='\n')i++;r.push(c);c='';if(r.some(x=>x.trim()))o.push(r);r=[]}
+  else c+=ch}
+ r.push(c);if(r.some(x=>x.trim()))o.push(r);return o}
+async function lsRead(file){const n=file.name.toLowerCase();
+ if(/\.xlsx$/.test(n)){await loadLib('readxlsx');let r=await readXlsxFile(file);if(r&&r.length&&r[0]&&!Array.isArray(r[0])&&r[0].data)r=r[0].data;return r.map(row=>row.map(c=>c==null?'':(c instanceof Date?xlDate(c):String(c).trim())))}
+ return csvRows(await file.text())}
+const LSCATS=[['Dino & Fossils',/dino|fossil|rock|mineral|gem/i],['Space & Planetarium',/space|astro|planet|rocket|moon|star|nasa/i],['IMAX Feature Tie-In',/imax|film|movie/i],['Plush & Apparel',/plush|stuffed|apparel|shirt|hoodie|hat|cloth|sock|toy/i],['STEM & Chemistry Kits',/kit|stem|chem|science|experiment|lab|magnet|crystal|puzzle|game/i]];
+function lsMapCat(txt){txt=String(txt||'').trim();if(!txt)return 'Other';const m=LSCATS.find(c=>c[1].test(txt));return m?m[0]:txt.slice(0,40)}
+function lsFind(nm){nm=String(nm||'').trim().toLowerCase();return nm?S.catalog.find(x=>x.nm.toLowerCase()===nm):null}
+function lsLists(){const names=new Set();S.catalog.forEach(x=>names.add(x.nm));S.restock.forEach(r=>names.add(r.item.replace(EX,'')));
+ const dl=$('itemList');if(dl)dl.innerHTML=[...names].slice(0,3000).map(n=>'<option value="'+esc(n)+'"></option>').join('');
+ const c=$('lsCat');if(c)c.innerHTML=S.catalog.length?S.catalog.length+' items saved on this device from your last import. They show up as pick-lists in the forms below. <button class="btn sm alt" data-a="lsClear">Clear this list</button>':''}
+function lsLoad(rows){
+ const nameRe=/^(item|product|description|name|title)/i,qtyRe=/(on.?hand|qty|quantity|stock|inventory|count)/i,catRe=/(category|department|dept|^type|^group)/i,skuRe=/(sku|upc|barcode|ean|code|system id)/i;
+ let hi=0;for(let i=0;i<Math.min(10,rows.length);i++){if(rows[i].filter(x=>String(x).trim()).length>=2&&rows[i].some(x=>nameRe.test(String(x).trim()))){hi=i;break}}
+ LS.head=rows[hi].map(x=>String(x).trim());LS.rows=rows.slice(hi+1);
+ let nc=LS.head.findIndex(h=>nameRe.test(h));if(nc<0)nc=0;
+ let qc=LS.head.findIndex((h,i)=>i!==nc&&qtyRe.test(h));if(qc<0)qc=Math.min(1,LS.head.length-1);
+ let cc=LS.head.findIndex((h,i)=>i!==nc&&i!==qc&&catRe.test(h));
+ let kc=LS.head.findIndex((h,i)=>i!==nc&&i!==qc&&i!==cc&&skuRe.test(h));
+ const opt=(sel,none)=>(none?`<option value="-1"${sel<0?' selected':''}>(none)</option>`:'')+LS.head.map((h,i)=>`<option value="${i}"${i===sel?' selected':''}>${esc(h||('Column '+(i+1)))}</option>`).join('');
+ $('lsOpts').innerHTML=`<div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(9rem,1fr));gap:.5rem;margin-top:.5rem"><div><label class="l">Item name</label><select id="lsName">${opt(nc)}</select></div><div><label class="l">Quantity</label><select id="lsQty">${opt(qc)}</select></div><div><label class="l">Category</label><select id="lsCatC">${opt(cc,1)}</select></div><div><label class="l">SKU / code</label><select id="lsSku">${opt(kc,1)}</select></div><div><label class="l">Low at or below</label><input type="number" id="lsTh" value="5" min="0" step="1"></div></div>`;
+ lsShow()}
+function lsShow(){
+ const nc=+$('lsName').value,qc=+$('lsQty').value,cc=+$('lsCatC').value,kc=+$('lsSku').value,th=parseFloat($('lsTh').value),t=isNaN(th)?5:th,items=[],cat=[];let bad=0;
+ LS.rows.forEach(r=>{const nm=String(r[nc]||'').trim();if(!nm)return;
+  const o={nm:nm.slice(0,80),cat:cc>=0?lsMapCat(r[cc]):'Other',sku:kc>=0?String(r[kc]||'').trim().slice(0,40):''};
+  if(cat.length<3000)cat.push({nm:o.nm,cat:o.cat,sku:o.sku});
+  const q=parseFloat(String(r[qc]||'').replace(/,/g,'').trim());if(isNaN(q)){bad++;return}o.q=q;if(q<=t)items.push(o)});
+ items.sort((a,b)=>a.q-b.q);LS.low=items;LS.cat=cat;
+ $('lsOut').innerHTML='<div class="small" style="margin:.5rem 0">'+LS.rows.length+' rows read. '+items.length+' at or below '+t+'.'+(bad?' '+bad+' rows had no quantity number and were skipped.':'')+' Check the columns above are the right ones.</div>'
+  +'<div class="row" style="margin:.4rem 0">'+(items.length?'<button class="btn sm" data-a="lsAll">+ Flag all shown</button>':'')+'<button class="btn sm alt" data-a="lsSave">Save all '+cat.length+' items as pick-lists</button></div>'
+  +items.slice(0,100).map((x,i)=>`<div class="item"><div class="tt"><b>${esc(x.nm)}</b><div class="small">${esc(x.cat)}${x.sku?' &bull; SKU '+esc(x.sku):''} &bull; ${x.q} in stock</div></div><button class="btn sm" data-a="lsAdd" data-id="${i}">+ Flag</button></div>`).join('')
+  +(items.length>100?'<div class="small">Showing the lowest 100.</div>':'')}
+function lsAdd(idx){let n=0;const have=new Set(S.restock.filter(r=>r.status!=='Restocked').map(r=>r.item.toLowerCase()));
+ idx.slice(0,100).forEach(i=>{const x=LS.low[i];if(!x||have.has(x.nm.toLowerCase()))return;have.add(x.nm.toLowerCase());S.restock.unshift({id:uid(),item:x.nm,cat:x.cat,sku:x.sku,qty:x.q,status:'Need on Floor'});n++});
+ if(LS.cat&&LS.cat.length)S.catalog=LS.cat;
+ save();renderStock();renderDyn();toast(n?n+' item'+(n===1?'':'s')+' flagged for restock':'Already flagged')}
+$('lsFile').addEventListener('change',async e=>{const f=e.target.files[0];if(!f)return;
+ if(f.size>20*1024*1024){toast('That file is too big (max 20 MB)');return}
+ try{const rows=await lsRead(f);if(rows.length<2){toast('No rows found in that file');return}lsLoad(rows)}catch(err){toast('Could not read that file')}});
+$('rItem').addEventListener('input',()=>{const c=lsFind($('rItem').value);if(c&&c.cat&&[...$('rCat').options].some(o=>o.value===c.cat))$('rCat').value=c.cat});
+$('lsOpts').addEventListener('change',lsShow);$('lsOpts').addEventListener('input',lsShow);
 $('impFile').addEventListener('change',async e=>{
  const f=e.target.files[0];if(!f)return;
  $('impStatus').textContent='Reading '+f.name+'...';impOpts('');
