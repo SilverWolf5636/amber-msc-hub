@@ -316,6 +316,12 @@ nav.tabs::after{content:"";position:absolute;right:0;top:0;bottom:2px;width:2.2r
     <div class="small" id="alDone" aria-live="polite" style="margin-top:.5rem"></div>
     <div class="note-box" id="alHint" style="margin-top:.6rem"></div>
     <div id="alarms"></div></div>
+   <div class="card c2 mgr" id="teamCard" style="margin-top:.8rem"><div class="hd"><h2>&#128227; Team Update</h2></div>
+    <div class="small">One message for your team: today's schedule, showtimes, tasks, closing steps, restock and notes. It builds itself. You send it by text.</div>
+    <label class="l" for="tmNote" style="margin-top:.5rem">Your own message (optional)</label>
+    <textarea id="tmNote" rows="2" placeholder="Example: Big school group at 11. Thank you, everyone!"></textarea>
+    <div id="tmPrev" role="region" tabindex="0" aria-label="Team update preview" class="code" style="white-space:pre-wrap;font-size:.8rem;margin-top:.6rem;max-height:14rem;overflow:auto"></div>
+    <div class="row" style="margin-top:.6rem;gap:.5rem;flex-wrap:wrap"><button class="btn" style="flex:1" data-a="tmCopy">&#128203; Copy</button><button class="btn alt" style="flex:1" data-a="tmTo">&#128172; Text it to&hellip;</button><button class="btn alt" style="flex:1" data-a="tmAll">&#128101; Text whole team</button></div></div>
   </div>
  </div>
 </section>
@@ -706,7 +712,7 @@ function renderTabs(){
  $('tabs').innerHTML=TABS.filter(t=>!(S.role==='floor'&&t[0]==='mod')&&!(t[0]==='stock'&&!S.invOn)).map(t=>`<button class="tab ${S.tab===t[0]?'on':''}" data-a="tab" data-v="${t[0]}">${t[1]} ${t[2]}</button>`).join('');
  document.querySelectorAll('.pane').forEach(p=>p.classList.toggle('on',p.id==='p-'+S.tab));
 }
-function renderDyn(){
+function renderDyn(){try{renderTeam()}catch(e){}
  const h=hours(),n=nowMin(),w=nextWave();
  $('hHours').textContent=h.label+(h.on?(n>=t2m(h.open)&&n<t2m(h.close)?'  • STORE OPEN':n<t2m(h.open)?'  • Opens '+m12(t2m(h.open)):'  • After hours'):'');
  $('hNext').textContent=w?'Next exit rush: '+m12(w.exit)+' ('+w.title.replace(EX,'')+')':'No more exit rushes';
@@ -871,7 +877,7 @@ function renderLook(){
 function renderRole(){document.body.classList.toggle('floor',S.role==='floor');$('rM').classList.toggle('on',S.role==='manager');$('rF').classList.toggle('on',S.role==='floor');if(S.role==='floor'&&S.tab==='mod')S.tab='today'}
 function renderHeaderInputs(){$('preset').value=S.preset;$('customHrs').style.display=S.preset==='custom'?'inline':'none';$('cOpen').value=S.cOpen;$('cClose').value=S.cClose;$('sim').value=S.live?m12x():S.sim}
 function m12x(){const d=new Date();return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')}
-function renderAll(){dailyReset();applyHrs();renderRole();renderLook();renderHeaderInputs();renderTabs();renderNotes();renderStaff();renderShows();renderTasks();renderStock();renderMod();renderEvents();renderMusic();renderDocs();renderDials();renderLists();renderGroups();renderSop();ctEditUI();grpEditUI();$('cPrice').value=S.calc.price;$('cDisc').value=S.calc.disc;renderCalc();buildTill();renderStickies();renderAlarms();renderWalls();$('myEmoji').innerHTML=EMOJIS.map(e=>`<option>${e}</option>`).join('');lastMin=-1;tick()}
+function renderAll(){dailyReset();applyHrs();renderRole();renderLook();renderHeaderInputs();renderTabs();renderNotes();renderStaff();renderShows();renderTasks();renderStock();renderMod();renderEvents();renderMusic();renderDocs();renderDials();renderLists();renderGroups();renderSop();ctEditUI();grpEditUI();$('cPrice').value=S.calc.price;$('cDisc').value=S.calc.disc;renderCalc();buildTill();renderStickies();renderAlarms();renderWalls();renderTeam();$('myEmoji').innerHTML=EMOJIS.map(e=>`<option>${e}</option>`).join('');lastMin=-1;tick()}
 
 
 /* ---------- batch 1: lists, groups, wristbands, procedures ---------- */
@@ -1066,6 +1072,9 @@ function act(a,el){const id=el.dataset.id,v=el.dataset.v,k=el.dataset.k;
  case'qLog':{const d=new Date(),tm=d.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'});S.mod.log.push({id:uid(),time:tm,place:S.mod.place||'',type:v,text:'',status:'Open'});renderLog();toast('Logged '+tm);break}
  case'txtHand':smsTo('',handover());break;
  case'txtTeam':{const nums=(S.staff[actDay()]||[]).filter(p=>p.phone&&p.status!=='Off Shift').map(p=>p.phone.replace(/[^0-9+]/g,'')).join(',');if(!nums){toast('No cell numbers on today\'s staff yet');break}smsTo(nums,handover());break}
+ case'tmCopy':copyText(teamUpdate(),'Team update copied');break;
+ case'tmTo':smsTo('',teamUpdate());break;
+ case'tmAll':{const nums=(S.staff[actDay()]||[]).filter(p=>p.phone&&p.status!=='Off Shift').map(p=>p.phone.replace(/[^0-9+]/g,'')).join(',');if(!nums){toast('No cell numbers on today\'s staff yet');break}smsTo(nums,teamUpdate());break}
  case'copyHandover':copyText(handover(),'Handover copied');break;
  case'miD':del(S.ev.miles,id);renderEvents();break;
  case'music':{const u=$('musicUrl').value.trim();if(!u)return;S.musicUrl=u;buildPlayer(u);break}
@@ -1095,6 +1104,19 @@ function handover(){
  const d=new Date();
  return `SHIFT HANDOVER - ${d.toLocaleDateString()} ${d.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'})}\nMOD: ${m.name||''} ${m.radio?'('+m.radio+')':''}\n${L.length} logged, ${op.length} still open\n\nSTILL OPEN:\n${op.map(fmt).join('\n')||'- (nothing open)'}\n\nRESOLVED:\n${rs.map(fmt).join('\n')||'- (none)'}\n\nOPEN FLOOR TASKS:\n${tasks}\n\nNOTES FOR NEXT MOD:\n${m.hand||'(none)'}`
 }
+function teamUpdate(){
+ const d=new Date(),day=actDay(),cl=x=>String(x||'').replace(EX,''),H=hours();
+ const ppl=(S.staff[day]||[]).filter(p=>p.status!=='Off Shift').map(p=>'- '+cl(p.name)+(p.role?' ('+cl(p.role)+')':'')+(p.zone?' at '+cl(p.zone):'')+(p.shift?', '+p.shift:'')+(p.brk?', break '+p.brk:'')+(p.task?' - Task: '+cl(p.task):''));
+ const shw=S.shows.slice().sort((a,b)=>t2m(a.start)-t2m(b.start)).map(w=>'- '+m12(t2m(w.start))+' '+w.venue+': '+cl(w.title));
+ const tk=(S.live_tasks||[]).filter(t=>!t.done).map(t=>'- '+cl(t.text)+(t.who?' (for '+cl(t.who)+')':''));
+ const cs=(S.closeList||[]).filter(t=>!t.done).map(t=>'- '+cl(t.text));
+ const rs=S.restock.filter(r=>r.status==='Need on Floor').map(r=>'- '+cl(r.item));
+ const nt=S.notes.filter(n=>!n.done).map(n=>'- '+cl(n.text));
+ const sec=(h,a)=>a.length?'\n\n'+h+':\n'+a.join('\n'):'';
+ const msg=(($('tmNote')||{}).value||'').trim();
+ return 'TEAM UPDATE - '+d.toLocaleDateString([],{weekday:'long',month:'short',day:'numeric'})+(H&&H.label?'\n'+H.label:'')+(msg?'\n\n'+msg:'')+sec('WHO IS WORKING',ppl)+sec('SHOWTIMES',shw)+sec('TASKS TO DO',tk)+sec('NEED ON THE FLOOR',rs)+sec('NOTES',nt)+sec('CLOSING STEPS LEFT',cs)
+}
+function renderTeam(){const e=$('tmPrev');if(!e)return;if(!window._tmW){window._tmW=1;$('tmNote').addEventListener('input',renderTeam)}e.textContent=teamUpdate()}
 function smsTo(nums,body){location.href='sms:'+nums+'?&body='+encodeURIComponent(body);toast('Opening your messages...')}
 function showQR(id){
  const d=find(S.docs,id),box=$('qrBox');$('qrTitle').textContent=d.title.replace(EX,'');box.innerHTML='Making code...';$('qrWrap').style.display='block';$('qrWrap').scrollIntoView({behavior:'smooth'});
@@ -1169,6 +1191,7 @@ try{matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{if
 const TOUR=/*TOUR*/[
 {t:'today',k:'w',since:1,h:"Welcome!",x:"This app keeps your store day in one place. This tour takes about 2 minutes. Tap Next to move on. You can stop any time. To see it again, tap the Help button at the top."},
 {t:'today',since:1,h:"Today",x:"Your home page. It shows what is on right now, the Rush Radar for the shop, notes, and alarms. Start here each day."},
+{t:'today',since:2,h:"Team Update",x:"On the Today tab, the Team Update card builds one message for your team: who is working, showtimes, tasks, notes and closing steps. Add your own line if you like, then tap Text whole team."},
 {t:'staff',since:1,h:"Staff",x:"Who is working, on break or off. Type a task under a person and tap Text Task to send it."},
 {t:'shows',since:1,h:"Showtimes",x:"Today's IMAX and Planetarium shows. Pick a day, then tap Use these shows for my day."},
 {t:'groups',since:1,h:"Groups & Wristbands",x:"Groups coming today and when they arrive, and the wristbands for today."},
@@ -1186,6 +1209,7 @@ const TOUR=/*TOUR*/[
 const HINTS=/*HINTS*/[
 ['Rush Radar',"Shows when IMAX, Planetarium and school groups let out toward the store, so you can see a rush coming."],
 ['Manager Notes',"Write notes for yourself or the team. They are saved on this device."],
+['Team Update',"Builds one message for your team from what is in the app. Add your own line, then copy it or text it. Texting the whole team uses the cell numbers on the Staff tab."],
 ['Alarms',"Pick a day and time and the app rings while it is open. Tap + Google Calendar to get a ring even when the app is closed."],
 ['Staff Schedule',"Who is working, on break or off. Type a task under a person and tap Text Task."],
 ['Shared Live Task Board',"Floor tasks and stock pulls everyone can see."],
