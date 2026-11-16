@@ -513,8 +513,10 @@ body[data-edge=era] .card::after,body[data-edge=era] #menuPanel::after{content:"
   <div>
    <div class="card c2"><div class="hd"><div><h2>&#129518; Register &amp; Phone Order Calculator</h2><div class="sub">Member discount + 6% Maryland sales tax.</div></div></div>
     <div class="grid" style="grid-template-columns:1fr 1fr;margin-bottom:.7rem"><div><label class="l">Subtotal ($)</label><input type="number" id="cPrice" step="0.01" min="0" value="0"></div>
-     <div><label class="l">Discount</label><select id="cDisc"><option value="0">Guest (0%)</option><option value="10">MSC Member (10%)</option><option value="20">Member Holiday Event (20%)</option><option value="15">Staff / Educator (15%)</option></select></div></div>
-    <div class="calc"><div><span>Discount savings</span><b id="cSave">$0.00</b></div><div><span>After discount</span><b id="cAfter">$0.00</b></div><div><span>Maryland tax (6%)</span><b id="cTax">$0.00</b></div><div class="tot"><span>Total to charge</span><b id="cTotal">$0.00</b></div></div></div>
+     <div><label class="l">Discount</label><select id="cDisc"><option value="0">Guest (0%)</option><option value="10">MSC Member (10%)</option><option value="20">Member Holiday Event (20%)</option><option value="15">Staff / Educator (15%)</option></select></div>
+     <div><label class="l">Coupon / gift card ($ off)</label><input type="number" id="cOff" step="0.01" min="0" value="0"></div>
+     <div style="align-self:end"><label class="l" style="display:flex;gap:.5rem;align-items:center;min-height:44px"><input type="checkbox" id="cEx"> Tax-exempt sale</label></div></div>
+    <div class="calc"><div><span>Discount + coupon savings</span><b id="cSave">$0.00</b></div><div><span>After discount</span><b id="cAfter">$0.00</b></div><div><span>Maryland tax (6%, off if exempt)</span><b id="cTax">$0.00</b></div><div class="tot"><span>Total to charge</span><b id="cTotal">$0.00</b></div></div></div>
    <div class="card c3"><div class="hd"><div><h2>&#128181; Till &amp; Safe Drop Counter</h2><div class="sub">Count what is in the drawer. The drop is the total minus your starting bank.</div></div><button class="btn sm alt" data-a="tillClear">Clear</button></div>
     <div class="till" id="tillGrid"></div>
     <div class="drop"><div><small>Total in drawer</small><strong id="tTotal">$0.00</strong></div><div style="text-align:right"><small>Safe drop</small><strong id="tDrop">$0.00</strong></div></div></div>
@@ -1017,7 +1019,7 @@ function defaults(){
  musicUrl:'',tracks:[],
  docs:[{id:uid(),title:EX+'Cash Drawer & Z-Report SOP',url:'',text:'Count drawers, bag deposit, sign the slip.'},{id:uid(),title:'Member Discount Policy',url:'',text:'MSC members get 10% off with a valid membership card at checkout.'}],
  contacts:[{id:uid(),name:'Science Store (direct)',role:'Gift shop line',phone:'410-545-5924'},{id:uid(),name:'Museum Operator',role:'Main desk',phone:'410-685-2370'},{id:uid(),name:EX+'Security Desk',role:'Add the real number',phone:''}],
- stickies:[],alarms:[],lastBackup:0,born:Date.now(),bkSnooze:0,big:false};
+ stickies:[],alarms:[],lastBackup:0,born:Date.now(),bkSnooze:0,big:false,hist:{},staleSnooze:''};
 }
 const OBJARR=['notes','live_tasks','shows','tasks','restock','orders','docs','contacts','groups','closeList','sops','stickies','alarms','playlists','tracks','media','walls','customLooks','team'];
 let LOADWARN='',RAWBAD='',BKPEND=null,SAVEFAIL=false,lastPrev=0;
@@ -1056,6 +1058,11 @@ let tTimer;function toast(m){const t=$('toast');t.textContent=m;t.classList.add(
 function copyText(txt,msg){const done=()=>toast(msg||'Copied');try{navigator.clipboard.writeText(txt).then(done,()=>fb())}catch(e){fb()}
  function fb(){$('copyBox').value=txt;$('copyModal').classList.add('show');$('copyBox').select()}}
 
+/* ---------- stale museum info ---------- */
+function staleCheck(){const td=todayISO(),ages=[];const a=(n,o)=>{if(o&&o.updated){const g=Math.round((new Date(td)-new Date(o.updated))/864e5);if(g>2)ages.push(n+' '+g+' days old')}};
+ try{a('hours',MSCH);a('show times',MSCS);a('events',MSCE)}catch(e){}
+ const b=$('staleBar');if(!ages.length||S.staleSnooze===td){if(b)b.remove();return}
+ wbar('staleBar','<b>&#9888; Museum info may be old:</b> '+esc(ages.join(', '))+'. Check mdsci.org before relying on it. <button class="btn sm alt" data-a="staleOk">OK</button>')}
 /* ---------- undo, big buttons, dialogs ---------- */
 const UNDOABLE={grpD:'Group deleted',wbD:'Wristband deleted',noteD:'Note deleted',stD:'Person removed',liveD:'Task deleted',shD:'Showtime deleted',rsD:'Item deleted',orD:'Order deleted',lgD:'Log entry deleted',miD:'Step deleted',plD:'Playlist deleted',trD:'Track deleted',dcD:'Doc deleted',ctD:'Number deleted',snD:'Sticky deleted',alD:'Alarm deleted',tillClear:'Till cleared',ckReset:'All unchecked'};
 let UNDO=null,undoT;
@@ -1106,8 +1113,9 @@ function tick(){
  if(w){const d=w.exit-n;let txt;if(d>=0){const tot=Math.round(d*60);const h=Math.floor(tot/3600),m=Math.floor(tot%3600/60),s=tot%60;txt=(h?h+':'+String(m).padStart(2,'0'):m)+':'+String(s).padStart(2,'0')}else txt='NOW';
   $('tkTitle').textContent='★ Next exit rush: '+w.title.replace(EX,'');$('tkTime').textContent=txt}
  else{$('tkTitle').textContent='★ No more exit rushes on the schedule';$('tkTime').textContent='--:--'}
- if(mi!==lastMin){lastMin=mi;renderDyn()}
+ if(mi!==lastMin){lastMin=mi;if(S.listDate!==new Date().toDateString()){renderAll()}else renderDyn();try{staleCheck()}catch(e){}}
 }
+document.addEventListener('visibilitychange',()=>{if(!document.hidden){try{tick()}catch(e){}}});
 
 /* ---------- render ---------- */
 function menuSet(o){document.body.classList.toggle('menu-open',o);$('menuBtn').setAttribute('aria-expanded',o?'true':'false');$('menuPanel').setAttribute('aria-hidden',o?'false':'true');
@@ -1402,8 +1410,8 @@ function renderDials(){
  $('contactList').innerHTML=l.map(c=>`<div class="contact"><div><b>${tx(c.name)}</b><div class="small">${esc(c.role)}${c.phone?' • '+esc(c.phone):''}</div></div><div class="row">${c.phone?`<a class="btn sm" href="tel:${esc(c.phone.replace(/[^0-9+]/g,''))}">\u{1F4DE} Call</a>`:''}<button class="x mgr" data-a="ctE" data-id="${c.id}" aria-label="Edit">\u270E</button><button class="x mgr" data-a="ctD" data-id="${c.id}" aria-label="Delete">✕</button></div></div>`).join('')||'<div class="empty">'+(S.contacts.length?'No match.':'No numbers yet.')+'</div>'
 }
 function renderCalc(){
- const p=parseFloat($('cPrice').value)||0,d=parseFloat($('cDisc').value)||0,sv=p*d/100,af=p-sv,tax=Math.round(af*6)/100,tot=af+tax;
- $('cSave').textContent='-'+money(sv);$('cAfter').textContent=money(af);$('cTax').textContent=money(tax);$('cTotal').textContent=money(tot);
+ const p=parseFloat($('cPrice').value)||0,d=parseFloat($('cDisc').value)||0,sv=p*d/100,cp=Math.min(Math.max(parseFloat($('cOff').value)||0,0),p-sv),af=p-sv-cp,ex=$('cEx').checked,tax=ex?0:Math.round(af*6)/100,tot=af+tax;
+ $('cSave').textContent='-'+money(sv+cp);$('cAfter').textContent=money(af);$('cTax').textContent=money(tax);$('cTotal').textContent=money(tot);
 }
 const TILL=[['b100','$50 / $100 bills',100],['b50','$50 bills',50],['b20','$20 bills',20],['b10','$10 bills',10],['b5','$5 bills',5],['b1','$1 bills',1],['qua','Quarters (count)',.25],['dim','Dimes (count)',.1],['nic','Nickels (count)',.05],['pen','Pennies (count)',.01]];
 function buildTill(){
@@ -1495,7 +1503,15 @@ const wbChip=n=>`<span class="wb" style="background:${wbHex(n)}"></span>`;
 const todayISO=()=>{const d=new Date();return new Date(d-d.getTimezoneOffset()*60000).toISOString().slice(0,10)};
 const prettyDate=iso=>{const a=String(iso||'').split('-').map(Number);return a.length<3||!a[0]?'':new Date(a[0],a[1]-1,a[2]).toLocaleDateString([],{weekday:'short',month:'short',day:'numeric'})};
 let grpF='today',sopQ='';
-function dailyReset(){const d=new Date().toDateString();if(S.listDate!==d){(S.closeList||[]).forEach(t=>t.done=false);Object.keys(S.walk||{}).forEach(k=>S.walk[k].forEach(t=>t.done=false));S.listDate=d;save()}}
+function dailyReset(){const d=new Date().toDateString();if(S.listDate!==d){
+ try{if(S.listDate){const o=new Date(S.listDate);if(!isNaN(o)){const key=new Date(o-o.getTimezoneOffset()*60000).toISOString().slice(0,10),c=a=>[(a||[]).filter(t=>t&&t.done).length,(a||[]).length];
+  if(!S.hist||typeof S.hist!=='object'||Array.isArray(S.hist))S.hist={};
+  S.hist[key]={tasks:c(S.tasks),close:c(S.closeList),live:c(S.live_tasks),mod:c(S.mod&&S.mod.walk)};
+  const ks=Object.keys(S.hist).sort();while(ks.length>120)delete S.hist[ks.shift()]}}}catch(e){}
+ (S.tasks||[]).forEach(t=>t.done=false);(S.closeList||[]).forEach(t=>t.done=false);if(S.mod&&Array.isArray(S.mod.walk))S.mod.walk.forEach(t=>t.done=false);
+ Object.keys(S.walk||{}).forEach(k=>(S.walk[k]||[]).forEach(t=>t.done=false));
+ if(Array.isArray(S.live_tasks))S.live_tasks=S.live_tasks.filter(t=>t&&!t.done);
+ S.listDate=d;save()}}
 function renderLists(){
  $('closeListEl').innerHTML=S.closeList.length?S.closeList.map(t=>ckRow('close',t)).join(''):'<div class="empty">No steps yet.</div>';
  if(!S.walk[S.walkSel])S.walkSel=Object.keys(S.walk)[0];
@@ -1766,6 +1782,7 @@ function act(a,el){const id=el.dataset.id,v=el.dataset.v,k=el.dataset.k;const sn
  case'backup':$('backupBox').value=JSON.stringify(S);toast('Backup text ready');break;
  case'copyBackup':copyText(JSON.stringify(S),'Backup copied');S.lastBackup=Date.now();bkBannerRender();break;
  case'undoDo':{if(!UNDO)return;try{S=fixShape(Object.assign(defaults(),JSON.parse(UNDO)));renderAll();save();toast('Brought it back')}catch(e){toast('Could not undo')}UNDO=null;const ub=$('undoBar');if(ub)ub.style.display='none';return}
+ case'staleOk':S.staleSnooze=todayISO();{const b=$('staleBar');if(b)b.remove()}break;
  case'bigToggle':S.big=!S.big;applyBig();toast(S.big?'Big buttons are on':'Big buttons are off');break;
  case'restore':{let p;try{p=JSON.parse($('backupBox').value.trim())}catch(e){toast('That backup text did not work');return}
   if(!validBackup(p)){toast('That backup text did not work');return}
@@ -1867,7 +1884,7 @@ document.addEventListener('click',e=>{const el=e.target.closest('[data-a]');if(!
  if(el.type==='checkbox'){act(el.dataset.a,el);return}act(el.dataset.a,el)});
 document.addEventListener('input',e=>{const t=e.target;
  if(t.dataset.till!==undefined){S.till[t.dataset.till]=t.value;calcTill();save()}
- else if(t.id==='cPrice'||t.id==='cDisc'){S.calc.price=$('cPrice').value;S.calc.disc=$('cDisc').value;renderCalc();save()}
+ else if(t.id==='cPrice'||t.id==='cDisc'||t.id==='cOff'||t.id==='cEx'){S.calc.price=$('cPrice').value;S.calc.disc=$('cDisc').value;renderCalc();save()}
  else if(t.dataset.sn){const n=find(S.stickies,t.dataset.sn);if(n){n.text=t.value;save()}}
  else if(t.dataset.su){const k=t.dataset.su;
   if(k==='hrs'){S.hrs={wd:[+$('suWdO').value,+$('suWdC').value],we:[+$('suWeO').value,+$('suWeC').value]};applyHrs();renderHeaderInputs();renderDyn()}
@@ -2042,7 +2059,7 @@ $('mpFile').addEventListener('change',e=>mpFileGo(e.target.files[0]));
 $('ypBar').addEventListener('input',()=>{YP.drag=true;try{$('ypCur').textContent=fmtT(YP.pl.getDuration()*$('ypBar').value/1000)}catch(e){}});
 $('ypBar').addEventListener('change',()=>{try{YP.pl.seekTo(YP.pl.getDuration()*$('ypBar').value/1000,true)}catch(e){}YP.drag=false});
 $('mpText').addEventListener('input',()=>{const t=$('mpText').value;if(!t.trim()){MP=null;$('mpPick').innerHTML='';$('mpPrev').textContent='';return}mpPreview(mpParse(t,''))});
-popInit();renderAll();addHints();popSum();tourBanner();setInterval(tick,1000);migrateWalls();slideSync();setInterval(lookTick,10000);checkTeamLink();loadWarnShow();bkBannerRender();bkFileInit();modalsInit();
+popInit();renderAll();addHints();popSum();tourBanner();setInterval(tick,1000);migrateWalls();slideSync();setInterval(lookTick,10000);checkTeamLink();loadWarnShow();bkBannerRender();bkFileInit();modalsInit();setTimeout(()=>{try{staleCheck()}catch(e){}},1500);
 /* ===== Document import (Batch 2) ===== */
 const LIBS={};
 async function libText(id){const el=$(id);if(!el)throw new Error('Library missing');if(el.textContent.trim())return el.textContent;const r=await fetch(el.dataset.src);if(!r.ok)throw new Error('Library missing');return r.text()}
