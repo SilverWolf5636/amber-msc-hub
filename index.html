@@ -1073,7 +1073,7 @@ function loadWarnShow(){if(LOADWARN==='corrupt')wbar('loadWarn','<b>&#9888; Your
 function save(){let s;try{s=JSON.stringify(S)}catch(e){return false}
  try{let old=null;try{old=localStorage.getItem(KEY)}catch(_){}
   try{localStorage.setItem(KEY,s)}catch(e){localStorage.removeItem(KEY+'_prev');localStorage.removeItem(KEY+'_corrupt');localStorage.removeItem(KEY+'_pre');localStorage.setItem(KEY,s)}
-  if(old&&old!==s&&Date.now()-lastPrev>6e5){lastPrev=Date.now();try{localStorage.setItem(KEY+'_prev',old)}catch(_){}}
+  if(old&&old!==s&&Date.now()-lastPrev>6e5){lastPrev=Date.now();try{localStorage.setItem(KEY+'_prev',old);localStorage.setItem(KEY+'_prev_at',String(Date.now()))}catch(_){}}
   if(SAVEFAIL){SAVEFAIL=false;saveWarn(false)}
   return true}
  catch(e){if(!SAVEFAIL){SAVEFAIL=true;saveWarn(true)}return false}}
@@ -1111,7 +1111,7 @@ async function dlBackup(){
  const blob=new Blob([JSON.stringify(out)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='amber-hub-backup-'+todayISO()+'.json';document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},4000);
  S.lastBackup=Date.now();save();bkBannerRender();toast(left?'Backup file saved. '+left+' big video(s) or picture(s) were left out.':'Backup file saved')}
 function applyRestore(p,photos){
- const beforeS=S;try{localStorage.setItem(KEY+'_pre',JSON.stringify(S))}catch(_){}
+ const beforeS=S;try{localStorage.setItem(KEY+'_pre',JSON.stringify(S));localStorage.setItem(KEY+'_pre_at',String(Date.now()))}catch(_){}
  try{const keep={media:S.media,show:S.show,lookShow:S.lookShow};const n=Object.assign(defaults(),p);if(!Array.isArray(p.media))n.media=keep.media;if(!p.show)n.show=keep.show;if(!p.lookShow)n.lookShow=keep.lookShow;S=fixShape(n);renderAll();migrateWalls();save();
   if(photos)Object.keys(photos).forEach(id=>{fetch(photos[id]).then(r=>r.blob()).then(b=>{delete MEDP[id];return idbPut(id,b)}).then(()=>{try{renderLook()}catch(_){}}).catch(()=>{})});
   return true}catch(err){S=beforeS;try{renderAll()}catch(_){}save();return false}}
@@ -1130,7 +1130,7 @@ function hours(){if(S.preset==='custom')return{open:S.cOpen,close:S.cClose,on:tr
 function waves(){return S.shows.map(s=>({...s,exit:t2m(s.start)+Number(s.dur||40)})).sort((a,b)=>a.exit-b.exit)}
 function nextWave(){const n=nowMin();return waves().find(w=>w.exit>=n-10)||null}
 let lastMin=-1;
-function simBar(){const b=$('simBar');if(S.live){if(b)b.remove();return}wbar('simBar','<b>&#9201; Practice time:</b> the app is showing '+esc(m12(t2m(S.sim)))+', not the real time. <button class="btn sm" data-a="sync">Back to live</button>')}
+function simBar(){const b=$('simBar');if(S.live){if(b)b.remove();return}const h='<b>&#9201; Practice time:</b> the app is showing '+esc(m12(t2m(S.sim)))+', not the real time. <button class="btn sm" data-a="sync">Back to live</button>';if(!b||b.dataset.h!==h){wbar('simBar',h);$('simBar').dataset.h=h}}
 function tick(){
  simBar();const n=nowMin(),mi=Math.floor(n);
  $('clock').textContent=m12(mi);$('clock').setAttribute('aria-label','Open alarms. The time is '+m12(mi));
@@ -1427,7 +1427,7 @@ function mpAdd(){if(!MP){toast('Pick a file or paste songs first');return}
  const msg=add+' song'+(add===1?'':'s')+' added'+(addP?', '+addP+' playlist'+(addP===1?'':'s'):'');
  MP=null;$('mpPick').innerHTML='';$('mpText').value='';$('mpName').value='';$('mpFile').value='';$('mpPrev').textContent='';save();renderMusic();toast(msg)}
 function renderDocs(){
- $('docList').innerHTML=S.docs.length?S.docs.map(d=>`<div class="item"><div class="tt"><b>${tx(d.title)}</b><div class="small" style="white-space:pre-wrap">${esc(d.text)}</div><div class="row" style="margin-top:.4rem">${d.url?`<a class="btn sm" href="${esc(d.url)}" target="_blank" rel="noopener">Open link</a>`:''}<button class="btn sm alt" data-a="dcC" data-id="${d.id}">Copy text</button><button class="btn sm alt" data-a="dcQ" data-id="${d.id}">QR code</button></div></div><button class="x mgr" data-a="dcD" data-id="${d.id}">✕</button></div>`).join(''):'<div class="empty">No documents yet.</div>'
+ $('docList').innerHTML=S.docs.length?S.docs.map(d=>`<div class="item"><div class="tt"><b>${tx(d.title)}</b><div class="small" style="white-space:pre-wrap">${esc(d.text)}</div><div class="row" style="margin-top:.4rem">${safeUrl(d.url)?`<a class="btn sm" href="${esc(safeUrl(d.url))}" target="_blank" rel="noopener">Open link</a>`:''}<button class="btn sm alt" data-a="dcC" data-id="${d.id}">Copy text</button><button class="btn sm alt" data-a="dcQ" data-id="${d.id}">QR code</button></div></div><button class="x mgr" data-a="dcD" data-id="${d.id}">✕</button></div>`).join(''):'<div class="empty">No documents yet.</div>'
 }
 let ctQ='';
 function renderDials(){
@@ -1820,7 +1820,7 @@ function act(a,el){const id=el.dataset.id,v=el.dataset.v,k=el.dataset.k;const sn
  case'plGo':{const x=find(S.playlists,id);if(!x)break;S.musicUrl=x.url;$('musicUrl').value=x.url;buildPlayer(x.url);save();renderPlaylists();break}
  case'plD':del(S.playlists,id);save();renderPlaylists();toast('Removed');break
  case'trD':del(S.tracks,id);renderMusic();break;
- case'dcC':{const d=find(S.docs,id);copyText(d.title.replace(EX,'')+'\n'+(d.url?d.url+'\n':'')+d.text,'Copied');break}
+ case'dcC':{const d=find(S.docs,id);copyText(d.title.replace(EX,'')+'\n'+(safeUrl(d.url)?safeUrl(d.url)+'\n':'')+d.text,'Copied');break}
  case'dcQ':showQR(id);break;
  case'dcD':del(S.docs,id);renderDocs();break;
  case'qrClose':$('qrWrap').style.display='none';break;
@@ -1841,7 +1841,7 @@ function act(a,el){const id=el.dataset.id,v=el.dataset.v,k=el.dataset.k;const sn
   if(!validBackup(p)){toast('That backup text did not work');return}
   if(!el.dataset.arm){el.dataset.arm='1';el.textContent='Tap again to replace everything';setTimeout(()=>{if(el.isConnected){el.dataset.arm='';el.textContent='Restore from text below'}},6000);return}
   el.dataset.arm='';el.textContent='Restore from text below';toast(applyRestore(p,null)?'Restored. "Go back to the safe copy" undoes it.':'That backup did not fit the app. Nothing was changed.');return}
- case'restorePrev':{let r=null;try{r=localStorage.getItem(KEY+'_pre')||localStorage.getItem(KEY+'_prev')}catch(e){}if(!r){toast('No safe copy yet');return}
+ case'restorePrev':{let r=null;try{const a=localStorage.getItem(KEY+'_pre'),b=localStorage.getItem(KEY+'_prev'),ta=Number(localStorage.getItem(KEY+'_pre_at'))||0,tb=Number(localStorage.getItem(KEY+'_prev_at'))||0;r=(a&&(!b||ta>tb))?a:(b||a)}catch(e){}if(!r){toast('No safe copy yet');return}
   if(!el.dataset.arm){el.dataset.arm='1';el.textContent='Tap again to go back';setTimeout(()=>{if(el.isConnected){el.dataset.arm='';el.textContent='Go back to the safe copy'}},6000);return}
   el.dataset.arm='';el.textContent='Go back to the safe copy';try{const p=JSON.parse(r);if(!validBackup(p))throw 0;toast(applyRestore(p,null)?'Went back to the safe copy':'The safe copy did not fit the app')}catch(e){toast('The safe copy could not be read')}return}
  case'dlBackup':case'bkNow':dlBackup();return;
@@ -1926,7 +1926,7 @@ function popForm(f,title){if(!f)return;const k=f.dataset.f;popOpenEl(f,$('pfb-'+
 function alRingOpen(){if(!popRing()||POP.el||document.querySelector('.modal.show')||document.body.classList.contains('touring')||document.body.classList.contains('menu-open'))return;const a=S.alarms.find(x=>x.state==='ring'&&!ALOPEN[x.id]);if(!a)return;ALOPEN[a.id]=1;popOpenEl($('alarmCard'),$('clock'),'Alarms')}
 function showQR(id){
  const d=find(S.docs,id),box=$('qrBox');$('qrTitle').textContent=d.title.replace(EX,'');box.innerHTML='Making code...';$('qrWrap').style.display='block';$('qrWrap').scrollIntoView({behavior:'smooth'});
- const data=(d.url||(d.title+'\n'+d.text)).slice(0,800);
+ const data=(safeUrl(d.url)||(d.title+'\n'+d.text)).slice(0,800);
  const go=()=>{box.innerHTML='';try{new QRCode(box,{text:data,width:200,height:200})}catch(e){box.textContent='Could not make a QR code.'}};
  if(window.QRCode)return go();
  const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';s.onload=go;s.onerror=()=>{box.textContent='QR maker needs internet the first time.'};document.head.appendChild(s)
