@@ -229,6 +229,14 @@ body[data-mode=dark] #pop .btn.alt,body[data-mode=dark] #pop a.btn.alt{color:col
 body[data-mode=dark] #pop .x{color:#e0dcd6}
 body[data-mode=dark] #pop .small,body[data-mode=dark] #pop .empty,body[data-mode=dark] #pop label{color:#e0dcd6}
 body[data-mode=dark] #pop input::placeholder,body[data-mode=dark] #pop textarea::placeholder{color:#b9b4ac;opacity:1}
+.card,.item,.tt,.small,.pcs,.sheet,.hd>div{overflow-wrap:anywhere}
+.item .tt,.hd>div{min-width:0}
+.ubar{position:fixed;left:.6rem;right:.6rem;bottom:4.2rem;z-index:2400;background:#1f2937;color:#fff;border:2px solid #fff;border-radius:14px;padding:.6rem .9rem;font-size:.9rem;box-shadow:0 8px 24px rgba(0,0,0,.45)}
+.ubar .btn{margin-left:.5rem;background:#fff;color:#1f2937}
+body.big .btn,body.big .pill,body.big .x,body.big .qh,body.big .tab,body.big select,body.big input[type=text],body.big input[type=tel],body.big input[type=time],body.big input[type=number]{min-height:44px;min-width:44px}
+body.big .btn.sm{padding-top:.55rem;padding-bottom:.55rem}
+body.big input[type=checkbox]{width:28px;height:28px}
+body.big .qh{width:44px;height:44px}
 .wbar{position:fixed;left:.6rem;right:.6rem;bottom:.6rem;z-index:2500;background:#7f1d1d;color:#fff;border:2px solid #fff;border-radius:14px;padding:.7rem .9rem;font-size:.85rem;box-shadow:0 8px 24px rgba(0,0,0,.45)}
 .wbar+.wbar{bottom:6.2rem}
 .wbar .btn{margin:.3rem .3rem 0 0;background:#fff;color:#7f1d1d}
@@ -819,6 +827,7 @@ body[data-edge=era] .card::after,body[data-edge=era] #menuPanel::after{content:"
 <div class="modal" id="settings"><div class="sheet">
  <div class="hd"><h2>&#9881; Settings</h2><button class="btn sm alt" data-a="closeSettings">Done</button></div>
  <div class="card" style="margin-bottom:.8rem"><div class="hd"><h2 style="font-size:.95rem">&#129517; App tour</h2></div><div class="sub">Replay the guided tour any time.</div><div class="row"><button class="btn sm" data-a="tourGo" data-v="all">Replay the tour</button></div></div>
+ <div class="card" style="margin-bottom:.8rem"><div class="hd"><h2 style="font-size:.95rem">&#128073; Big buttons</h2></div><div class="sub">Makes buttons, delete marks and check boxes bigger and easier to tap.</div><div class="row"><button class="btn sm" id="bigBtn" data-a="bigToggle" aria-pressed="false">Big buttons: off</button></div></div>
  <div class="card" style="margin-bottom:.8rem"><div class="hd"><h2 style="font-size:.95rem">&#128190; Backup</h2></div>
   <div class="sub">Everything is saved on this device only. Make a backup file now and then and keep it somewhere safe.</div>
   <div class="small" id="bkInfo"></div>
@@ -1008,7 +1017,7 @@ function defaults(){
  musicUrl:'',tracks:[],
  docs:[{id:uid(),title:EX+'Cash Drawer & Z-Report SOP',url:'',text:'Count drawers, bag deposit, sign the slip.'},{id:uid(),title:'Member Discount Policy',url:'',text:'MSC members get 10% off with a valid membership card at checkout.'}],
  contacts:[{id:uid(),name:'Science Store (direct)',role:'Gift shop line',phone:'410-545-5924'},{id:uid(),name:'Museum Operator',role:'Main desk',phone:'410-685-2370'},{id:uid(),name:EX+'Security Desk',role:'Add the real number',phone:''}],
- stickies:[],alarms:[],lastBackup:0,born:Date.now(),bkSnooze:0};
+ stickies:[],alarms:[],lastBackup:0,born:Date.now(),bkSnooze:0,big:false};
 }
 const OBJARR=['notes','live_tasks','shows','tasks','restock','orders','docs','contacts','groups','closeList','sops','stickies','alarms','playlists','tracks','media','walls','customLooks','team'];
 let LOADWARN='',RAWBAD='',BKPEND=null,SAVEFAIL=false,lastPrev=0;
@@ -1046,6 +1055,22 @@ let S=load();
 let tTimer;function toast(m){const t=$('toast');t.textContent=m;t.classList.add('show');clearTimeout(tTimer);tTimer=setTimeout(()=>t.classList.remove('show'),2200)}
 function copyText(txt,msg){const done=()=>toast(msg||'Copied');try{navigator.clipboard.writeText(txt).then(done,()=>fb())}catch(e){fb()}
  function fb(){$('copyBox').value=txt;$('copyModal').classList.add('show');$('copyBox').select()}}
+
+/* ---------- undo, big buttons, dialogs ---------- */
+const UNDOABLE={grpD:'Group deleted',wbD:'Wristband deleted',noteD:'Note deleted',stD:'Person removed',liveD:'Task deleted',shD:'Showtime deleted',rsD:'Item deleted',orD:'Order deleted',lgD:'Log entry deleted',miD:'Step deleted',plD:'Playlist deleted',trD:'Track deleted',dcD:'Doc deleted',ctD:'Number deleted',snD:'Sticky deleted',alD:'Alarm deleted',tillClear:'Till cleared',ckReset:'All unchecked'};
+let UNDO=null,undoT;
+function undoOffer(json,msg){UNDO=json;let b=$('undoBar');if(!b){b=document.createElement('div');b.id='undoBar';b.className='ubar';b.setAttribute('role','status');document.body.appendChild(b)}
+ b.innerHTML=esc(msg)+' <button class="btn sm" data-a="undoDo">Undo</button>';b.style.display='';clearTimeout(undoT);undoT=setTimeout(()=>{b.style.display='none';UNDO=null},8000)}
+function applyBig(){document.body.classList.toggle('big',!!S.big);const b=$('bigBtn');if(b){b.setAttribute('aria-pressed',S.big?'true':'false');b.textContent=S.big?'Big buttons: ON':'Big buttons: off'}}
+function safeUrl(u){u=String(u||'').trim();if(!u)return '';if(/^(https?:|mailto:|tel:)/i.test(u))return u;if(/^[a-z][a-z0-9+.-]*:/i.test(u))return '';return 'https://'+u}
+const FOCUSABLE='button,[href],input,select,textarea,[tabindex]:not([tabindex="-1"])';
+function modalsInit(){document.querySelectorAll('.modal:not(#pop)').forEach(m=>{const sh=m.firstElementChild;if(!sh)return;sh.setAttribute('role','dialog');sh.setAttribute('aria-modal','true');const h=sh.querySelector('h2,h3');if(h&&!sh.getAttribute('aria-label'))sh.setAttribute('aria-label',h.textContent.replace(/[^\w\s&',.-]/g,'').trim()||'Dialog');
+  let was=false;new MutationObserver(()=>{const on=m.classList.contains('show');if(on&&!was){m._op=document.activeElement;setTimeout(()=>{const c=sh.querySelector('[data-a=helpClose],[data-a^=close]');try{(c||sh).focus({preventScroll:true})}catch(_){}},30)}
+   else if(!on&&was){const o=m._op;m._op=null;if(o&&o.isConnected&&!document.querySelector('.modal.show')){try{o.focus({preventScroll:true})}catch(_){}}}was=on}).observe(m,{attributes:true,attributeFilter:['class']});if(!sh.hasAttribute('tabindex'))sh.setAttribute('tabindex','-1')});
+ document.addEventListener('keydown',e=>{if(e.key!=='Escape'&&e.key!=='Tab')return;const ms=[...document.querySelectorAll('.modal.show')],top=ms[ms.length-1];if(!top||top.id==='pop')return;
+  if(e.key==='Escape'){const c=top.querySelector('[data-a=helpClose],[data-a^=close]');if(c){e.preventDefault();c.click()}return}
+  const f=[...top.querySelectorAll(FOCUSABLE)].filter(x=>!x.disabled&&x.offsetParent!==null);if(!f.length)return;const a=document.activeElement;
+  if(e.shiftKey&&(a===f[0]||!top.contains(a)||a===top.firstElementChild)){e.preventDefault();f[f.length-1].focus()}else if(!e.shiftKey&&(a===f[f.length-1]||!top.contains(a))){e.preventDefault();f[0].focus()}})}
 
 /* ---------- backup file, restore, reminder ---------- */
 const blobToURL=b=>new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(b)});
@@ -1130,7 +1155,7 @@ function renderRadar(){
   <div class="small" style="margin-top:.25rem">Starts ${m12(t2m(w.start))} (${w.dur} min) &rarr; <b style="color:var(--p)">store rush ${m12(w.exit)}</b></div>${w.tip?`<span class="tip">\u{1F4A1} Put out front: ${esc(w.tip)}</span>`:''}</div>`}).join('')
 }
 function renderNotes(){$('noteCount').textContent=S.notes.length+' note'+(S.notes.length===1?'':'s');
- $('notes').innerHTML=S.notes.length?S.notes.map(n=>`<div class="item ${n.done?'done':''}"><input type="checkbox" data-a="noteT" data-id="${n.id}" ${n.done?'checked':''}><div class="tt"><span class="tag">${esc(n.tag)}</span><br>${tx(n.text)}</div><button class="x mgr" data-a="noteD" data-id="${n.id}" title="Remove">✕</button></div>`).join(''):'<div class="empty">No notes pinned.</div>'}
+ $('notes').innerHTML=S.notes.length?S.notes.map(n=>`<div class="item ${n.done?'done':''}"><input type="checkbox" data-a="noteT" data-id="${n.id}" aria-label="Done: ${esc(String(n.text||'').replace(EX,'').slice(0,40))}" ${n.done?'checked':''}><div class="tt"><span class="tag">${esc(n.tag)}</span><br>${tx(n.text)}</div><button class="x mgr" data-a="noteD" data-id="${n.id}" title="Remove">✕</button></div>`).join(''):'<div class="empty">No notes pinned.</div>'}
 const ST=['On Floor','On Break','Stockroom','Off Shift'];
 function renderStaff(){
  $('days').innerHTML=DAYS.map(d=>`<button class="pill ${S.day===d?'on':''}" data-a="day" data-v="${d}">${d}</button>`).join('');
@@ -1460,7 +1485,7 @@ function renderLook(){
 function renderRole(){document.body.classList.toggle('floor',S.role==='floor');$('rM').classList.toggle('on',S.role==='manager');$('rF').classList.toggle('on',S.role==='floor');if(S.role==='floor'&&S.tab==='mod')S.tab='today'}
 function renderHeaderInputs(){$('preset').value=S.preset;$('customHrs').style.display=S.preset==='custom'?'inline':'none';$('cOpen').value=S.cOpen;$('cClose').value=S.cClose;$('sim').value=S.live?m12x():S.sim}
 function m12x(){const d=new Date();return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')}
-function renderAll(){dailyReset();applyHrs();renderRole();renderLook();renderHeaderInputs();renderTabs();renderNotes();renderStaff();renderShows();renderTasks();renderStock();renderMod();renderEvents();renderMusic();renderDocs();renderDials();renderLists();renderGroups();renderSop();ctEditUI();grpEditUI();$('cPrice').value=S.calc.price;$('cDisc').value=S.calc.disc;renderCalc();buildTill();renderStickies();renderAlarms();renderWalls();renderTeam();$('myEmoji').innerHTML=EMOJIS.map(e=>`<option>${e}</option>`).join('');lastMin=-1;tick()}
+function renderAll(){dailyReset();applyBig();applyHrs();renderRole();renderLook();renderHeaderInputs();renderTabs();renderNotes();renderStaff();renderShows();renderTasks();renderStock();renderMod();renderEvents();renderMusic();renderDocs();renderDials();renderLists();renderGroups();renderSop();ctEditUI();grpEditUI();$('cPrice').value=S.calc.price;$('cDisc').value=S.calc.disc;renderCalc();buildTill();renderStickies();renderAlarms();renderWalls();renderTeam();$('myEmoji').innerHTML=EMOJIS.map(e=>`<option>${e}</option>`).join('');lastMin=-1;tick()}
 
 
 /* ---------- batch 1: lists, groups, wristbands, procedures ---------- */
@@ -1572,7 +1597,7 @@ document.addEventListener('pointerup',()=>{if(!drag)return;const n=S.stickies.fi
 /* ---------- actions ---------- */
 const find=(arr,id)=>arr.find(x=>x.id===id);
 const del=(arr,id)=>{const i=arr.findIndex(x=>x.id===id);if(i>=0)arr.splice(i,1)};
-function act(a,el){const id=el.dataset.id,v=el.dataset.v,k=el.dataset.k;
+function act(a,el){const id=el.dataset.id,v=el.dataset.v,k=el.dataset.k;const snap=UNDOABLE[a]?JSON.stringify(S):null;
  switch(a){
  case'tab':S.tab=v;renderTabs();menuSet(false);scrollTo(0,0);tourBanner();break;
  case'menuOpen':menuSet(true);break;
@@ -1740,6 +1765,8 @@ function act(a,el){const id=el.dataset.id,v=el.dataset.v,k=el.dataset.k;
  case'alStop':{const a=find(S.alarms,id);if(a){a.state='rang';alStopSound();save();renderAlarms()}break}
  case'backup':$('backupBox').value=JSON.stringify(S);toast('Backup text ready');break;
  case'copyBackup':copyText(JSON.stringify(S),'Backup copied');S.lastBackup=Date.now();bkBannerRender();break;
+ case'undoDo':{if(!UNDO)return;try{S=fixShape(Object.assign(defaults(),JSON.parse(UNDO)));renderAll();save();toast('Brought it back')}catch(e){toast('Could not undo')}UNDO=null;const ub=$('undoBar');if(ub)ub.style.display='none';return}
+ case'bigToggle':S.big=!S.big;applyBig();toast(S.big?'Big buttons are on':'Big buttons are off');break;
  case'restore':{let p;try{p=JSON.parse($('backupBox').value.trim())}catch(e){toast('That backup text did not work');return}
   if(!validBackup(p)){toast('That backup text did not work');return}
   if(!el.dataset.arm){el.dataset.arm='1';el.textContent='Tap again to replace everything';setTimeout(()=>{if(el.isConnected){el.dataset.arm='';el.textContent='Restore from text below'}},6000);return}
@@ -1757,7 +1784,7 @@ function act(a,el){const id=el.dataset.id,v=el.dataset.v,k=el.dataset.k;
  case'loadWarnOk':{const b=$('loadWarn');if(b)b.remove();return}
  case'reset':if(el.dataset.arm){(S.media||[]).forEach(m=>idbDel(m.id).catch(()=>{}));S=defaults();save();renderAll();el.dataset.arm='';el.textContent='Reset app';toast('App reset')}else{el.dataset.arm='1';el.textContent='Tap again to confirm';setTimeout(()=>{el.dataset.arm='';el.textContent='Reset app'},3500)}return;
  }
- save()
+ save();if(snap)undoOffer(snap,UNDOABLE[a])
 }
 function handover(){
  const m=S.mod,L=m.log,fmt=g=>`- ${g.time} ${g.place?'['+g.place+'] ':''}${g.type}${g.text?': '+g.text:''}`,op=L.filter(g=>g.status!=='Resolved'),rs=L.filter(g=>g.status==='Resolved');
@@ -1862,7 +1889,7 @@ document.addEventListener('input',e=>{const t=e.target;
 });
 document.addEventListener('change',e=>{const t=e.target;
  if(t.id==='preset'){S.preset=t.value;renderHeaderInputs();renderDyn();save()}
- else if(t.dataset.a==='stTask'){const p=find(S.staff[S.day],t.dataset.id);if(p){p.task=t.value;save();renderStaff()}}
+ else if(t.dataset.a==='stTask'){const p=find(S.staff[S.day],t.dataset.id);if(p){p.task=t.value;save();const a=t.parentNode&&t.parentNode.querySelector('a[href^="sms:"]');if(a)a.href=a.href.replace(/body=.*$/,'body='+encodeURIComponent((p.task||'Hi '+p.name.replace(EX,'').split(' ')[0]+', quick task:')+' - Amber'))}}
  else if(t.dataset.a==='noteT'||t.dataset.a==='ckT'||t.dataset.a==='liveT'){/* handled by click */}
  else if((t.id==='mediaFile'||t.id==='mediaDir')&&t.files.length){const a=[...t.files];t.value='';addMedia(a)}
  else if(t.id==='shSecs'){S.show.secs=+t.value;save();renderShowUI()}
@@ -1872,6 +1899,7 @@ document.addEventListener('change',e=>{const t=e.target;
  else if(t.id==='fText'){S.textFont=t.value;save();applyFonts()}
 });
 document.addEventListener('submit',e=>{e.preventDefault();const f=e.target.dataset.f,v=id=>$(id).value.trim();let ok=true;
+ for(const el of e.target.querySelectorAll('input[type=text],input[type=tel],input[type=url],input:not([type]),textarea')){if(el.value&&el.value!==el.value.trim())el.value=el.value.trim();if(el.required&&!el.value.trim()){toast('Please fill in the empty box');try{el.focus()}catch(_){}return}}
  switch(f){
  case'note':S.notes.unshift({id:uid(),text:v('noteText'),tag:$('noteTag').value,done:false});renderNotes();break;
  case'staff':(S.staff[S.day]=S.staff[S.day]||[]).push(mk(v('sName'),$('sRole').value,$('sZone').value,v('sShift'),v('sBreak'),v('sPhone')));renderStaff();renderDyn();break;
@@ -1885,7 +1913,7 @@ document.addEventListener('submit',e=>{e.preventDefault();const f=e.target.datas
  case'mile':S.ev.miles.push({id:uid(),time:$('mlTime').value,text:v('mlText')});renderEvents();break;
  case'evtask':S.ev.tasks.push({id:uid(),text:v('etText'),done:false});renderTasks();break;
  case'track':S.tracks.push({id:uid(),title:v('kTitle'),note:v('kNote')});renderMusic();break;
- case'doc':S.docs.unshift({id:uid(),title:v('dTitle'),url:v('dUrl'),text:$('dText').value.trim()});renderDocs();break;
+ case'doc':S.docs.unshift({id:uid(),title:v('dTitle'),url:safeUrl(v('dUrl')),text:$('dText').value.trim()});renderDocs();break;
  case'mylook':{const k='c'+uid();S.customLooks.push({key:k,name:v('myName'),emoji:$('myEmoji').value,c1:$('myC1').value,c2:$('myC2').value});S.look=k;renderLook();break}
  case'closeadd':S.closeList.push({id:uid(),text:v('clText'),done:false});renderLists();break;
  case'walkadd':(S.walk[S.walkSel]=S.walk[S.walkSel]||[]).push({id:uid(),text:v('wlText'),done:false});renderLists();break;
@@ -1964,7 +1992,7 @@ const HINTS=/*HINTS*/[
 ['Operating Procedures',"Your written store procedures."],
 ['Build a Procedure',"Add your own procedure here, step by step."]
 ]/*ENDHINTS*/;
-const TOUR_IGNORE=/*IGNORE*/['Time for a backup','My Photos','Choose the part to show','Right now','Active Event Profile','Event Schedule','Setup & Breakdown','Vetted Clean Tracks','QR code','Copy this text','Quick Guide','Backup','My Look','Settings','Set up my store','App tour','Help','New here?','What is new']/*ENDIGNORE*/;
+const TOUR_IGNORE=/*IGNORE*/['Big buttons','Time for a backup','My Photos','Choose the part to show','Right now','Active Event Profile','Event Schedule','Setup & Breakdown','Vetted Clean Tracks','QR code','Copy this text','Quick Guide','Backup','My Look','Settings','Set up my store','App tour','Help','New here?','What is new']/*ENDIGNORE*/;
 let tr={list:[],i:0,mark:false};
 const TV=()=>TOUR.reduce((m,s)=>Math.max(m,s.since),1);
 function tourList(m,t){return tourList0(m,t).filter(s=>!s.m||!document.body.classList.contains('floor'))}
@@ -2014,7 +2042,7 @@ $('mpFile').addEventListener('change',e=>mpFileGo(e.target.files[0]));
 $('ypBar').addEventListener('input',()=>{YP.drag=true;try{$('ypCur').textContent=fmtT(YP.pl.getDuration()*$('ypBar').value/1000)}catch(e){}});
 $('ypBar').addEventListener('change',()=>{try{YP.pl.seekTo(YP.pl.getDuration()*$('ypBar').value/1000,true)}catch(e){}YP.drag=false});
 $('mpText').addEventListener('input',()=>{const t=$('mpText').value;if(!t.trim()){MP=null;$('mpPick').innerHTML='';$('mpPrev').textContent='';return}mpPreview(mpParse(t,''))});
-popInit();renderAll();addHints();popSum();tourBanner();setInterval(tick,1000);migrateWalls();slideSync();setInterval(lookTick,10000);checkTeamLink();loadWarnShow();bkBannerRender();bkFileInit();
+popInit();renderAll();addHints();popSum();tourBanner();setInterval(tick,1000);migrateWalls();slideSync();setInterval(lookTick,10000);checkTeamLink();loadWarnShow();bkBannerRender();bkFileInit();modalsInit();
 /* ===== Document import (Batch 2) ===== */
 const LIBS={};
 async function libText(id){const el=$(id);if(!el)throw new Error('Library missing');if(el.textContent.trim())return el.textContent;const r=await fetch(el.dataset.src);if(!r.ok)throw new Error('Library missing');return r.text()}
