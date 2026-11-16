@@ -252,6 +252,17 @@ body[data-mode=dark] #pop .btn.alt,body[data-mode=dark] #pop a.btn.alt{color:col
 body[data-mode=dark] #pop .x{color:#e0dcd6}
 body[data-mode=dark] #pop .small,body[data-mode=dark] #pop .empty,body[data-mode=dark] #pop label{color:#e0dcd6}
 body[data-mode=dark] #pop input::placeholder,body[data-mode=dark] #pop textarea::placeholder{color:#b9b4ac;opacity:1}
+.card,.item,.tt,.small,.pcs,.sheet,.hd>div{overflow-wrap:anywhere}
+.item .tt,.hd>div{min-width:0}
+.ubar{position:fixed;left:.6rem;right:.6rem;bottom:4.2rem;z-index:2400;background:#1f2937;color:#fff;border:2px solid #fff;border-radius:14px;padding:.6rem .9rem;font-size:.9rem;box-shadow:0 8px 24px rgba(0,0,0,.45)}
+.ubar .btn{margin-left:.5rem;background:#fff;color:#1f2937}
+body.big .btn,body.big .pill,body.big .x,body.big .qh,body.big .tab,body.big select,body.big input[type=text],body.big input[type=tel],body.big input[type=time],body.big input[type=number]{min-height:44px;min-width:44px}
+body.big .btn.sm{padding-top:.55rem;padding-bottom:.55rem}
+body.big input[type=checkbox]{width:28px;height:28px}
+body.big .qh{width:44px;height:44px}
+.wbar{position:fixed;left:.6rem;right:.6rem;bottom:.6rem;z-index:2500;background:#7f1d1d;color:#fff;border:2px solid #fff;border-radius:14px;padding:.7rem .9rem;font-size:.85rem;box-shadow:0 8px 24px rgba(0,0,0,.45)}
+.wbar+.wbar{bottom:6.2rem}
+.wbar .btn{margin:.3rem .3rem 0 0;background:#fff;color:#7f1d1d}
 .hclock.ringing,.pcb.ringing{background:#b91c1c!important;color:#fff!important;border-color:#fff!important}
 .pcb.ringing .pcn{background:#fff;color:#b91c1c}
 .looks{display:grid;grid-template-columns:repeat(auto-fit,minmax(8rem,1fr));gap:.5rem;margin-bottom:.9rem}
@@ -436,6 +447,7 @@ body[data-edge=era] .card::after,body[data-edge=era] #menuPanel::after{content:"
 <main>
 <!-- TODAY -->
 <section class="pane on" id="p-today">
+ <div class="card c4" id="bkBanner" style="display:none"></div>
  <div class="card c4" id="tourBanner" style="display:none"></div>
  <div class="card c4" id="todayEv" style="display:none;border-left:5px solid var(--gold)"></div>
  <div class="card c4"><div class="hd"><h2>&#129517; Right now</h2><span class="small" id="nowDay"></span></div><div id="nowBox"></div></div>
@@ -460,7 +472,7 @@ body[data-edge=era] .card::after,body[data-edge=era] #menuPanel::after{content:"
     <form class="form" data-f="alarm"><input type="text" id="alText" placeholder="What is it for?" required>
      <div class="row"><input type="date" id="alDate" required aria-label="Alarm date"><select id="alSel" aria-label="Alarm time" style="flex:1"></select><button class="btn" type="submit">+ Set alarm</button></div>
      <div class="row" id="alOther" style="display:none"><input type="time" id="alTime" aria-label="Type a time (check AM or PM)"></div>
-     <div class="row" style="margin-top:.2rem"><button class="btn sm alt" type="button" data-a="alQ" data-v="15">In 15 min</button><button class="btn sm alt" type="button" data-a="alQ" data-v="30">In 30 min</button><button class="btn sm alt" type="button" data-a="alQ" data-v="60">In 1 hour</button></div></form>
+     <div class="row" style="margin-top:.2rem"><button class="btn sm alt" type="button" data-a="alQ" data-v="15">In 15 min</button><button class="btn sm alt" type="button" data-a="alQ" data-v="30">In 30 min</button><button class="btn sm alt" type="button" data-a="alQ" data-v="60">In 1 hour</button><button class="btn sm alt" type="button" data-a="alTest">&#128266; Test sound</button></div></form>
     <div class="small" id="alDone" aria-live="polite" style="margin-top:.5rem"></div>
     <div class="note-box" id="alHint" style="margin-top:.6rem"></div>
     <div id="alarms"></div></div>
@@ -524,8 +536,10 @@ body[data-edge=era] .card::after,body[data-edge=era] #menuPanel::after{content:"
   <div>
    <div class="card c2"><div class="hd"><div><h2>&#129518; Register &amp; Phone Order Calculator</h2><div class="sub">Member discount + 6% Maryland sales tax.</div></div></div>
     <div class="grid" style="grid-template-columns:1fr 1fr;margin-bottom:.7rem"><div><label class="l">Subtotal ($)</label><input type="number" id="cPrice" step="0.01" min="0" value="0"></div>
-     <div><label class="l">Discount</label><select id="cDisc"><option value="0">Guest (0%)</option><option value="10">MSC Member (10%)</option><option value="20">Member Holiday Event (20%)</option><option value="15">Staff / Educator (15%)</option></select></div></div>
-    <div class="calc"><div><span>Discount savings</span><b id="cSave">$0.00</b></div><div><span>After discount</span><b id="cAfter">$0.00</b></div><div><span>Maryland tax (6%)</span><b id="cTax">$0.00</b></div><div class="tot"><span>Total to charge</span><b id="cTotal">$0.00</b></div></div></div>
+     <div><label class="l">Discount</label><select id="cDisc"><option value="0">Guest (0%)</option><option value="10">MSC Member (10%)</option><option value="20">Member Holiday Event (20%)</option><option value="15">Staff / Educator (15%)</option></select></div>
+     <div><label class="l">Coupon / gift card ($ off)</label><input type="number" id="cOff" step="0.01" min="0" value="0"></div>
+     <div style="align-self:end"><label class="l" style="display:flex;gap:.5rem;align-items:center;min-height:44px"><input type="checkbox" id="cEx"> Tax-exempt sale</label></div></div>
+    <div class="calc"><div><span>Discount + coupon savings</span><b id="cSave">$0.00</b></div><div><span>After discount</span><b id="cAfter">$0.00</b></div><div><span>Maryland tax (6%, off if exempt)</span><b id="cTax">$0.00</b></div><div class="tot"><span>Total to charge</span><b id="cTotal">$0.00</b></div></div></div>
    <div class="card c3"><div class="hd"><div><h2>&#128181; Till &amp; Safe Drop Counter</h2><div class="sub">Count what is in the drawer. The drop is the total minus your starting bank.</div></div><button class="btn sm alt" data-a="tillClear">Clear</button></div>
     <div class="till" id="tillGrid"></div>
     <div class="drop"><div><small>Total in drawer</small><strong id="tTotal">$0.00</strong></div><div style="text-align:right"><small>Safe drop</small><strong id="tDrop">$0.00</strong></div></div></div>
@@ -715,6 +729,7 @@ body[data-edge=era] .card::after,body[data-edge=era] #menuPanel::after{content:"
    <form class="form mgr" data-f="walkadd"><div class="row"><input type="text" id="wlText" placeholder="Add a walkthrough step..." required style="flex:1"><button class="btn" type="submit">+ Add</button></div></form>
    <div id="walkListEl"></div></div>
  </div>
+ <div class="card" id="histCard" style="margin-top:.8rem"><div class="hd"><div><h2>&#128197; Past Days</h2><div class="sub">Each new day the app keeps how many steps were done the day before. Tap a day to open it.</div></div><button class="btn sm" data-a="histSave">Save today's close-out</button></div><div id="histList"></div></div>
 </section>
 
 <!-- PROCEDURES -->
@@ -838,8 +853,13 @@ body[data-edge=era] .card::after,body[data-edge=era] #menuPanel::after{content:"
 <div class="modal" id="settings"><div class="sheet">
  <div class="hd"><h2>&#9881; Settings</h2><button class="btn sm alt" data-a="closeSettings">Done</button></div>
  <div class="card" style="margin-bottom:.8rem"><div class="hd"><h2 style="font-size:.95rem">&#129517; App tour</h2></div><div class="sub">Replay the guided tour any time.</div><div class="row"><button class="btn sm" data-a="tourGo" data-v="all">Replay the tour</button></div></div>
+ <div class="card" style="margin-bottom:.8rem"><div class="hd"><h2 style="font-size:.95rem">&#128073; Big buttons</h2></div><div class="sub">Makes buttons, delete marks and check boxes bigger and easier to tap.</div><div class="row"><button class="btn sm" id="bigBtn" data-a="bigToggle" aria-pressed="false">Big buttons: off</button></div></div>
  <div class="card" style="margin-bottom:.8rem"><div class="hd"><h2 style="font-size:.95rem">&#128190; Backup</h2></div>
-  <div class="sub">Everything is saved on this device only. Copy a backup now and then and keep it somewhere safe.</div>
+  <div class="sub">Everything is saved on this device only. Make a backup file now and then and keep it somewhere safe.</div>
+  <div class="small" id="bkInfo"></div>
+  <div class="row" style="margin:.4rem 0"><button class="btn sm gold" data-a="dlBackup">Save a backup file</button><button class="btn sm alt" data-a="loadBackupFile">Open a backup file</button><button class="btn sm alt" data-a="restorePrev">Go back to the safe copy</button></div>
+  <input type="file" id="bkFile" accept=".json,application/json,text/plain" hidden>
+  <div class="small" id="bkStatus" role="status"></div>
   <div class="row"><button class="btn sm" data-a="backup">Show backup text</button><button class="btn sm alt" data-a="restore">Restore from text below</button></div>
   <textarea id="backupBox" rows="4" style="margin-top:.5rem;font-size:.7rem" placeholder="Backup text appears here. To restore, paste it here and tap Restore."></textarea>
   <div class="row" style="margin-top:.5rem"><button class="btn sm gold" data-a="copyBackup">Copy</button><button class="btn sm red" id="resetBtn" data-a="reset">Reset app</button></div></div>
@@ -1023,14 +1043,86 @@ function defaults(){
  musicUrl:'',tracks:[],
  docs:[{id:uid(),title:EX+'Cash Drawer & Z-Report SOP',url:'',text:'Count drawers, bag deposit, sign the slip.'},{id:uid(),title:'Member Discount Policy',url:'',text:'MSC members get 10% off with a valid membership card at checkout.'}],
  contacts:[{id:uid(),name:'Science Store (direct)',role:'Gift shop line',phone:'410-545-5924'},{id:uid(),name:'Museum Operator',role:'Main desk',phone:'410-685-2370'},{id:uid(),name:EX+'Security Desk',role:'Add the real number',phone:''}],
- stickies:[],alarms:[]};
+ stickies:[],alarms:[],lastBackup:0,born:Date.now(),bkSnooze:0,big:false,hist:{},staleSnooze:''};
 }
+const OBJARR=['notes','live_tasks','shows','tasks','restock','orders','docs','contacts','groups','closeList','sops','stickies','alarms','playlists','tracks','media','walls','customLooks','team'];
+let LOADWARN='',RAWBAD='',BKPEND=null,SAVEFAIL=false,lastPrev=0;
+const isObj=x=>x&&typeof x==='object'&&!Array.isArray(x);
+const objs=a=>Array.isArray(a)?a.filter(x=>x&&typeof x==='object'):[];
+/* make any stored/restored data safe to use: right types, no null items, no missing lists */
+function fixShape(o){const d=defaults();
+ Object.keys(d).forEach(k=>{const dv=d[k],v=o[k];
+  if(Array.isArray(dv)){if(!Array.isArray(v))o[k]=dv;else if(OBJARR.includes(k))o[k]=objs(v)}
+  else if(isObj(dv)){if(!isObj(v))o[k]=dv;else Object.keys(dv).forEach(s=>{const a=dv[s],b=v[s];if(Array.isArray(a)){if(!Array.isArray(b))v[s]=a}else if(isObj(a)){if(!isObj(b))v[s]=a}else if(a!==null&&typeof a!==typeof b)v[s]=a})}
+  else if(dv!==null&&typeof dv!==typeof v)o[k]=dv});
+ if(!isObj(o.walk))o.walk=d.walk;Object.keys(o.walk).forEach(k=>{o.walk[k]=objs(o.walk[k])});
+ if(!isObj(o.staff))o.staff=d.staff;Object.keys(d.staff).forEach(k=>{if(!Array.isArray(o.staff[k]))o.staff[k]=[]});Object.keys(o.staff).forEach(k=>{o.staff[k]=objs(o.staff[k])});
+ o.sops.forEach(x=>{if(!Array.isArray(x.steps))x.steps=[];if(!Array.isArray(x.done))x.done=[]});
+ o.mod.walk=objs(o.mod.walk);o.mod.log=objs(o.mod.log);o.ev.miles=objs(o.ev.miles);o.ev.tasks=objs(o.ev.tasks);
+ ['wd','we'].forEach(k=>{const h=o.hrs[k];if(!Array.isArray(h)||h.length<2||!isFinite(h[0])||!isFinite(h[1]))o.hrs[k]=d.hrs[k]});
+ o.invOn=true;if(!Array.isArray(o.catalog))o.catalog=[];return o}
+function load(){const d=defaults();let raw=null;try{raw=localStorage.getItem(KEY)}catch(e){}
+ if(raw){try{const p=JSON.parse(raw);if(!isObj(p))throw 0;return fixShape(Object.assign(d,p))}
+  catch(e){RAWBAD=raw;LOADWARN='corrupt';try{if(!localStorage.getItem(KEY+'_corrupt'))localStorage.setItem(KEY+'_corrupt',raw)}catch(_){}}}
+ return d}
+function wbar(id,html){let b=$(id);if(!b){b=document.createElement('div');b.id=id;b.className='wbar';b.setAttribute('role','alert');document.body.appendChild(b)}b.innerHTML=html}
+function saveWarn(on){const b=$('saveWarn');if(!on){if(b)b.remove();return}
+ wbar('saveWarn','<b>&#9888; Not saved.</b> This phone is out of space, so your newest changes are not being kept. <button class="btn sm" data-a="saveWarnCopy">Copy my data now</button>')}
+function loadWarnShow(){if(LOADWARN==='corrupt')wbar('loadWarn','<b>&#9888; Your saved data could not be read,</b> so the app started fresh. A copy of the old data was kept on this phone. <button class="btn sm" data-a="copyBad">Copy the old data</button> <button class="btn sm alt" data-a="loadWarnOk">OK</button>')}
+/* save: keeps a safe copy of the previous state (at most every 10 minutes) and warns if the phone is full */
+function save(){let s;try{s=JSON.stringify(S)}catch(e){return false}
+ try{let old=null;try{old=localStorage.getItem(KEY)}catch(_){}
+  try{localStorage.setItem(KEY,s)}catch(e){localStorage.removeItem(KEY+'_prev');localStorage.removeItem(KEY+'_corrupt');localStorage.removeItem(KEY+'_pre');localStorage.setItem(KEY,s)}
+  if(old&&old!==s&&Date.now()-lastPrev>6e5){lastPrev=Date.now();try{localStorage.setItem(KEY+'_prev',old)}catch(_){}}
+  if(SAVEFAIL){SAVEFAIL=false;saveWarn(false)}
+  return true}
+ catch(e){if(!SAVEFAIL){SAVEFAIL=true;saveWarn(true)}return false}}
 let S=load();
-function load(){const d=defaults();try{const r=localStorage.getItem(KEY);if(r){const p=JSON.parse(r);const o=Object.assign(d,p);o.invOn=true;if(!Array.isArray(o.catalog))o.catalog=[];return o}}catch(e){}return d}
-function save(){try{localStorage.setItem(KEY,JSON.stringify(S));return true}catch(e){return false}}
 let tTimer;function toast(m){const t=$('toast');t.textContent=m;t.classList.add('show');clearTimeout(tTimer);tTimer=setTimeout(()=>t.classList.remove('show'),2200)}
 function copyText(txt,msg){const done=()=>toast(msg||'Copied');try{navigator.clipboard.writeText(txt).then(done,()=>fb())}catch(e){fb()}
  function fb(){$('copyBox').value=txt;$('copyModal').classList.add('show');$('copyBox').select()}}
+
+/* ---------- stale museum info ---------- */
+function staleCheck(){const td=todayISO(),ages=[];const a=(n,o)=>{if(o&&o.updated){const g=Math.round((new Date(td)-new Date(o.updated))/864e5);if(g>2)ages.push(n+' '+g+' days old')}};
+ try{a('hours',MSCH);a('show times',MSCS);a('events',MSCE)}catch(e){}
+ const b=$('staleBar');if(!ages.length||S.staleSnooze===td){if(b)b.remove();return}
+ wbar('staleBar','<b>&#9888; Museum info may be old:</b> '+esc(ages.join(', '))+'. Check mdsci.org before relying on it. <button class="btn sm alt" data-a="staleOk">OK</button>')}
+/* ---------- undo, big buttons, dialogs ---------- */
+const UNDOABLE={grpD:'Group deleted',wbD:'Wristband deleted',noteD:'Note deleted',stD:'Person removed',liveD:'Task deleted',shD:'Showtime deleted',rsD:'Item deleted',orD:'Order deleted',lgD:'Log entry deleted',miD:'Step deleted',plD:'Playlist deleted',trD:'Track deleted',dcD:'Doc deleted',ctD:'Number deleted',snD:'Sticky deleted',alD:'Alarm deleted',tillClear:'Till cleared',ckReset:'All unchecked'};
+let UNDO=null,undoT;
+function undoOffer(json,msg){UNDO=json;let b=$('undoBar');if(!b){b=document.createElement('div');b.id='undoBar';b.className='ubar';b.setAttribute('role','status');document.body.appendChild(b)}
+ b.innerHTML=esc(msg)+' <button class="btn sm" data-a="undoDo">Undo</button>';b.style.display='';clearTimeout(undoT);undoT=setTimeout(()=>{b.style.display='none';UNDO=null},8000)}
+function applyBig(){document.body.classList.toggle('big',!!S.big);const b=$('bigBtn');if(b){b.setAttribute('aria-pressed',S.big?'true':'false');b.textContent=S.big?'Big buttons: ON':'Big buttons: off'}}
+function safeUrl(u){u=String(u||'').trim();if(!u)return '';if(/^(https?:|mailto:|tel:)/i.test(u))return u;if(/^[a-z][a-z0-9+.-]*:/i.test(u))return '';return 'https://'+u}
+const FOCUSABLE='button,[href],input,select,textarea,[tabindex]:not([tabindex="-1"])';
+function modalsInit(){document.querySelectorAll('.modal:not(#pop)').forEach(m=>{const sh=m.firstElementChild;if(!sh)return;sh.setAttribute('role','dialog');sh.setAttribute('aria-modal','true');const h=sh.querySelector('h2,h3');if(h&&!sh.getAttribute('aria-label'))sh.setAttribute('aria-label',h.textContent.replace(/[^\w\s&',.-]/g,'').trim()||'Dialog');
+  let was=false;new MutationObserver(()=>{const on=m.classList.contains('show');if(on&&!was){m._op=document.activeElement;setTimeout(()=>{const c=sh.querySelector('[data-a=helpClose],[data-a^=close]');try{(c||sh).focus({preventScroll:true})}catch(_){}},30)}
+   else if(!on&&was){const o=m._op;m._op=null;if(o&&o.isConnected&&!document.querySelector('.modal.show')){try{o.focus({preventScroll:true})}catch(_){}}}was=on}).observe(m,{attributes:true,attributeFilter:['class']});if(!sh.hasAttribute('tabindex'))sh.setAttribute('tabindex','-1')});
+ document.addEventListener('keydown',e=>{if(e.key!=='Escape'&&e.key!=='Tab')return;const ms=[...document.querySelectorAll('.modal.show')],top=ms[ms.length-1];if(!top||top.id==='pop')return;
+  if(e.key==='Escape'){const c=top.querySelector('[data-a=helpClose],[data-a^=close]');if(c){e.preventDefault();c.click()}return}
+  const f=[...top.querySelectorAll(FOCUSABLE)].filter(x=>!x.disabled&&x.offsetParent!==null);if(!f.length)return;const a=document.activeElement;
+  if(e.shiftKey&&(a===f[0]||!top.contains(a)||a===top.firstElementChild)){e.preventDefault();f[f.length-1].focus()}else if(!e.shiftKey&&(a===f[f.length-1]||!top.contains(a))){e.preventDefault();f[0].focus()}})}
+
+/* ---------- backup file, restore, reminder ---------- */
+const blobToURL=b=>new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(b)});
+async function dlBackup(){
+ const out={app:'msc-hub-backup',v:2,saved:new Date().toISOString(),state:S,photos:{}};let left=0,total=0;
+ for(const m of (S.media||[])){try{const b=await idbGet(m.id);if(!b)continue;if((b.type||'').indexOf('video')===0||b.size>25e6||total+b.size>120e6){left++;continue}total+=b.size;out.photos[m.id]=await blobToURL(b)}catch(e){left++}}
+ const blob=new Blob([JSON.stringify(out)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='amber-hub-backup-'+todayISO()+'.json';document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},4000);
+ S.lastBackup=Date.now();save();bkBannerRender();toast(left?'Backup file saved. '+left+' big video(s) or picture(s) were left out.':'Backup file saved')}
+function applyRestore(p,photos){
+ const beforeS=S;try{localStorage.setItem(KEY+'_pre',JSON.stringify(S))}catch(_){}
+ try{const keep={media:S.media,show:S.show,lookShow:S.lookShow};const n=Object.assign(defaults(),p);if(!Array.isArray(p.media))n.media=keep.media;if(!p.show)n.show=keep.show;if(!p.lookShow)n.lookShow=keep.lookShow;S=fixShape(n);renderAll();migrateWalls();save();
+  if(photos)Object.keys(photos).forEach(id=>{fetch(photos[id]).then(r=>r.blob()).then(b=>{delete MEDP[id];return idbPut(id,b)}).then(()=>{try{renderLook()}catch(_){}}).catch(()=>{})});
+  return true}catch(err){S=beforeS;try{renderAll()}catch(_){}save();return false}}
+function bkInfo(){const e=$('bkInfo');if(!e)return;const t=S.lastBackup;e.textContent=t?'Last backup: '+new Date(t).toLocaleDateString([],{month:'short',day:'numeric'})+' ('+Math.floor((Date.now()-t)/864e5)+' days ago).':'You have not made a backup yet.'}
+function bkBannerRender(){const b=$('bkBanner');if(!b)return;const ref=Math.max(S.lastBackup||0,S.born||Date.now()),days=Math.floor((Date.now()-ref)/864e5),show=days>=7&&!((S.bkSnooze||0)>Date.now());b.style.display=show?'':'none';
+ if(show)b.innerHTML='<div class="hd"><h2 style="font-size:.95rem">&#128190; Time for a backup</h2></div><div class="sub">'+(S.lastBackup?'Your last backup was '+days+' days ago.':'You have not made a backup yet.')+' A backup file keeps your data and pictures safe if this phone is lost or reset.</div><div class="row"><button class="btn sm" data-a="bkNow">Save a backup file</button><button class="btn sm alt" data-a="bkLater">Not now</button></div>';bkInfo()}
+function validBackup(x){return isObj(x)&&Object.keys(defaults()).some(k=>k in x)}
+function bkFileInit(){const f=$('bkFile');if(!f)return;f.addEventListener('change',async()=>{const file=f.files[0];f.value='';if(!file)return;const st=$('bkStatus');
+ try{if(file.size>150e6)throw 0;const j=JSON.parse(await file.text()),state=j&&j.app==='msc-hub-backup'?j.state:j;if(!validBackup(state))throw 0;BKPEND={state,photos:(j&&j.photos)||null};const n=Object.keys(BKPEND.photos||{}).length;
+  st.innerHTML='File ready ('+esc(file.name)+(n?', with '+n+' picture'+(n>1?'s':''):'')+'). <button class="btn sm red" data-a="bkApply">Replace everything with this file</button>'}
+ catch(e){BKPEND=null;st.textContent='That file did not work.'}})}
 
 /* ---------- time ---------- */
 function nowMin(){if(S.live){const d=new Date();return d.getHours()*60+d.getMinutes()+d.getSeconds()/60}return t2m(S.sim)}
@@ -1038,15 +1130,17 @@ function hours(){if(S.preset==='custom')return{open:S.cOpen,close:S.cClose,on:tr
 function waves(){return S.shows.map(s=>({...s,exit:t2m(s.start)+Number(s.dur||40)})).sort((a,b)=>a.exit-b.exit)}
 function nextWave(){const n=nowMin();return waves().find(w=>w.exit>=n-10)||null}
 let lastMin=-1;
+function simBar(){const b=$('simBar');if(S.live){if(b)b.remove();return}wbar('simBar','<b>&#9201; Practice time:</b> the app is showing '+esc(m12(t2m(S.sim)))+', not the real time. <button class="btn sm" data-a="sync">Back to live</button>')}
 function tick(){
- const n=nowMin(),mi=Math.floor(n);
+ simBar();const n=nowMin(),mi=Math.floor(n);
  $('clock').textContent=m12(mi);$('clock').setAttribute('aria-label','Open alarms. The time is '+m12(mi));
  const w=nextWave();
  if(w){const d=w.exit-n;let txt;if(d>=0){const tot=Math.round(d*60);const h=Math.floor(tot/3600),m=Math.floor(tot%3600/60),s=tot%60;txt=(h?h+':'+String(m).padStart(2,'0'):m)+':'+String(s).padStart(2,'0')}else txt='NOW';
   $('tkTitle').textContent='★ Next exit rush: '+w.title.replace(EX,'');$('tkTime').textContent=txt}
  else{$('tkTitle').textContent='★ No more exit rushes on the schedule';$('tkTime').textContent='--:--'}
- if(mi!==lastMin){lastMin=mi;renderDyn()}
+ if(mi!==lastMin){lastMin=mi;if(S.listDate!==new Date().toDateString()){renderAll()}else renderDyn();try{staleCheck()}catch(e){}}
 }
+document.addEventListener('visibilitychange',()=>{if(!document.hidden){try{tick()}catch(e){}}});
 
 /* ---------- render ---------- */
 function menuSet(o){document.body.classList.toggle('menu-open',o);$('menuBtn').setAttribute('aria-expanded',o?'true':'false');$('menuPanel').setAttribute('aria-hidden',o?'false':'true');
@@ -1094,7 +1188,7 @@ function renderRadar(){
   <div class="small" style="margin-top:.25rem">Starts ${m12(t2m(w.start))} (${w.dur} min) &rarr; <b style="color:var(--p)">store rush ${m12(w.exit)}</b></div>${w.tip?`<span class="tip">\u{1F4A1} Put out front: ${esc(w.tip)}</span>`:''}</div>`}).join('')
 }
 function renderNotes(){$('noteCount').textContent=S.notes.length+' note'+(S.notes.length===1?'':'s');
- $('notes').innerHTML=S.notes.length?S.notes.map(n=>`<div class="item ${n.done?'done':''}"><input type="checkbox" data-a="noteT" data-id="${n.id}" ${n.done?'checked':''}><div class="tt"><span class="tag">${esc(n.tag)}</span><br>${tx(n.text)}</div><button class="x mgr" data-a="noteD" data-id="${n.id}" title="Remove">✕</button></div>`).join(''):'<div class="empty">No notes pinned.</div>'}
+ $('notes').innerHTML=S.notes.length?S.notes.map(n=>`<div class="item ${n.done?'done':''}"><input type="checkbox" data-a="noteT" data-id="${n.id}" aria-label="Done: ${esc(String(n.text||'').replace(EX,'').slice(0,40))}" ${n.done?'checked':''}><div class="tt"><span class="tag">${esc(n.tag)}</span><br>${tx(n.text)}</div><button class="x mgr" data-a="noteD" data-id="${n.id}" title="Remove">✕</button></div>`).join(''):'<div class="empty">No notes pinned.</div>'}
 const ST=['On Floor','On Break','Stockroom','Off Shift'];
 function renderStaff(){
  $('days').innerHTML=DAYS.map(d=>`<button class="pill ${S.day===d?'on':''}" data-a="day" data-v="${d}">${d}</button>`).join('');
@@ -1341,8 +1435,8 @@ function renderDials(){
  $('contactList').innerHTML=l.map(c=>`<div class="contact"><div><b>${tx(c.name)}</b><div class="small">${esc(c.role)}${c.phone?' • '+esc(c.phone):''}</div></div><div class="row">${c.phone?`<a class="btn sm" href="tel:${esc(c.phone.replace(/[^0-9+]/g,''))}">\u{1F4DE} Call</a>`:''}<button class="x mgr" data-a="ctE" data-id="${c.id}" aria-label="Edit">\u270E</button><button class="x mgr" data-a="ctD" data-id="${c.id}" aria-label="Delete">✕</button></div></div>`).join('')||'<div class="empty">'+(S.contacts.length?'No match.':'No numbers yet.')+'</div>'
 }
 function renderCalc(){
- const p=parseFloat($('cPrice').value)||0,d=parseFloat($('cDisc').value)||0,sv=p*d/100,af=p-sv,tax=Math.round(af*6)/100,tot=af+tax;
- $('cSave').textContent='-'+money(sv);$('cAfter').textContent=money(af);$('cTax').textContent=money(tax);$('cTotal').textContent=money(tot);
+ const p=parseFloat($('cPrice').value)||0,d=parseFloat($('cDisc').value)||0,sv=p*d/100,cp=Math.min(Math.max(parseFloat($('cOff').value)||0,0),p-sv),af=p-sv-cp,ex=$('cEx').checked,tax=ex?0:Math.round(af*6)/100,tot=af+tax;
+ $('cSave').textContent='-'+money(sv+cp);$('cAfter').textContent=money(af);$('cTax').textContent=money(tax);$('cTotal').textContent=money(tot);
 }
 const TILL=[['b100','$50 / $100 bills',100],['b50','$50 bills',50],['b20','$20 bills',20],['b10','$10 bills',10],['b5','$5 bills',5],['b1','$1 bills',1],['qua','Quarters (count)',.25],['dim','Dimes (count)',.1],['nic','Nickels (count)',.05],['pen','Pennies (count)',.01]];
 function buildTill(){
@@ -1424,7 +1518,7 @@ function renderLook(){
 function renderRole(){document.body.classList.toggle('floor',S.role==='floor');$('rM').classList.toggle('on',S.role==='manager');$('rF').classList.toggle('on',S.role==='floor');if(S.role==='floor'&&S.tab==='mod')S.tab='today'}
 function renderHeaderInputs(){$('preset').value=S.preset;$('customHrs').style.display=S.preset==='custom'?'inline':'none';$('cOpen').value=S.cOpen;$('cClose').value=S.cClose;$('sim').value=S.live?m12x():S.sim}
 function m12x(){const d=new Date();return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')}
-function renderAll(){dailyReset();applyHrs();renderRole();renderLook();renderHeaderInputs();renderTabs();renderNotes();renderStaff();renderShows();renderTasks();renderStock();renderMod();renderEvents();renderMusic();renderDocs();renderDials();renderLists();renderGroups();renderSop();ctEditUI();grpEditUI();$('cPrice').value=S.calc.price;$('cDisc').value=S.calc.disc;renderCalc();buildTill();renderStickies();renderAlarms();renderWalls();renderTeam();$('myEmoji').innerHTML=EMOJIS.map(e=>`<option>${e}</option>`).join('');lastMin=-1;tick()}
+function renderAll(){dailyReset();applyBig();applyHrs();renderRole();renderLook();renderHeaderInputs();renderTabs();renderNotes();renderStaff();renderShows();renderTasks();renderStock();renderMod();renderEvents();renderMusic();renderDocs();renderDials();renderLists();renderHist();renderGroups();renderSop();ctEditUI();grpEditUI();$('cPrice').value=S.calc.price;$('cDisc').value=S.calc.disc;renderCalc();buildTill();renderStickies();renderAlarms();renderWalls();renderTeam();$('myEmoji').innerHTML=EMOJIS.map(e=>`<option>${e}</option>`).join('');lastMin=-1;tick()}
 
 
 /* ---------- batch 1: lists, groups, wristbands, procedures ---------- */
@@ -1434,7 +1528,40 @@ const wbChip=n=>`<span class="wb" style="background:${wbHex(n)}"></span>`;
 const todayISO=()=>{const d=new Date();return new Date(d-d.getTimezoneOffset()*60000).toISOString().slice(0,10)};
 const prettyDate=iso=>{const a=String(iso||'').split('-').map(Number);return a.length<3||!a[0]?'':new Date(a[0],a[1]-1,a[2]).toLocaleDateString([],{weekday:'short',month:'short',day:'numeric'})};
 let grpF='today',sopQ='';
-function dailyReset(){const d=new Date().toDateString();if(S.listDate!==d){(S.closeList||[]).forEach(t=>t.done=false);Object.keys(S.walk||{}).forEach(k=>S.walk[k].forEach(t=>t.done=false));S.listDate=d;save()}}
+function dailyReset(){const d=new Date().toDateString();if(S.listDate!==d){
+ try{if(S.listDate){const o=new Date(S.listDate);if(!isNaN(o)){const key=new Date(o-o.getTimezoneOffset()*60000).toISOString().slice(0,10),c=a=>[(a||[]).filter(t=>t&&t.done).length,(a||[]).length];
+  if(!S.hist||typeof S.hist!=='object'||Array.isArray(S.hist))S.hist={};
+  if(!(S.hist[key]&&S.hist[key].manual))S.hist[key]={tasks:c(S.tasks),close:c(S.closeList),live:c(S.live_tasks),mod:c(S.mod&&S.mod.walk)};
+  const ks=Object.keys(S.hist).sort();while(ks.length>120)delete S.hist[ks.shift()]}}}catch(e){}
+ (S.tasks||[]).forEach(t=>t.done=false);(S.closeList||[]).forEach(t=>t.done=false);if(S.mod&&Array.isArray(S.mod.walk))S.mod.walk.forEach(t=>t.done=false);
+ Object.keys(S.walk||{}).forEach(k=>(S.walk[k]||[]).forEach(t=>t.done=false));
+ if(Array.isArray(S.live_tasks))S.live_tasks=S.live_tasks.filter(t=>t&&!t.done);
+ S.day=todayDay();try{const de=$('alDate');if(de&&de.value&&de.value<todayISO())de.value=todayISO()}catch(e){}
+ S.listDate=d;save()}}
+let histOpen='';
+function histSaveToday(){
+ const c=a=>[(a||[]).filter(t=>t&&t.done).length,(a||[]).length];
+ let tot=0;TILL.forEach(t=>{tot+=(parseFloat(S.till[t[0]])||0)*t[2]});const st=parseFloat(S.till.start)||0;
+ if(!S.hist||typeof S.hist!=='object'||Array.isArray(S.hist))S.hist={};
+ const e={tasks:c(S.tasks),close:c(S.closeList),live:c(S.live_tasks),mod:c(S.mod&&S.mod.walk),manual:Date.now()};
+ if(tot>0||st>0)e.till={total:Math.round(tot*100)/100,start:st,drop:Math.round((tot-st)*100)/100};
+ S.hist[todayISO()]=e;
+ const ks=Object.keys(S.hist).sort();while(ks.length>120)delete S.hist[ks.shift()];
+ save();renderHist();toast(e.till?'Saved today, with the till count':'Saved today (no till count was entered)')}
+function renderHist(){
+ const el=$('histList');if(!el)return;
+ const h=S.hist&&typeof S.hist==='object'&&!Array.isArray(S.hist)?S.hist:{};
+ const ks=Object.keys(h).filter(k=>h[k]&&typeof h[k]==='object').sort().reverse().slice(0,30);
+ if(!ks.length){el.innerHTML='<div class="empty">No past days yet. The first one is saved when the app sees a new day.</div>';return}
+ const f=a=>Array.isArray(a)&&Number(a[1])>0?(Number(a[0])||0)+' of '+Number(a[1]):'none';
+ el.innerHTML=ks.map(k=>{const e=h[k],on=histOpen===k,nm=prettyDate(k)||esc(k);
+  const sum='Closing list: '+f(e.close);
+  let det='';
+  if(on){det='<div class="small" style="margin:.2rem 0 .5rem 0">'
+   +'Opening &amp; mid-day checklist: '+f(e.tasks)+'<br>Closing list: '+f(e.close)+'<br>Floor tasks: '+f(e.live)+'<br>Manager walk: '+f(e.mod)
+   +(e.till&&typeof e.till==='object'?'<br>Till total: '+money(Number(e.till.total)||0)+' &bull; Start bank: '+money(Number(e.till.start)||0)+' &bull; Safe drop: '+money(Number(e.till.drop)||0):'<br>No till count saved for this day.')
+   +(e.manual?'<br>Saved by hand.':'')+'</div>'}
+  return '<div class="item"><div class="tt"><b>'+nm+'</b><div class="small">'+sum+(e.till?' &bull; Drop '+money(Number(e.till.drop)||0):'')+'</div>'+det+'</div><div class="row"><button class="btn sm alt" data-a="histOpen" data-v="'+esc(k)+'" aria-expanded="'+(on?'true':'false')+'">'+(on?'Close':'Open')+'</button></div></div>'}).join('')}
 function renderLists(){
  $('closeListEl').innerHTML=S.closeList.length?S.closeList.map(t=>ckRow('close',t)).join(''):'<div class="empty">No steps yet.</div>';
  if(!S.walk[S.walkSel])S.walkSel=Object.keys(S.walk)[0];
@@ -1536,7 +1663,7 @@ document.addEventListener('pointerup',()=>{if(!drag)return;const n=S.stickies.fi
 /* ---------- actions ---------- */
 const find=(arr,id)=>arr.find(x=>x.id===id);
 const del=(arr,id)=>{const i=arr.findIndex(x=>x.id===id);if(i>=0)arr.splice(i,1)};
-function act(a,el){const id=el.dataset.id,v=el.dataset.v,k=el.dataset.k;
+function act(a,el){const id=el.dataset.id,v=el.dataset.v,k=el.dataset.k;const snap=UNDOABLE[a]?JSON.stringify(S):null;
  switch(a){
  case'tab':S.tab=v;renderTabs();menuSet(false);scrollTo(0,0);tourBanner();break;
  case'menuOpen':menuSet(true);break;
@@ -1610,6 +1737,9 @@ function act(a,el){const id=el.dataset.id,v=el.dataset.v,k=el.dataset.k;
  case'ph':S.phase=v;renderTasks();break;
  case'ckT':{const t=find(CKL[k](),id);t.done=!t.done;renderTasks();renderLists();renderDyn();break}
  case'ckD':del(CKL[k](),id);renderTasks();renderLists();renderDyn();break;
+ case'alTest':alUnlock();alBeep();setTimeout(()=>{const ok=alCtx&&alCtx.state==='running';toast(ok?'Beep! If you heard nothing, turn the phone volume up.':'This phone is blocking sound. Tap Test sound once more.')},300);break;
+ case'histSave':histSaveToday();break;
+ case'histOpen':histOpen=histOpen===v?'':v;renderHist();break;
  case'ckReset':CKL[k]().forEach(t=>t.done=false);renderTasks();renderLists();renderDyn();toast('All unchecked');break;
  case'tillClear':Object.keys(S.till).forEach(x=>S.till[x]=x==='start'?S.till.start:'');buildTill();break;
  case'help':menuSet(false);helpFill();$('help').classList.add('show');break;
@@ -1703,11 +1833,28 @@ function act(a,el){const id=el.dataset.id,v=el.dataset.v,k=el.dataset.k;
  case'alQ':{const d=new Date(Date.now()+(+el.dataset.v)*60000),p2=n=>String(n).padStart(2,'0');if(alSubmit(d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate()),p2(d.getHours())+':'+p2(d.getMinutes()),$('alText').value.trim(),'q'+el.dataset.v))$('alText').value='';break}
  case'alStop':{const a=find(S.alarms,id);if(a){a.state='rang';alStopSound();save();renderAlarms()}break}
  case'backup':$('backupBox').value=JSON.stringify(S);toast('Backup text ready');break;
- case'copyBackup':copyText(JSON.stringify(S),'Backup copied');break;
- case'restore':try{const p=JSON.parse($('backupBox').value),keep={media:S.media,show:S.show,lookShow:S.lookShow};S=Object.assign(defaults(),p);if(!Array.isArray(p.media))S.media=keep.media;if(!p.show)S.show=keep.show;if(!p.lookShow)S.lookShow=keep.lookShow;save();renderAll();migrateWalls();toast('Restored')}catch(e){toast('That backup text did not work')}return;
+ case'copyBackup':copyText(JSON.stringify(S),'Backup copied');S.lastBackup=Date.now();bkBannerRender();break;
+ case'undoDo':{if(!UNDO)return;try{S=fixShape(Object.assign(defaults(),JSON.parse(UNDO)));renderAll();save();toast('Brought it back')}catch(e){toast('Could not undo')}UNDO=null;const ub=$('undoBar');if(ub)ub.style.display='none';return}
+ case'staleOk':S.staleSnooze=todayISO();{const b=$('staleBar');if(b)b.remove()}break;
+ case'bigToggle':S.big=!S.big;applyBig();toast(S.big?'Big buttons are on':'Big buttons are off');break;
+ case'restore':{let p;try{p=JSON.parse($('backupBox').value.trim())}catch(e){toast('That backup text did not work');return}
+  if(!validBackup(p)){toast('That backup text did not work');return}
+  if(!el.dataset.arm){el.dataset.arm='1';el.textContent='Tap again to replace everything';setTimeout(()=>{if(el.isConnected){el.dataset.arm='';el.textContent='Restore from text below'}},6000);return}
+  el.dataset.arm='';el.textContent='Restore from text below';toast(applyRestore(p,null)?'Restored. "Go back to the safe copy" undoes it.':'That backup did not fit the app. Nothing was changed.');return}
+ case'restorePrev':{let r=null;try{r=localStorage.getItem(KEY+'_pre')||localStorage.getItem(KEY+'_prev')}catch(e){}if(!r){toast('No safe copy yet');return}
+  if(!el.dataset.arm){el.dataset.arm='1';el.textContent='Tap again to go back';setTimeout(()=>{if(el.isConnected){el.dataset.arm='';el.textContent='Go back to the safe copy'}},6000);return}
+  el.dataset.arm='';el.textContent='Go back to the safe copy';try{const p=JSON.parse(r);if(!validBackup(p))throw 0;toast(applyRestore(p,null)?'Went back to the safe copy':'The safe copy did not fit the app')}catch(e){toast('The safe copy could not be read')}return}
+ case'dlBackup':case'bkNow':dlBackup();return;
+ case'loadBackupFile':$('bkFile').click();return;
+ case'bkApply':{if(!BKPEND)return;if(!el.dataset.arm){el.dataset.arm='1';el.textContent='Tap again to replace everything';setTimeout(()=>{if(el.isConnected){el.dataset.arm='';el.textContent='Replace everything with this file'}},6000);return}
+  const ok=applyRestore(BKPEND.state,BKPEND.photos);BKPEND=null;$('bkStatus').textContent='';toast(ok?'Restored from file':'That file did not fit the app. Nothing was changed.');return}
+ case'bkLater':S.bkSnooze=Date.now()+3*864e5;save();bkBannerRender();return;
+ case'saveWarnCopy':copyText(JSON.stringify(S),'Backup copied');return;
+ case'copyBad':copyText(RAWBAD,'Copied');return;
+ case'loadWarnOk':{const b=$('loadWarn');if(b)b.remove();return}
  case'reset':if(el.dataset.arm){(S.media||[]).forEach(m=>idbDel(m.id).catch(()=>{}));S=defaults();save();renderAll();el.dataset.arm='';el.textContent='Reset app';toast('App reset')}else{el.dataset.arm='1';el.textContent='Tap again to confirm';setTimeout(()=>{el.dataset.arm='';el.textContent='Reset app'},3500)}return;
  }
- save()
+ save();if(snap)undoOffer(snap,UNDOABLE[a])
 }
 function handover(){
  const m=S.mod,L=m.log,fmt=g=>`- ${g.time} ${g.place?'['+g.place+'] ':''}${g.type}${g.text?': '+g.text:''}`,op=L.filter(g=>g.status!=='Resolved'),rs=L.filter(g=>g.status==='Resolved');
@@ -1790,7 +1937,7 @@ document.addEventListener('click',e=>{const el=e.target.closest('[data-a]');if(!
  if(el.type==='checkbox'){act(el.dataset.a,el);return}act(el.dataset.a,el)});
 document.addEventListener('input',e=>{const t=e.target;
  if(t.dataset.till!==undefined){S.till[t.dataset.till]=t.value;calcTill();save()}
- else if(t.id==='cPrice'||t.id==='cDisc'){S.calc.price=$('cPrice').value;S.calc.disc=$('cDisc').value;renderCalc();save()}
+ else if(t.id==='cPrice'||t.id==='cDisc'||t.id==='cOff'||t.id==='cEx'){S.calc.price=$('cPrice').value;S.calc.disc=$('cDisc').value;renderCalc();save()}
  else if(t.dataset.sn){const n=find(S.stickies,t.dataset.sn);if(n){n.text=t.value;save()}}
  else if(t.dataset.su){const k=t.dataset.su;
   if(k==='hrs'){S.hrs={wd:[+$('suWdO').value,+$('suWdC').value],we:[+$('suWeO').value,+$('suWeC').value]};applyHrs();renderHeaderInputs();renderDyn()}
@@ -1812,7 +1959,7 @@ document.addEventListener('input',e=>{const t=e.target;
 });
 document.addEventListener('change',e=>{const t=e.target;
  if(t.id==='preset'){S.preset=t.value;renderHeaderInputs();renderDyn();save()}
- else if(t.dataset.a==='stTask'){const p=find(S.staff[S.day],t.dataset.id);if(p){p.task=t.value;save();renderStaff()}}
+ else if(t.dataset.a==='stTask'){const p=find(S.staff[S.day],t.dataset.id);if(p){p.task=t.value;save();const a=t.parentNode&&t.parentNode.querySelector('a[href^="sms:"]');if(a)a.href=a.href.replace(/body=.*$/,'body='+encodeURIComponent((p.task||'Hi '+p.name.replace(EX,'').split(' ')[0]+', quick task:')+' - Amber'))}}
  else if(t.dataset.a==='noteT'||t.dataset.a==='ckT'||t.dataset.a==='liveT'){/* handled by click */}
  else if((t.id==='mediaFile'||t.id==='mediaDir')&&t.files.length){const a=[...t.files];t.value='';addMedia(a)}
  else if(t.id==='shSecs'){S.show.secs=+t.value;save();renderShowUI()}
@@ -1822,6 +1969,7 @@ document.addEventListener('change',e=>{const t=e.target;
  else if(t.id==='fText'){S.textFont=t.value;save();applyFonts()}
 });
 document.addEventListener('submit',e=>{e.preventDefault();const f=e.target.dataset.f,v=id=>$(id).value.trim();let ok=true;
+ for(const el of e.target.querySelectorAll('input[type=text],input[type=tel],input[type=url],input:not([type]),textarea')){if(el.value&&el.value!==el.value.trim())el.value=el.value.trim();if(el.required&&!el.value.trim()){toast('Please fill in the empty box');try{el.focus()}catch(_){}return}}
  switch(f){
  case'note':S.notes.unshift({id:uid(),text:v('noteText'),tag:$('noteTag').value,done:false});renderNotes();break;
  case'staff':(S.staff[S.day]=S.staff[S.day]||[]).push(mk(v('sName'),$('sRole').value,$('sZone').value,v('sShift'),v('sBreak'),v('sPhone')));renderStaff();renderDyn();break;
@@ -1835,7 +1983,7 @@ document.addEventListener('submit',e=>{e.preventDefault();const f=e.target.datas
  case'mile':S.ev.miles.push({id:uid(),time:$('mlTime').value,text:v('mlText')});renderEvents();break;
  case'evtask':S.ev.tasks.push({id:uid(),text:v('etText'),done:false});renderTasks();break;
  case'track':S.tracks.push({id:uid(),title:v('kTitle'),note:v('kNote')});renderMusic();break;
- case'doc':S.docs.unshift({id:uid(),title:v('dTitle'),url:v('dUrl'),text:$('dText').value.trim()});renderDocs();break;
+ case'doc':S.docs.unshift({id:uid(),title:v('dTitle'),url:safeUrl(v('dUrl')),text:$('dText').value.trim()});renderDocs();break;
  case'mylook':{const k='c'+uid();S.customLooks.push({key:k,name:v('myName'),emoji:$('myEmoji').value,c1:$('myC1').value,c2:$('myC2').value});S.look=k;renderLook();break}
  case'closeadd':S.closeList.push({id:uid(),text:v('clText'),done:false});renderLists();break;
  case'walkadd':(S.walk[S.walkSel]=S.walk[S.walkSel]||[]).push({id:uid(),text:v('wlText'),done:false});renderLists();break;
@@ -1880,6 +2028,7 @@ const TOUR=/*TOUR*/[
 {t:'today',k:'e',since:1,h:"That is it!",x:"Tap Menu, then Help, any time to replay this tour, hear about one tab, or see what is new. A small ? next to a card title tells you what that card is for."}
 ]/*ENDTOUR*/;
 const HINTS=/*HINTS*/[
+['Past Days',"Shows how many steps were done on earlier days. Tap Open on a day for details. Tap Save today's close-out to also keep today's till total and safe drop."],
 ['Rush Radar',"Shows when IMAX, Planetarium and school groups let out toward the store, so you can see a rush coming."],
 ['Manager Notes',"Write notes for yourself or the team. They are saved on this device."],
 ['Coming up',"Events the museum has listed for the next few weeks. Tap Details to open the museum's page. Check the museum's page before relying on a date."],
@@ -1914,7 +2063,7 @@ const HINTS=/*HINTS*/[
 ['Operating Procedures',"Your written store procedures."],
 ['Build a Procedure',"Add your own procedure here, step by step."]
 ]/*ENDHINTS*/;
-const TOUR_IGNORE=/*IGNORE*/['My Photos','Choose the part to show','Right now','Active Event Profile','Event Schedule','Setup & Breakdown','Vetted Clean Tracks','QR code','Copy this text','Quick Guide','Backup','My Look','Settings','Set up my store','App tour','Help','New here?','What is new']/*ENDIGNORE*/;
+const TOUR_IGNORE=/*IGNORE*/['Big buttons','Time for a backup','My Photos','Choose the part to show','Right now','Active Event Profile','Event Schedule','Setup & Breakdown','Vetted Clean Tracks','QR code','Copy this text','Quick Guide','Backup','My Look','Settings','Set up my store','App tour','Help','New here?','What is new']/*ENDIGNORE*/;
 let tr={list:[],i:0,mark:false};
 const TV=()=>TOUR.reduce((m,s)=>Math.max(m,s.since),1);
 function tourList(m,t){return tourList0(m,t).filter(s=>!s.m||!document.body.classList.contains('floor'))}
@@ -1964,7 +2113,7 @@ $('mpFile').addEventListener('change',e=>mpFileGo(e.target.files[0]));
 $('ypBar').addEventListener('input',()=>{YP.drag=true;try{$('ypCur').textContent=fmtT(YP.pl.getDuration()*$('ypBar').value/1000)}catch(e){}});
 $('ypBar').addEventListener('change',()=>{try{YP.pl.seekTo(YP.pl.getDuration()*$('ypBar').value/1000,true)}catch(e){}YP.drag=false});
 $('mpText').addEventListener('input',()=>{const t=$('mpText').value;if(!t.trim()){MP=null;$('mpPick').innerHTML='';$('mpPrev').textContent='';return}mpPreview(mpParse(t,''))});
-popInit();renderAll();addHints();popSum();tourBanner();setInterval(tick,1000);migrateWalls();slideSync();setInterval(lookTick,10000);checkTeamLink();
+popInit();renderAll();addHints();popSum();tourBanner();setInterval(tick,1000);migrateWalls();slideSync();setInterval(lookTick,10000);checkTeamLink();loadWarnShow();bkBannerRender();bkFileInit();modalsInit();setTimeout(()=>{try{staleCheck()}catch(e){}},1500);
 /* ===== Document import (Batch 2) ===== */
 const LIBS={};
 async function libText(id){const el=$(id);if(!el)throw new Error('Library missing');if(el.textContent.trim())return el.textContent;const r=await fetch(el.dataset.src);if(!r.ok)throw new Error('Library missing');return r.text()}
@@ -2344,10 +2493,11 @@ function alBeep(){try{alCtx=alCtx||new (window.AudioContext||window.webkitAudioC
 function alStopSound(){if(!S.alarms.some(a=>a.state==='ring')&&alSnd){clearInterval(alSnd);alSnd=null}}
 function alarmCheck(){
  const now=new Date();let ch=false;
- S.alarms.forEach(a=>{if(a.state!=='wait')return;const due=new Date(a.date+'T'+a.time);if(now<due)return;
-  if(now-due>5*60000){a.state='missed';ch=true;return}
+ const mis=[];S.alarms.forEach(a=>{if(a.state!=='wait')return;const due=new Date(a.date+'T'+a.time);if(now<due)return;
+  if(now-due>5*60000){a.state='missed';mis.push(a.text);ch=true;return}
   a.state='ring';ch=true;toast('⏰ '+a.text);
   try{if('Notification'in window&&Notification.permission==='granted')new Notification('Alarm',{body:a.text})}catch(e){}});
+ if(mis.length)toast('Missed while the phone was asleep or the app was closed: '+mis.slice(0,3).join(', ')+(mis.length>3?' and '+(mis.length-3)+' more':''));
  if(ch){save();renderAlarms()}
  if(S.alarms.some(a=>a.state==='ring')){if(!alSnd){alBeep();alSnd=setInterval(alBeep,2000)}}else alStopSound();
  popSum();alRingOpen()}
