@@ -245,6 +245,13 @@ body.touring{padding-bottom:15rem}
 #popBody .card{margin:0!important}
 #popBody .form{margin:0}
 button.hclock{font-family:inherit;color:inherit;cursor:pointer;line-height:inherit}
+/* readable text inside pop-out sheets in dark mode (all Looks) */
+body[data-mode=dark] #pop .qh{color:color-mix(in srgb,var(--p) 30%,#fff);border-color:color-mix(in srgb,var(--p) 30%,#fff)}
+body[data-mode=dark] #pop .badge:not(.ok):not(.warn):not(.gray):not(.hot),body[data-mode=dark] #pop .tag{color:color-mix(in srgb,var(--p) 25%,#fff);background:color-mix(in srgb,var(--p) 26%,#181a1b)}
+body[data-mode=dark] #pop .btn.alt,body[data-mode=dark] #pop a.btn.alt{color:color-mix(in srgb,var(--p) 25%,#fff);border-color:color-mix(in srgb,var(--p) 55%,#fff)}
+body[data-mode=dark] #pop .x{color:#e0dcd6}
+body[data-mode=dark] #pop .small,body[data-mode=dark] #pop .empty,body[data-mode=dark] #pop label{color:#e0dcd6}
+body[data-mode=dark] #pop input::placeholder,body[data-mode=dark] #pop textarea::placeholder{color:#b9b4ac;opacity:1}
 .hclock.ringing,.pcb.ringing{background:#b91c1c!important;color:#fff!important;border-color:#fff!important}
 .pcb.ringing .pcn{background:#fff;color:#b91c1c}
 .looks{display:grid;grid-template-columns:repeat(auto-fit,minmax(8rem,1fr));gap:.5rem;margin-bottom:.9rem}
