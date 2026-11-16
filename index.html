@@ -980,7 +980,7 @@ function renderShowUI(){
 }
 /* swipe between pages */
 function visTabs(){return TABS.filter(t=>!(S.role==='floor'&&t[0]==='mod')&&!(t[0]==='stock'&&!S.invOn)&&!(S.easy&&!EASY.includes(t[0])&&t[0]!==S.tab))}
-function swipePage(dir){const vt=visTabs(),i=vt.findIndex(t=>t[0]===S.tab),n=vt[i+dir];if(!n)return;S.tab=n[0];save();renderTabs();scrollTo(0,0);tourBanner();const p=$('p-'+S.tab);if(p&&!REDUCE()){p.classList.remove('sw-n','sw-p');void p.offsetWidth;p.classList.add(dir>0?'sw-n':'sw-p');p.addEventListener('animationend',()=>p.classList.remove('sw-n','sw-p'),{once:true})}}
+function swipePage(dir){const vt=visTabs(),i=vt.findIndex(t=>t[0]===S.tab);if(i<0||vt.length<2)return;const n=vt[(i+dir+vt.length)%vt.length];S.tab=n[0];save();renderTabs();scrollTo(0,0);tourBanner();const p=$('p-'+S.tab);if(p&&!REDUCE()){p.classList.remove('sw-n','sw-p');void p.offsetWidth;p.classList.add(dir>0?'sw-n':'sw-p');p.addEventListener('animationend',()=>p.classList.remove('sw-n','sw-p'),{once:true})}}
 function swipeBlocked(el){if(!el||!el.closest)return true;if(el.closest('input,select,textarea,video,iframe,[contenteditable],[data-drag],.modal,#menuPanel,#tourBar,#pgBand'))return true;for(let n=el;n&&n!==document.body&&n!==document.documentElement;n=n.parentElement){if(n.scrollWidth>n.clientWidth+4){const o=getComputedStyle(n).overflowX;if(o==='auto'||o==='scroll')return true}}return false}
 (function(){let sx=0,sy=0,st=0,ok=false;
  const busy=()=>document.body.classList.contains('menu-open')||document.body.classList.contains('touring')||!!document.querySelector('.modal.show');
