@@ -439,7 +439,10 @@ body[data-edge=era] .card::after,body[data-edge=era] #menuPanel::after{content:"
 /* themed pop-out sheets: translucent, tinted, still readable */
 body .modal .sheet{background:color-mix(in srgb,color-mix(in srgb,var(--p) 7%,var(--solid)) 93%,transparent);-webkit-backdrop-filter:blur(14px) saturate(1.2);backdrop-filter:blur(14px) saturate(1.2);border:1.5px solid color-mix(in srgb,var(--p) 35%,transparent);border-bottom:0;box-shadow:0 -10px 40px color-mix(in srgb,var(--p) 30%,transparent),0 0 0 1px color-mix(in srgb,var(--s) 25%,transparent) inset}
 body .modal .sheet::before{content:"";display:block;height:5px;margin:-1.1rem -1.1rem .8rem;border-radius:22px 22px 0 0;background:linear-gradient(90deg,var(--p),var(--s))}
-body .modal .sheet>.hd:first-child{background:color-mix(in srgb,color-mix(in srgb,var(--p) 12%,var(--solid)) 96%,transparent);margin-top:-.8rem;padding-top:.8rem;border-radius:0;border-bottom:1.5px solid color-mix(in srgb,var(--p) 25%,transparent)}
+body .modal .sheet>.hd:first-child,body .modal #popSheet>.hd:first-child{display:contents!important;background:none!important;border:0!important}
+body .modal .sheet>.hd:first-child>.btn,body .modal .sheet>.hd:first-child>.x{float:right;position:sticky;top:.4rem;z-index:6;margin:-2.5rem 0 0 .6rem;background-color:var(--solid);box-shadow:0 2px 8px rgba(0,0,0,.22)}
+body .modal .sheet>.hd:first-child>h2{margin-top:0;padding-right:5rem}
+#dstart .ds-top{display:block!important}#dstart .ds-top .btn{float:right}
 #popBody .form,#popBody form.form{background:transparent!important;border:0!important;padding:0!important;margin:0!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
 #popBody{padding-top:.2rem}
 @media(min-width:700px){body .modal .sheet{border-bottom:1.5px solid color-mix(in srgb,var(--p) 35%,transparent)}body .modal .sheet::before{border-radius:22px 22px 0 0}}
