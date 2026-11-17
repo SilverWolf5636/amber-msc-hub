@@ -340,6 +340,7 @@ main{padding-bottom:7.5rem}
 nav.tabs{display:flex;align-items:center;gap:.7rem;max-width:none;padding:.45rem .8rem}
 .menu-btn{display:inline-flex;align-items:center;gap:.45rem;min-height:44px;padding:0 1rem;border-radius:99px;font-weight:800;font-size:.9rem;font-family:inherit;color:#fff;background:var(--grad);border:0;box-shadow:0 4px 12px -2px rgba(0,0,0,.3)}
 .menu-btn .mb-ico{font-size:.95rem;line-height:1}
+#dsBackBtn{min-height:44px;white-space:nowrap}
 .menu-cur{font-weight:800;font-size:.95rem;color:var(--ink);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #menuBack{position:fixed;inset:0;z-index:300;background:rgba(15,8,35,.62);backdrop-filter:blur(6px);opacity:0;visibility:hidden;transition:opacity .3s ease,visibility 0s linear .3s}
 #menuPanel{position:fixed;top:0;bottom:0;right:0;z-index:310;width:min(88vw,380px);display:flex;flex-direction:column;background:#fff;color:var(--ink);border-left:2px solid var(--p);border-radius:26px 0 0 26px;box-shadow:-16px 0 50px color-mix(in srgb,var(--p) 40%,transparent);transform:translateX(104%);visibility:hidden;transition:transform .38s cubic-bezier(.22,.9,.3,1),visibility 0s linear .38s}
@@ -462,7 +463,7 @@ body[data-edge=era] .card::after,body[data-edge=era] #menuPanel::after{content:"
  </div>
 </header>
 
-<nav class="tabs"><button class="menu-btn" id="menuBtn" data-a="menuOpen" aria-haspopup="dialog" aria-expanded="false" aria-controls="menuPanel"><span class="mb-ico" aria-hidden="true">☰</span><span>Menu</span></button><span class="menu-cur" id="menuCur" aria-live="polite"></span><button class="aplus" id="aPlus" type="button" data-a="aplus" aria-label="A+ Make the text bigger"><span id="aPlusT" aria-hidden="true">A+</span></button><div class="pgband" id="pgBand" role="group" aria-label="Pages"></div></nav>
+<nav class="tabs"><button class="menu-btn" id="menuBtn" data-a="menuOpen" aria-haspopup="dialog" aria-expanded="false" aria-controls="menuPanel"><span class="mb-ico" aria-hidden="true">☰</span><span>Menu</span></button><span class="menu-cur" id="menuCur" aria-live="polite"></span><button class="btn sm alt" id="dsBackBtn" type="button" data-a="dsBack" style="display:none">&#8592; Start screen</button><button class="aplus" id="aPlus" type="button" data-a="aplus" aria-label="A+ Make the text bigger"><span id="aPlusT" aria-hidden="true">A+</span></button><div class="pgband" id="pgBand" role="group" aria-label="Pages"></div></nav>
 <div id="menuBack" data-a="menuClose"></div>
 <div id="menuPanel" role="dialog" aria-modal="true" aria-labelledby="menuTtl" aria-hidden="true">
  <div class="mp-head"><div><h2 id="menuTtl">Menu</h2><p>Pick where to go</p></div><button class="mp-close" data-a="menuClose">✕ Close</button></div>
@@ -1227,6 +1228,7 @@ function renderTabs(){
  {const row=(t,big)=>`<button class="tab ${big?'bigtab ':''}${S.tab===t[0]?'on':''}" data-a="tab" data-v="${t[0]}"${S.tab===t[0]?' aria-current="page"':''}><span class="mr-ico" aria-hidden="true">${t[1]}</span><span class="mr-t">${t[2]}</span>${S.tab===t[0]?'<span class="mr-ok" aria-hidden="true">✓</span>':''}</button>`;
   $('tabs').innerHTML=vt.filter(t=>BIGTABS.includes(t[0])).map(t=>row(t,1)).join('')+'<div class="mp-sub">Everything else</div>'+vt.filter(t=>!BIGTABS.includes(t[0])).map(t=>row(t,0)).join('')}
  {const c=vt.find(t=>t[0]===S.tab);$('menuCur').textContent=c?c[1]+' '+c[2]:''}
+ {const b=$('dsBackBtn');if(b)b.style.display=(S.tab==='today'||(S.dstart&&S.dstart.off))?'none':''}
  {const b=$('pgBand');if(b){const hadF=b.contains(document.activeElement);b.innerHTML=vt.map(t=>`<button type="button" class="pg${S.tab===t[0]?' on':''}" data-a="tab" data-v="${t[0]}" aria-label="${esc(t[2])}"${S.tab===t[0]?' aria-current="page"':''}><span aria-hidden="true">${t[1]}</span></button>`).join('');const c=b.querySelector('.pg.on');if(c){b.scrollLeft=c.offsetLeft-(b.clientWidth-c.offsetWidth)/2;if(hadF)c.focus({preventScroll:true})}}}
  document.querySelectorAll('.pane').forEach(p=>p.classList.toggle('on',p.id==='p-'+S.tab));
 }
@@ -1297,6 +1299,8 @@ function renderDS(){const el=$('dsBody');if(!el)return;const day=dsDay(),n=Math.
   const up=S.shows.map(s=>({...s,st:t2m(s.start)})).sort((a,b)=>a.st-b.st);
   const dn=S.tasks.filter(t=>t.done).length,tot=S.tasks.length;
   h+=`<div class="ds-h">Good ${n<720?'morning':n<1020?'afternoon':'evening'}${S.mod&&S.mod.name?', '+x(S.mod.name):''}</div><div class="ds-s">Here is your day.</div>`;
+  const gs=(S.groups||[]).filter(g=>g.date===todayISO()).map(g=>({...g,st:t2m(g.time),n:parseInt(g.count,10)||0})).sort((a,b)=>a.st-b.st),gz=n=>n>=80?'Big':n>=30?'Medium':'Small';
+  h+=`<div class="ds-box"><b>School groups today</b>${gs.length?gs.map(g=>`<div>${esc(m12(g.st))} ${x(g.name)}${g.n?', '+g.n+' people, '+gz(g.n):''}</div>`).join(''):'<div>No groups added yet</div>'}${gs.some(g=>g.n>=80)?'<div><b>Big group today. Plan breaks around its arrival.</b></div>':''}<div style="margin-top:.4rem"><button class="btn sm alt" data-a="dsGroups">Assign groups</button></div></div>`;
   h+=`<div class="ds-box"><b>Shows today</b>${up.length?up.map(s=>`<div>${esc(m12(s.st))} ${x(s.venue)} ${x(s.title)}</div>`).join(''):'<div>No shows added yet</div>'}</div>`;
   h+=`<div class="ds-box"><b>Who is in today</b>${day.length?day.map(p=>`<div>${x(p.name)}${p.shift?' - '+x(p.shift):''}</div>`).join(''):'<div>Nobody added yet</div>'}</div>`;
   h+=`<div class="ds-box"><b>Checklists</b><div>${tot?dn+' of '+tot+' done':'No checklist items yet'}</div></div>`;
@@ -1821,6 +1825,8 @@ function act(a,el){const id=el.dataset.id,v=el.dataset.v,k=el.dataset.k;if(GUARD
  case'tab':S.tab=v;renderTabs();menuSet(false);scrollTo(0,0);tourBanner();break;
  case'setupDone':S.setupDone=true;break;
  case'dsGo':S.dstart.date=dsToday();$('dstart').classList.remove('show');break;
+ case'dsGroups':$('dstart').classList.remove('show');S.tab='groups';renderTabs();menuSet(false);scrollTo(0,0);break;
+ case'dsBack':menuSet(false);dsOpenNow();break;
  case'dsTeam':S.dstart.date=dsToday();if(lockOn()){UNLOCKED=false;S.role='floor';renderRole();renderTabs();lockUI()}DS.mode='pick';renderDS();break;
  case'dsPick':DS.pid=id;DS.mode='person';renderDS();break;
  case'dsGot':DS.seen[DS.pid]=1;DS.pid=null;DS.mode='pick';renderDS();break;
