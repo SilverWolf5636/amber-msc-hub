@@ -229,6 +229,7 @@ body.touring{padding-bottom:15rem}
 .hint{background:color-mix(in srgb,var(--p) 12%,var(--surface));border-left:4px solid var(--p);border-radius:10px;padding:.55rem .75rem;font-size:.88rem;line-height:1.4;margin-bottom:.6rem}
 .modal{position:fixed;inset:0;background:rgba(30,10,50,.55);z-index:150;display:none;align-items:flex-end;justify-content:center;padding:0}
 .modal.show{display:flex}
+#dstart .ds-row{display:flex;gap:.6rem;align-items:center;min-height:44px;padding:.2rem 0;cursor:pointer}#dstart .ds-row input{width:26px;height:26px;flex:none}
 #dstart .sheet{max-height:100vh;min-height:60vh}
 .modal#lockM{z-index:170}
 .lk-in{width:100%;font-size:1.6rem;letter-spacing:.5rem;text-align:center;padding:.6rem;border-radius:12px;border:2px solid var(--p);background:var(--solid);color:var(--ink);margin:.4rem 0}
@@ -895,6 +896,7 @@ body[data-edge=era] .card::after,body[data-edge=era] #menuPanel::after{content:"
   <div class="row" style="margin-top:.5rem"><button class="btn sm gold" data-a="copyBackup">Copy</button><button class="btn sm red" id="resetBtn" data-a="reset">Reset app</button></div></div>
  <div class="card mgr" style="margin-bottom:.8rem"><div class="hd"><h2 style="font-size:.95rem">&#128274; Manager lock</h2></div><div class="sub">It keeps the team out of the manager screens on a shared phone. It is not a bank lock \u2014 someone who knows their way around a phone could get past it.</div><div class="small" id="lockInfo"></div><div class="row"><button class="btn sm" id="lockSetBtn" data-a="lockSet">Set a code</button><button class="btn sm alt" id="lockOffBtn" data-a="lockOff" style="display:none">Turn lock off</button><button class="btn sm alt" id="lockNowBtn" data-a="lockNow" style="display:none">Lock now</button></div></div>
  <div class="card mgr" style="margin-bottom:.8rem"><div class="hd"><h2 style="font-size:.95rem">&#9728; Start of day screen</h2></div><div class="sub">A short screen once a day with the shows, who is in, and the checklist. Staff can open their own part from it.</div><div class="row"><button class="btn sm" id="dsOffBtn" data-a="dsOff">Turn off</button><button class="btn sm alt" data-a="dsShow">Show it now</button></div></div>
+ <div class="card mgr" style="margin-bottom:.8rem"><div class="hd"><h2 style="font-size:.95rem">&#128276; Reminders</h2></div><div class="sub">About every 90 minutes during the day, the app shows what may have been missed. It can also send a phone notification. Notifications only arrive while the app is open or running in the background on the phone.</div><div class="row"><button class="btn sm" id="remOnBtn" data-a="remToggle">Turn off</button><button class="btn sm alt" data-a="remNow">Show it now</button><button class="btn sm alt" data-a="dsNotif">Allow phone notifications</button></div></div>
  <div class="card c4" style="margin-bottom:0"><div class="hd"><h2 style="font-size:.95rem">&#128214; Quick Guide</h2></div>
   <div class="small" style="color:var(--soft);display:grid;gap:.4rem">
    <p><b>Help and tour:</b> tap Menu, then Help, to replay the tour or read about one tab. A small ? next to a card title tells you what that card is for.</p>
@@ -1214,9 +1216,9 @@ function tick(){
  if(w){const d=w.exit-n;let txt;if(d>=0){const tot=Math.round(d*60);const h=Math.floor(tot/3600),m=Math.floor(tot%3600/60),s=tot%60;txt=(h?h+':'+String(m).padStart(2,'0'):m)+':'+String(s).padStart(2,'0')}else txt='NOW';
   $('tkTitle').textContent='★ Next exit rush: '+w.title.replace(EX,'');$('tkTime').textContent=txt}
  else{$('tkTitle').textContent='★ No more exit rushes on the schedule';$('tkTime').textContent='--:--'}
- if(mi!==lastMin){lastMin=mi;if(S.listDate!==new Date().toDateString()){renderAll()}else renderDyn();try{staleCheck()}catch(e){}}
+ if(mi!==lastMin){lastMin=mi;if(S.listDate!==new Date().toDateString()){renderAll()}else renderDyn();try{staleCheck()}catch(e){}try{remCheck()}catch(e){}}
 }
-document.addEventListener('visibilitychange',()=>{if(!document.hidden){try{tick()}catch(e){}try{dsMaybeOpen()}catch(e){}}});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden){try{tick()}catch(e){}try{dsMaybeOpen()}catch(e){}try{remCheck()}catch(e){}}});
 
 /* ---------- render ---------- */
 function menuSet(o){document.body.classList.toggle('menu-open',o);$('menuBtn').setAttribute('aria-expanded',o?'true':'false');$('menuPanel').setAttribute('aria-hidden',o?'false':'true');
@@ -1293,19 +1295,40 @@ function dsDay(){return S.staff[actDay()]||[]}
 function dsOpenNow(mode){DS.mode=mode||(lockOn()&&!UNLOCKED?'pick':'amber');DS.pid=null;renderDS();$('dstart').classList.add('show')}
 function dsMaybeOpen(){try{if(DS.dismissed||!S.dstart||S.dstart.off||S.dstart.date===dsToday())return;if(document.querySelector('.modal.show')||document.body.classList.contains('touring'))return;
  if(!S.shows.length&&!Object.values(S.staff).some(a=>a&&a.length))return;dsOpenNow()}catch(e){}}
+function dsSt(){let d=S.dstart;if(!d||typeof d!=='object')d=S.dstart={date:'',off:false};if(d.sd!==dsToday()){d.sd=dsToday();d.clock=false;d.grp=false;d.next=0}return d}
+function remPending(){const st=dsSt(),n=Math.floor(nowMin()),h=S.hrs||{wd:[600,960],we:[600,1020]},wk=[0,6].includes(new Date().getDay()),cl=(wk?h.we:h.wd)[1];
+ return {clock:!st.clock,grp:!st.grp,items:(S.tasks||[]).filter(t=>!t.done&&(t.phase==='Opening'||(t.phase==='Mid-Day Rush'&&n>=660)||(t.phase==='Closing'&&n>=cl-60)))}}
+function remCount(p){return (p.clock?1:0)+(p.grp?1:0)+p.items.length}
+function remNotify(p){try{if(!('Notification' in window)||Notification.permission!=='granted')return;const c=remCount(p),names=[].concat(p.clock?['Clock in']:[],p.grp?['School groups']:[],p.items.map(t=>String(t.text).replace(EX,''))).slice(0,3).join(', ');
+ const o={body:c+(c>1?' things are':' thing is')+' still to do: '+names,tag:'msc-reminder',icon:'icon-192.png'};
+ if(navigator.serviceWorker&&navigator.serviceWorker.ready)navigator.serviceWorker.ready.then(r=>r.showNotification('Still to do',o)).catch(()=>{try{new Notification('Still to do',o)}catch(e){}});else new Notification('Still to do',o)}catch(e){}}
+function remCheck(){try{const st=dsSt();if(st.off||st.rm===false)return;if(!S.shows.length&&!Object.values(S.staff).some(a=>a&&a.length))return;const n=Math.floor(nowMin());if(n<630||n>1080)return;
+ if(!st.next){st.next=Math.max(660,n+90);save();return}
+ if(n<st.next)return;
+ if(document.querySelector('.modal.show')||document.body.classList.contains('touring'))return;
+ const p=remPending();st.next=n+90;save();if(!remCount(p))return;
+ remNotify(p);DS.mode='remind';DS.pid=null;renderDS();$('dstart').classList.add('show')}catch(e){}}
 function renderDS(){const el=$('dsBody');if(!el)return;const day=dsDay(),n=Math.floor(nowMin());let h='';
- const x=s=>esc(String(s||'').replace(EX,''));
+ const x=s=>esc(String(s||'').replace(EX,'')),row=(lab,on,at)=>`<label class="ds-row"><input type="checkbox" ${on?'checked':''} ${at}><span>${lab}</span></label>`;
  if(DS.mode==='amber'){
-  const up=S.shows.map(s=>({...s,st:t2m(s.start)})).sort((a,b)=>a.st-b.st);
-  const dn=S.tasks.filter(t=>t.done).length,tot=S.tasks.length;
-  h+=`<div class="ds-h">Good ${n<720?'morning':n<1020?'afternoon':'evening'}${S.mod&&S.mod.name?', '+x(S.mod.name):''}</div><div class="ds-s">Here is your day.</div>`;
+  const st=dsSt(),up=S.shows.map(s=>({...s,st:t2m(s.start)})).sort((a,b)=>a.st-b.st),ops=S.tasks.filter(t=>t.phase==='Opening'),od=ops.filter(t=>t.done).length;
   const gs=(S.groups||[]).filter(g=>g.date===todayISO()).map(g=>({...g,st:t2m(g.time),n:parseInt(g.count,10)||0})).sort((a,b)=>a.st-b.st),gz=n=>n>=500?'Large':n>=100?'Medium':'Small';
-  h+=`<div class="ds-box"><b>School groups today</b>${gs.length?gs.map(g=>`<div>${esc(m12(g.st))} ${x(g.name)}${g.n?', '+g.n+' people, '+gz(g.n):''}</div>`).join(''):'<div>No groups added yet</div>'}${gs.some(g=>g.n>=500)?'<div><b>Large group today. Plan breaks around its arrival.</b></div>':''}<div style="margin-top:.4rem"><button class="btn sm alt" data-a="dsGroups">Assign groups</button></div></div>`;
+  h+=`<div class="ds-h">Good ${n<720?'morning':n<1020?'afternoon':'evening'}${S.mod&&S.mod.name?', '+x(S.mod.name):''}</div><div class="ds-s">Here is your day, one step at a time.</div>`;
+  h+=`<div class="ds-box"><b>1. Clock in</b>${row('I clocked in',st.clock,'data-a="dsStep" data-k="clock"')}</div>`;
+  h+=`<div class="ds-box"><b>2. School groups today</b>${gs.length?gs.map(g=>`<div>${esc(m12(g.st))} ${x(g.name)}${g.n?', '+g.n+' people, '+gz(g.n):''}</div>`).join(''):'<div>No groups added yet</div>'}${gs.some(g=>g.n>=500)?'<div><b>Large group today. Plan breaks around its arrival.</b></div>':''}${row('School groups are set up',st.grp,'data-a="dsStep" data-k="grp"')}<div style="margin-top:.4rem"><button class="btn sm alt" data-a="dsGroups">Assign groups</button></div></div>`;
+  h+=`<div class="ds-box"><b>3. Opening checklist</b>${ops.length?ops.map(t=>row(x(t.text),t.done,'data-a="dsTick" data-id="'+t.id+'"')).join('')+'<div class="small">'+od+' of '+ops.length+' done</div>':'<div>No opening items yet</div>'}</div>`;
   h+=`<div class="ds-box"><b>Shows today</b>${up.length?up.map(s=>`<div>${esc(m12(s.st))} ${x(s.venue)} ${x(s.title)}</div>`).join(''):'<div>No shows added yet</div>'}</div>`;
   h+=`<div class="ds-box"><b>Who is in today</b>${day.length?day.map(p=>`<div>${x(p.name)}${p.shift?' - '+x(p.shift):''}</div>`).join(''):'<div>Nobody added yet</div>'}</div>`;
-  h+=`<div class="ds-box"><b>Checklists</b><div>${tot?dn+' of '+tot+' done':'No checklist items yet'}</div></div>`;
   if(S.ev&&S.ev.title)h+=`<div class="ds-box"><b>Heads-up</b><div>${x(S.ev.title)}${S.ev.hours?' - '+x(S.ev.hours):''}</div></div>`;
+  if(typeof Notification!=='undefined'&&Notification.permission==='default')h+=`<div class="small" style="margin:.4rem 0"><button class="btn sm alt" data-a="dsNotif">Allow phone notifications</button></div>`;
   h+=`<div class="row"><button class="btn" data-a="dsGo">Start the day</button>${day.length?'<button class="btn alt" data-a="dsTeam">Hand the phone to the team</button>':''}</div>`}
+ else if(DS.mode==='remind'){
+  const p=remPending(),c=remCount(p),mg=!(lockOn()&&!UNLOCKED);
+  h+=`<div class="ds-h">Still to do</div><div class="ds-s">${c?'These may have been missed.':'You are all caught up.'}</div>`;
+  if(p.clock)h+=`<div class="ds-box">${row('Clock in',false,'data-a="dsStep" data-k="clock"')}</div>`;
+  if(p.grp)h+=`<div class="ds-box"><b>School groups</b>${row('School groups are set up',false,'data-a="dsStep" data-k="grp"')}${mg?'<div style="margin-top:.4rem"><button class="btn sm alt" data-a="dsGroups">Assign groups</button></div>':''}</div>`;
+  ['Opening','Mid-Day Rush','Closing'].forEach(ph=>{const l=p.items.filter(t=>t.phase===ph);if(l.length)h+=`<div class="ds-box"><b>${ph} checklist</b>${l.map(t=>row(x(t.text),false,'data-a="dsTick" data-id="'+t.id+'"')).join('')}</div>`});
+  h+=`<div class="row"><button class="btn" data-a="dsRemClose">Done for now</button><button class="btn alt" data-a="dsRemLater">Remind me in 30 minutes</button></div>`}
  else if(DS.mode==='pick'){
   h+=`<div class="ds-h">Who are you?</div><div class="ds-s">Tap your name.</div><div class="ds-pick">${day.map(p=>`<button class="btn ${DS.seen[p.id]?'alt':''}" data-a="dsPick" data-id="${p.id}">${x(p.name)}${DS.seen[p.id]?' \u2713':''}</button>`).join('')||'<div class="ds-box">Nobody is added for today.</div>'}</div><div class="row"><button class="btn alt" data-a="closeDstart">Done</button></div>${lockOn()&&!UNLOCKED?'<div class="small" style="margin-top:.7rem"><button class="btn sm alt" data-a="dsMgr">I am the manager</button></div>':''}`}
  else{const p=day.find(q=>q.id===DS.pid);if(!p){DS.mode='pick';return renderDS()}
@@ -1827,6 +1850,13 @@ function act(a,el){const id=el.dataset.id,v=el.dataset.v,k=el.dataset.k;if(GUARD
  case'dsGo':S.dstart.date=dsToday();$('dstart').classList.remove('show');break;
  case'dsGroups':$('dstart').classList.remove('show');S.tab='groups';renderTabs();menuSet(false);scrollTo(0,0);break;
  case'dsBack':menuSet(false);dsOpenNow();break;
+ case'dsStep':{const st=dsSt();st[k]=!st[k];renderDS();break}
+ case'dsTick':{const t=find(S.tasks,id);if(t){t.done=!t.done;renderTasks();renderLists();renderDyn();renderDS()}break}
+ case'dsNotif':try{Notification.requestPermission().then(()=>renderDS())}catch(e){}break;
+ case'dsRemClose':$('dstart').classList.remove('show');break;
+ case'dsRemLater':dsSt().next=Math.floor(nowMin())+30;$('dstart').classList.remove('show');toast('I will remind you in 30 minutes');break;
+ case'remToggle':{const st=dsSt();st.rm=st.rm===false;$('remOnBtn').textContent=st.rm===false?'Turn on':'Turn off';toast(st.rm===false?'Reminders are off':'Reminders are on');break}
+ case'remNow':$('settings').classList.remove('show');DS.mode='remind';renderDS();$('dstart').classList.add('show');break;
  case'dsTeam':S.dstart.date=dsToday();if(lockOn()){UNLOCKED=false;S.role='floor';renderRole();renderTabs();lockUI()}DS.mode='pick';renderDS();break;
  case'dsPick':DS.pid=id;DS.mode='person';renderDS();break;
  case'dsGot':DS.seen[DS.pid]=1;DS.pid=null;DS.mode='pick';renderDS();break;
@@ -1861,7 +1891,7 @@ function act(a,el){const id=el.dataset.id,v=el.dataset.v,k=el.dataset.k;if(GUARD
  case'hmore':{const h=document.querySelector('header');const o=h.classList.toggle('hopen');el.setAttribute('aria-expanded',o);el.innerHTML=o?'&#10005; Hide info':'&#9776; Store info';break}
  case'mode':S.mode=S.mode==='dark'?'light':'dark';applyMode();renderLook();toast('Mode: '+S.mode);break;
  case'closeLook':$('look').classList.remove('show');break;
- case'openSettings':menuSet(false);lockUI();{const b=$('dsOffBtn');if(b)b.textContent=S.dstart&&S.dstart.off?'Turn on':'Turn off'}$('settings').classList.add('show');break;
+ case'openSettings':menuSet(false);lockUI();{const b=$('dsOffBtn');if(b)b.textContent=S.dstart&&S.dstart.off?'Turn on':'Turn off'}{const b=$('remOnBtn');if(b)b.textContent=dsSt().rm===false?'Turn on':'Turn off'}$('settings').classList.add('show');break;
  case'closeSettings':$('settings').classList.remove('show');break;
  case'closeCopy':$('copyModal').classList.remove('show');break;
  case'look':S.look=v;renderLook();break;
@@ -2230,7 +2260,7 @@ const HINTS=/*HINTS*/[
 ['How-to Steps',"Your written store how-to steps."],
 ['Build a How-to',"Add your own how-to here, step by step."]
 ]/*ENDHINTS*/;
-const TOUR_IGNORE=/*IGNORE*/['Big buttons','See-through','Manager lock','Start of day screen','Time for a backup','My Photos','Choose the part to show','Right now','Active Event Profile','Event Schedule','Setup & Breakdown','Vetted Clean Tracks','QR code','Copy this text','Quick Guide','Backup','Colors','Settings','Set up my store','App tour','Help','New here?','What is new']/*ENDIGNORE*/;
+const TOUR_IGNORE=/*IGNORE*/['Big buttons','See-through','Manager lock','Start of day screen','Reminders','Time for a backup','My Photos','Choose the part to show','Right now','Active Event Profile','Event Schedule','Setup & Breakdown','Vetted Clean Tracks','QR code','Copy this text','Quick Guide','Backup','Colors','Settings','Set up my store','App tour','Help','New here?','What is new']/*ENDIGNORE*/;
 let tr={list:[],i:0,mark:false};
 const TV=()=>TOUR.reduce((m,s)=>Math.max(m,s.since),1);
 function tourList(m,t){return tourList0(m,t).filter(s=>!s.m||!document.body.classList.contains('floor'))}
