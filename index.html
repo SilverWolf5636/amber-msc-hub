@@ -233,7 +233,7 @@ body.touring{padding-bottom:15rem}
 #dstart .sheet{max-height:100vh;min-height:60vh}
 /* touch screens: every tappable control is at least 44px tall (gloves, rush, big thumbs) */
 @media(pointer:coarse){.btn,.btn.sm,.pill,.x,.tab{min-height:44px}.btn,.btn.sm,.pill,.x{display:inline-flex;align-items:center;justify-content:center}.x{min-width:44px}.item input[type=checkbox],input[type=checkbox]{min-width:28px;min-height:28px}}
-#dstart .ds-top{position:sticky;top:0;z-index:5;background:var(--solid);margin:-1.1rem -1.1rem .4rem;padding:.7rem 1.1rem .4rem;display:flex;justify-content:flex-end;border-radius:22px 22px 0 0}
+#dstart .ds-top{position:sticky;top:.3rem;z-index:5;background:none;margin:0;padding:0;height:0;overflow:visible;display:flex;align-items:flex-start;justify-content:flex-end}#dstart .ds-top .btn{flex:none;height:auto;min-height:2.2rem}#dstart .ds-top .btn{box-shadow:0 2px 8px rgba(0,0,0,.25);background:var(--solid)}#dstart .ds-h{padding-right:5.5rem}
 .modal#lockM{z-index:170}
 .lk-in{width:100%;font-size:1.6rem;letter-spacing:.5rem;text-align:center;padding:.6rem;border-radius:12px;border:2px solid var(--p);background:var(--solid);color:var(--ink);margin:.4rem 0}
 .lk-msg{min-height:1.3rem;color:var(--ink);font-weight:700;margin:.2rem 0 .5rem}
@@ -436,6 +436,18 @@ body[data-edge=glow] .card{box-shadow:inset 0 1.5px 0 rgba(255,255,255,.7),0 0 0
 body[data-edge=era] .card::after,body[data-edge=era] #menuPanel::after{content:"";position:absolute;inset:0;padding:14px;pointer-events:none;z-index:1;border-radius:inherit;background:var(--eh) top left/56px 14px repeat-x,var(--eh) bottom left/56px 14px repeat-x,var(--ev) top left/14px 56px repeat-y,var(--ev) top right/14px 56px repeat-y;-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0)}
 @media print{body[data-edge] .card::after{display:none}}
 
+/* themed pop-out sheets: translucent, tinted, still readable */
+body .modal .sheet{background:color-mix(in srgb,color-mix(in srgb,var(--p) 7%,var(--solid)) 93%,transparent);-webkit-backdrop-filter:blur(14px) saturate(1.2);backdrop-filter:blur(14px) saturate(1.2);border:1.5px solid color-mix(in srgb,var(--p) 35%,transparent);border-bottom:0;box-shadow:0 -10px 40px color-mix(in srgb,var(--p) 30%,transparent),0 0 0 1px color-mix(in srgb,var(--s) 25%,transparent) inset}
+body .modal .sheet::before{content:"";display:block;height:5px;margin:-1.1rem -1.1rem .8rem;border-radius:22px 22px 0 0;background:linear-gradient(90deg,var(--p),var(--s))}
+body .modal .sheet>.hd:first-child{background:color-mix(in srgb,color-mix(in srgb,var(--p) 12%,var(--solid)) 96%,transparent);margin-top:-.8rem;padding-top:.8rem;border-radius:0;border-bottom:1.5px solid color-mix(in srgb,var(--p) 25%,transparent)}
+#popBody .form,#popBody form.form{background:transparent!important;border:0!important;padding:0!important;margin:0!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+#popBody{padding-top:.2rem}
+@media(min-width:700px){body .modal .sheet{border-bottom:1.5px solid color-mix(in srgb,var(--p) 35%,transparent)}body .modal .sheet::before{border-radius:22px 22px 0 0}}
+.swg{display:flex;flex-wrap:wrap;gap:.45rem;margin-top:.2rem}
+.swp{display:inline-flex;align-items:center;gap:.45rem;min-height:44px;padding:.3rem .8rem .3rem .45rem;font-weight:700}
+.swp.on{outline:2.5px solid var(--p);outline-offset:1px;font-weight:800}
+.swd{width:1.5rem;height:1.5rem;border-radius:50%;border:2px solid rgba(0,0,0,.45);box-shadow:0 0 0 1.5px rgba(255,255,255,.7);flex:none}
+.swp.on .swd::after{content:"\2713";display:flex;align-items:center;justify-content:center;height:100%;font-size:.9rem;font-weight:900;color:#fff;mix-blend-mode:difference}
 </style>
 </head>
 <body data-look="lover">
@@ -1805,7 +1817,16 @@ function renderAll(){dailyReset();applyBig();applyHrs();renderRole();renderLook(
 
 
 /* ---------- batch 1: lists, groups, wristbands, procedures ---------- */
-const WBC=[['Red','#e5484d'],['Orange','#f76b15'],['Yellow','#f5d90a'],['Green','#30a46c'],['Teal','#12a594'],['Blue','#0090ff'],['Purple','#8e4ec6'],['Pink','#e93d82'],['Gold','#d9a21b'],['Silver','#a1a1aa'],['White','#ffffff'],['Black','#1a1a1a']];
+function swInit(id,none){const sel=$(id);if(!sel||sel.dataset.sw)return;sel.dataset.sw='1';sel.style.display='none';sel.setAttribute('aria-hidden','true');sel.tabIndex=-1;
+ if(sel.parentNode)sel.parentNode.style.gridColumn='1/-1';
+ const g=document.createElement('div');g.className='swg';g.id=id+'Sw';g.setAttribute('role','radiogroup');g.setAttribute('aria-label','Wristband color');
+ const all=(none?[['','#ffffff','No band']]:[]).concat(WBC.map(c=>[c[0],c[1],c[0]]));
+ g.innerHTML=all.map(c=>`<button type="button" class="pill swp" role="radio" data-sv="${esc(c[0])}"><i class="swd" style="background:${c[1]}"></i>${esc(c[2])}</button>`).join('');
+ g.addEventListener('click',e=>{const b=e.target.closest('.swp');if(!b)return;sel.value=b.dataset.sv;swSync(id)});
+ sel.insertAdjacentElement('afterend',g);swSync(id)}
+function swSync(id){const sel=$(id),g=$(id+'Sw');if(!sel||!g)return;g.querySelectorAll('.swp').forEach(b=>{const on=b.dataset.sv===sel.value;b.classList.toggle('on',on);b.setAttribute('aria-checked',on?'true':'false')})}
+setInterval(()=>{try{swSync('gBand');swSync('wColor')}catch(e){}},400);
+const WBC=[['Red','#e5484d'],['Orange','#f76b15'],['Yellow','#f5d90a'],['Green','#30a46c'],['Teal','#12a594'],['Blue','#0090ff'],['Purple','#8e4ec6'],['Pink','#e93d82'],['Gold','#d9a21b'],['Silver','#a1a1aa'],['White','#ffffff'],['Black','#1a1a1a'],['Other / mixed','conic-gradient(#e5484d,#f5d90a,#30a46c,#0090ff,#8e4ec6,#e5484d)']];
 const wbHex=n=>(WBC.find(c=>c[0]===n)||[0,'#999'])[1];
 const wbChip=n=>`<span class="wb" style="background:${wbHex(n)}"></span>`;
 const todayISO=()=>{const d=new Date();return new Date(d-d.getTimezoneOffset()*60000).toISOString().slice(0,10)};
@@ -1861,6 +1882,7 @@ function renderGroups(){
  const opts=WBC.map(c=>`<option>${c[0]}</option>`).join('');
  if(!$('gBand').options.length)$('gBand').innerHTML='<option value="">No band</option>'+opts;
  if(!$('wColor').options.length)$('wColor').innerHTML=opts;
+ swInit('gBand',true);swInit('wColor',false);
  const l=S.groups.filter(g=>grpF==='all'||(grpF==='today'?g.date===t:g.date>=t)).sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time));
  $('grpList').innerHTML=l.length?l.map(g=>`<div class="item"><div class="tt"><b>${tx(g.name)}</b> ${g.date===t?'<span class="badge hot">TODAY</span>':`<span class="badge">${prettyDate(g.date)}</span>`}<div class="small">\u{1F552} ${m12(t2m(g.time))}${g.count?' • '+esc(g.count)+' people':''}${g.band?' • '+wbChip(g.band)+esc(g.band)+' band':''}</div>${g.note?`<div class="small">${esc(g.note)}</div>`:''}</div><div class="row"><button class="x" data-a="grpE" data-id="${g.id}" aria-label="Edit">✎</button><button class="x" data-a="grpD" data-id="${g.id}" aria-label="Delete">✕</button></div></div>`).join(''):'<div class="empty">'+(grpF==='today'?'No groups today.':'No groups here.')+'</div>';
  const wb=S.wrist||(S.wrist={date:'',items:[]});
