@@ -1299,8 +1299,8 @@ function renderDS(){const el=$('dsBody');if(!el)return;const day=dsDay(),n=Math.
   const up=S.shows.map(s=>({...s,st:t2m(s.start)})).sort((a,b)=>a.st-b.st);
   const dn=S.tasks.filter(t=>t.done).length,tot=S.tasks.length;
   h+=`<div class="ds-h">Good ${n<720?'morning':n<1020?'afternoon':'evening'}${S.mod&&S.mod.name?', '+x(S.mod.name):''}</div><div class="ds-s">Here is your day.</div>`;
-  const gs=(S.groups||[]).filter(g=>g.date===todayISO()).map(g=>({...g,st:t2m(g.time),n:parseInt(g.count,10)||0})).sort((a,b)=>a.st-b.st),gz=n=>n>=80?'Big':n>=30?'Medium':'Small';
-  h+=`<div class="ds-box"><b>School groups today</b>${gs.length?gs.map(g=>`<div>${esc(m12(g.st))} ${x(g.name)}${g.n?', '+g.n+' people, '+gz(g.n):''}</div>`).join(''):'<div>No groups added yet</div>'}${gs.some(g=>g.n>=80)?'<div><b>Big group today. Plan breaks around its arrival.</b></div>':''}<div style="margin-top:.4rem"><button class="btn sm alt" data-a="dsGroups">Assign groups</button></div></div>`;
+  const gs=(S.groups||[]).filter(g=>g.date===todayISO()).map(g=>({...g,st:t2m(g.time),n:parseInt(g.count,10)||0})).sort((a,b)=>a.st-b.st),gz=n=>n>=500?'Large':n>=100?'Medium':'Small';
+  h+=`<div class="ds-box"><b>School groups today</b>${gs.length?gs.map(g=>`<div>${esc(m12(g.st))} ${x(g.name)}${g.n?', '+g.n+' people, '+gz(g.n):''}</div>`).join(''):'<div>No groups added yet</div>'}${gs.some(g=>g.n>=500)?'<div><b>Large group today. Plan breaks around its arrival.</b></div>':''}<div style="margin-top:.4rem"><button class="btn sm alt" data-a="dsGroups">Assign groups</button></div></div>`;
   h+=`<div class="ds-box"><b>Shows today</b>${up.length?up.map(s=>`<div>${esc(m12(s.st))} ${x(s.venue)} ${x(s.title)}</div>`).join(''):'<div>No shows added yet</div>'}</div>`;
   h+=`<div class="ds-box"><b>Who is in today</b>${day.length?day.map(p=>`<div>${x(p.name)}${p.shift?' - '+x(p.shift):''}</div>`).join(''):'<div>Nobody added yet</div>'}</div>`;
   h+=`<div class="ds-box"><b>Checklists</b><div>${tot?dn+' of '+tot+' done':'No checklist items yet'}</div></div>`;
