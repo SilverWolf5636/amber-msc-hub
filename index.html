@@ -231,6 +231,9 @@ body.touring{padding-bottom:15rem}
 .modal.show{display:flex}
 #dstart .ds-row{display:flex;gap:.6rem;align-items:center;min-height:44px;padding:.2rem 0;cursor:pointer}#dstart .ds-row input{width:26px;height:26px;flex:none}
 #dstart .sheet{max-height:100vh;min-height:60vh}
+/* touch screens: every tappable control is at least 44px tall (gloves, rush, big thumbs) */
+@media(pointer:coarse){.btn,.btn.sm,.pill,.x,.tab{min-height:44px}.btn,.btn.sm,.pill,.x{display:inline-flex;align-items:center;justify-content:center}.x{min-width:44px}.item input[type=checkbox],input[type=checkbox]{min-width:28px;min-height:28px}}
+#dstart .ds-top{position:sticky;top:0;z-index:5;background:var(--solid);margin:-1.1rem -1.1rem .4rem;padding:.7rem 1.1rem .4rem;display:flex;justify-content:flex-end;border-radius:22px 22px 0 0}
 .modal#lockM{z-index:170}
 .lk-in{width:100%;font-size:1.6rem;letter-spacing:.5rem;text-align:center;padding:.6rem;border-radius:12px;border:2px solid var(--p);background:var(--solid);color:var(--ink);margin:.4rem 0}
 .lk-msg{min-height:1.3rem;color:var(--ink);font-weight:700;margin:.2rem 0 .5rem}
@@ -1259,12 +1262,16 @@ function renderSimple(){const el=$('simpleToday');if(!el)return;
  const n=Math.floor(nowMin()),day=S.staff[actDay()]||[],anyStaff=Object.values(S.staff).some(a=>a&&a.length);
  const up=S.shows.map(s=>({...s,st:t2m(s.start),en:t2m(s.start)+Number(s.dur||40)})).filter(s=>s.en>=n).sort((a,b)=>a.st-b.st);
  const tile=(go,label,big,sub,extra)=>`<button type="button" class="card stile tilebtn" data-a="tab" data-v="${go}"><div class="sl">${label}</div><div class="sb">${big}</div>${sub?`<div class="ss">${sub}</div>`:''}${extra||''}</button>`;
- let h='';
+ let h='',staleNote='';
+ try{const td=todayISO(),real=(S.shows||[]).filter(x=>String(x.title||'').indexOf(EX)!==0),sig=real.map(x=>x.id+'|'+x.start+'|'+x.title).join(';');
+  if(S.showsSig!==sig){S.showsSig=sig;S.showsSigDay=td;save()}
+  const fresh=(S.showsSrc==='museum'&&S.showsAuto===td)?td:S.showsSigDay;
+  if(real.length&&fresh&&fresh<td)staleNote='<br><b>These shows are from '+esc(new Date(fresh+'T12:00:00').toLocaleDateString([],{month:'short',day:'numeric'}))+'. Tap to check.</b>'}catch(e){}
  if(!S.setupDone&&(!S.shows.length||!anyStaff)){
   const st=(i,done,a,v,t)=>`<button type="button" class="btn ${done?'alt ':''}sstep" data-a="${a}"${v?` data-v="${v}"`:''}><span class="sn">${i}</span><span>${t}${done?' \u2713':''}</span></button>`;
   h+=`<div class="card stile mgr" id="firstRun"><h3>Let's set up</h3><div class="ss">Three things. About two minutes.</div>${st(1,S.shows.length>0,'tab','shows',"Add today's showtimes")}${st(2,anyStaff,'openSetup','',"Add who's working")}${st(3,false,'setupDone','','Done')}</div>`}
- if(up.length){const a=up[0],b=up[1];h+=tile('shows','Next shows',esc(m12(a.st)+' '+(a.venue||'')),esc(String(a.title||'').replace(EX,''))+(b?'<br>then '+esc(m12(b.st)+' '+(b.venue||'')):''))}
- else h+=tile('shows','Next shows',S.shows.length?'No more shows today':'No shows added yet',S.shows.length?'':'Tap here to add them');
+ if(up.length){const a=up[0],b=up[1];h+=tile('shows','Next shows',esc(m12(a.st)+' '+(a.venue||'')),esc(String(a.title||'').replace(EX,''))+(b?'<br>then '+esc(m12(b.st)+' '+(b.venue||'')):'')+staleNote)}
+ else h+=tile('shows','Next shows',S.shows.length?'No more shows today':'No shows added yet',S.shows.length?staleNote.replace(/^<br>/,''):'Tap here to add them');
  const ob=day.filter(x=>x.status==='On Break'),nx=day.filter(x=>x.status!=='On Break'&&parseT(x.brk)!=null&&parseT(x.brk)>=n).sort((a,b)=>parseT(a.brk)-parseT(b.brk))[0];
  h+=tile('staff','Who needs a break',ob.length?esc(ob.map(nm).join(', '))+' on break':nx?esc(nm(nx))+' at '+esc(nx.brk):day.length?'No breaks coming up':'Nobody added yet',
   ob.length?(day.length>ob.length?'Everyone else is on the floor':''):nx?'Next break':day.length?'No other breaks set for today':"Tap here to add who's working");
@@ -1348,6 +1355,7 @@ function renderDS(){const el=$('dsBody');if(!el)return;const day=dsDay(),n=Math.
   h+=`<div class="ds-box"><b>Your break</b><div>${p.brk?x(p.brk):'Not set'}</div></div>`;
   h+=`<div class="ds-box"><b>Your tasks</b>${p.task?`<div>${x(p.task)}</div>`:''}${mine.map(t=>`<div>${x(t.text)}</div>`).join('')}${!p.task&&!mine.length?'<div>Nothing assigned yet</div>':''}</div>`;
   h+=`<div class="row"><button class="btn" data-a="dsGot">Got it</button></div>`}
+ {const ca=DS.mode==='remind'?'dsRemClose':DS.mode==='person'?'dsGot':'closeDstart';h=`<div class="ds-top"><button class="btn sm alt" data-a="${ca}">\u2715 Close</button></div>`+h}
  if(el.dataset.h!==h){el.innerHTML=h;el.dataset.h=h}}
 function renderDyn(){try{renderSimple()}catch(e){}try{renderTeam()}catch(e){}try{renderBreak()}catch(e){}
  const h=hours(),n=nowMin(),w=nextWave();
@@ -1855,7 +1863,7 @@ function act(a,el){const id=el.dataset.id,v=el.dataset.v,k=el.dataset.k;if(GUARD
  case'lockNow':relock('Locked');return;
  case'lockForgot':lockOpen('forgot');return;
  case'lockWipe':if(!el.dataset.arm){el.dataset.arm='1';el.textContent='Tap again to erase everything';setTimeout(()=>{el.dataset.arm='';el.textContent='Erase and start over'},3500);return}try{localStorage.setItem(KEY+'_pre',JSON.stringify(exportS()));localStorage.setItem(KEY+'_pre_at',String(Date.now()))}catch(_){}S=defaults();UNLOCKED=false;save();$('lockM').classList.remove('show');renderAll();lockUI();toast('Erased. You can restore a backup file now.');return;
- case'tab':S.tab=v;renderTabs();menuSet(false);scrollTo(0,0);tourBanner();break;
+ case'tab':if(v==='shows'&&S.showsSigDay){S.showsSigDay=todayISO();save()}S.tab=v;renderTabs();menuSet(false);scrollTo(0,0);tourBanner();break;
  case'setupDone':S.setupDone=true;break;
  case'dsGo':S.dstart.date=dsToday();$('dstart').classList.remove('show');break;
  case'dsGroups':$('dstart').classList.remove('show');S.tab='groups';renderTabs();menuSet(false);scrollTo(0,0);break;
