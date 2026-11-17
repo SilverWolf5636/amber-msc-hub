@@ -575,6 +575,7 @@ body[data-edge=era] .card::after,body[data-edge=era] #menuPanel::after{content:"
    <div id="imxFilms"></div>
    <div class="grid" style="grid-template-columns:1fr 1fr;gap:.5rem;margin-top:.6rem"><div><label class="l">Week starting</label><input type="date" id="imxWeek"></div><div><label class="l">Gap between shows (min)</label><input type="number" id="imxGap" min="0" max="120" step="5" value="20"></div></div>
    <div class="row" style="margin-top:.5rem"><button class="btn" type="button" data-a="imxMake">Make the week</button></div>
+   <div style="margin-top:.6rem"><label class="l" for="imxDay">Remind me to plan on</label><select id="imxDay"><option value="">No reminder</option><option value="1">Monday</option><option value="2">Tuesday</option><option value="3">Wednesday</option><option value="4">Thursday</option><option value="5">Friday</option><option value="6">Saturday</option><option value="0">Sunday</option></select><div class="small">A note shows on Today that day until you make the week.</div></div>
    <div id="imxOut"></div></div>
 </section>
 
@@ -1126,6 +1127,11 @@ function swipeBlocked(el){if(!el||!el.closest)return true;if(el.closest('input,s
  const up=()=>{if(d){d=null;save()}};f.addEventListener('pointerup',up);f.addEventListener('pointercancel',up);
  document.addEventListener('visibilitychange',()=>{const v=$('wallVid');if(!v)return;if(document.hidden)v.pause();else if(v.classList.contains('on')&&!REDUCE())v.play().catch(()=>{})})
 })();
+const ED={};const EDF={staff:['sName','+ Add to this day'],show:['shTitle','+ Add show'],task:['tText','+ Add'],restock:['rItem','+ Flag']};
+function edBtn(f){const fm=document.querySelector('form[data-f="'+f+'"]');return fm&&fm.querySelector('button[type=submit]')}
+function edUI(f){const b=edBtn(f);if(b)b.textContent=ED[f]?'Save changes':EDF[f][1]}
+function edStart(f,id,fill){ED[f]=id;fill();edUI(f);popForm(document.querySelector('form[data-f="'+f+'"]'))}
+function edEnd(f){if(!ED[f])return;ED[f]=null;const fm=document.querySelector('form[data-f="'+f+'"]');if(fm)fm.reset();edUI(f)}
 const mk=(n,r,z,sh,br,ph)=>({id:uid(),name:n,role:r,zone:z,shift:sh,brk:br,phone:ph||'',task:'',status:'On Floor'});
 function todayPreset(){const d=new Date().getDay();return d===1?'closed':(d===0||d===6)?'weekend':'weekday'}
 function todayDay(){const a=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][new Date().getDay()];return a==='Mon'?'Tue':a}
@@ -1140,7 +1146,7 @@ function defaults(){
  tasks:[...ck(['Count the starting cash bank into Register 1 & 2 before doors open','Check the Box Office board for today\'s IMAX & Planetarium schedule changes','Check voicemail on the Science Store line (410-545-5924) for overnight orders','Front & face the feature displays by the entrance'],'Opening'),...ck(['Both registers staffed 5 minutes before each theater exit wave','Rotate staff lunches outside the big exit waves','Restock impulse items after each school group wave'],'Mid-Day Rush'),...ck(['Package & label phone orders for outgoing mail','Run POS Z-out reports, count drawers with the Till Counter, drop safe deposit','Lock glass display cases and secure the store gates'],'Closing')],
  restock:[],
  stock:[],vendors:[],
- imax:{films:[],gap:20,week:'',plans:{},vr:{}},
+ imax:{films:[],gap:20,week:'',plans:{},vr:{},day:'',madeOn:''},
  orders:[],
  till:{b100:'',b50:'',b20:'',b10:'',b5:'',b1:'',qua:'',dim:'',nic:'',pen:'',start:''},calc:{price:'0',disc:'10'},
  mod:{name:'Amber',radio:'',hand:'',walk:[],log:[]},
@@ -1201,7 +1207,7 @@ function staleCheck(){const td=todayISO(),ages=[];const a=(n,o)=>{if(o&&o.update
  const b=$('staleBar');if(!ages.length||S.staleSnooze===td){if(b)b.remove();return}
  wbar('staleBar','<b>&#9888; Museum info may be old:</b> '+esc(ages.join(', '))+'. Check mdsci.org before relying on it. <button class="btn sm alt" data-a="staleOk">OK</button>')}
 /* ---------- undo, big buttons, dialogs ---------- */
-const UNDOABLE={grpD:'Group deleted',wbD:'Wristband deleted',noteD:'Note deleted',stD:'Person removed',liveD:'Task deleted',shD:'Showtime deleted',rsD:'Item deleted',orD:'Order deleted',lgD:'Log entry deleted',miD:'Step deleted',plD:'Playlist deleted',trD:'Track deleted',dcD:'Doc deleted',ctD:'Number deleted',snD:'Sticky deleted',alD:'Alarm deleted',tillClear:'Till cleared',ckReset:'All unchecked'};
+const UNDOABLE={skD:'Stock item deleted',vnD:'Vendor deleted',imxD:'Film deleted',lsCounts:'Counts updated',grpD:'Group deleted',wbD:'Wristband deleted',noteD:'Note deleted',stD:'Person removed',liveD:'Task deleted',shD:'Showtime deleted',rsD:'Item deleted',orD:'Order deleted',lgD:'Log entry deleted',miD:'Step deleted',plD:'Playlist deleted',trD:'Track deleted',dcD:'Doc deleted',ctD:'Number deleted',snD:'Sticky deleted',alD:'Alarm deleted',tillClear:'Till cleared',ckReset:'All unchecked'};
 let UNDO=null,undoT;
 function undoOffer(json,msg){UNDO=json;let b=$('undoBar');if(!b){b=document.createElement('div');b.id='undoBar';b.className='ubar';b.setAttribute('role','status');document.body.appendChild(b)}
  b.innerHTML=esc(msg)+' <button class="btn sm" data-a="undoDo">Undo</button>';b.style.display='';clearTimeout(undoT);undoT=setTimeout(()=>{b.style.display='none';UNDO=null},8000)}
@@ -1303,6 +1309,7 @@ function renderSimple(){const el=$('simpleToday');if(!el)return;
  h+=tile('tasks','Checklists',tot?dn+' of '+tot+' done':'No checklist items yet','',tot?`<div class="sbar" role="img" aria-label="${pc} percent done"><i style="width:${pc}%"></i></div>`:'');
  {const nmz=esc(S.mod&&S.mod.name||'Not set yet'),rd=S.mod&&S.mod.radio?'Radio: '+esc(S.mod.radio):'';
   h+=S.role==='floor'?`<div class="card stile"><div class="sl">Who's in charge today</div><div class="sb">${nmz}</div>${rd?`<div class="ss">${rd}</div>`:''}</div>`:tile('mod',"Who's in charge today",nmz,rd)}
+ try{const I=S.imax;if(S.role!=='floor'&&I&&/^[0-6]$/.test(String(I.day))&&new Date().getDay()===+I.day&&I.madeOn!==todayISO())h+=`<button type="button" class="card stile tilebtn mgr" data-a="tab" data-v="shows"><div class="sl">IMAX planning day</div><div class="sb">Plan next week's IMAX shows</div><div class="ss">Tap to open the planner</div></button>`}catch(e){}
  h+='<div class="alsoLbl">Also today</div>';
  if(el.dataset.h!==h){el.innerHTML=h;el.dataset.h=h}}
 const LK={mode:'',pend:null,bad:0,until:0,pnd2:null};
@@ -1411,7 +1418,7 @@ function renderStaff(){
  $('cover').innerHTML=`<b>${S.day}:</b> ${on} on floor &bull; ${br} on break &bull; ${list.length} scheduled. ${on>=2?'Registers are covered.':'<b>Heads up:</b> fewer than 2 on the floor. Stagger breaks before the next exit rush.'}`;
  $('staffList').innerHTML=list.length?list.map(p=>{const body=encodeURIComponent((p.task||'Hi '+p.name.replace(EX,'').split(' ')[0]+', quick task:')+' - Amber');
   const badge=p.status==='On Floor'?'ok':p.status==='On Break'?'warn':'gray';
-  return `<div class="card c2" style="padding:.8rem"><div class="hd" style="margin-bottom:.4rem"><div><b>${tx(p.name)}</b><div class="small">${esc(p.role)} &bull; ${esc(p.zone)}</div></div><div class="row"><span class="badge ${badge}">${esc(p.status)}</span><button class="x mgr" data-a="stD" data-id="${p.id}">✕</button></div></div>
+  return `<div class="card c2" style="padding:.8rem"><div class="hd" style="margin-bottom:.4rem"><div><b>${tx(p.name)}</b><div class="small">${esc(p.role)} &bull; ${esc(p.zone)}</div></div><div class="row"><span class="badge ${badge}">${esc(p.status)}</span><button class="btn sm alt mgr" data-a="edStaff" data-id="${p.id}">Edit</button><button class="x mgr" data-a="stD" data-id="${p.id}">✕</button></div></div>
   <div class="small" style="margin-bottom:.4rem">\u{1F552} ${esc(p.shift)} &nbsp; ☕ Break ${esc(p.brk)}</div>${brkLine(p,list)}
   <div class="pills" style="margin-bottom:.4rem">${ST.map(s=>`<button class="pill ${p.status===s?'on':''}" data-a="stS" data-id="${p.id}" data-v="${s}">${s}</button>`).join('')}</div>
   <div class="row"><input type="text" data-a="stTask" data-id="${p.id}" value="${esc(p.task)}" placeholder="Task for ${esc(p.name.replace(EX,'').split(' ')[0])}..." style="flex:1">${p.phone?`<a class="btn sm" href="sms:${esc(p.phone)}?&body=${body}">Text Task</a>`:'<span class="small">add cell to text</span>'}</div>${p.phone?`<div class="small" style="margin-top:.25rem">Cell: ${esc(p.phone)}</div>`:''}</div>`}).join(''):'<div class="empty">Nobody scheduled for '+S.day+'. Add someone above.</div>';
@@ -1421,10 +1428,10 @@ function renderShows(){
  try{renderImx()}catch(e){}
  const f=S.showFilter;$('showFilter').innerHTML=[['ALL','All'],['IMAX','\u{1F3A5} IMAX'],['Planetarium','\u{1FA90} Planetarium'],['Group / Event','\u{1F68C} Groups & Events']].map(a=>`<button class="pill ${f===a[0]?'on':''}" data-a="shF" data-v="${a[0]}">${a[1]}</button>`).join('');
  const l=waves().filter(w=>f==='ALL'||w.venue===f);
- $('showList').innerHTML=l.length?l.map(w=>`<div class="wave"><div class="row" style="justify-content:space-between"><div class="row"><span class="venue ${w.venue==='Planetarium'?'pl':w.venue==='IMAX'?'':'ev'}">${esc(w.venue)}</span><b>${tx(w.title)}</b></div><button class="x mgr" data-a="shD" data-id="${w.id}">✕</button></div>
+ $('showList').innerHTML=l.length?l.map(w=>`<div class="wave"><div class="row" style="justify-content:space-between"><div class="row"><span class="venue ${w.venue==='Planetarium'?'pl':w.venue==='IMAX'?'':'ev'}">${esc(w.venue)}</span><b>${tx(w.title)}</b></div><span class="row"><button class="btn sm alt mgr" data-a="edShow" data-id="${w.id}">Edit</button><button class="x mgr" data-a="shD" data-id="${w.id}">✕</button></span></div>
  <div class="small" style="margin-top:.3rem">Starts <b>${m12(t2m(w.start))}</b> &bull; ${w.dur} min &rarr; <b style="color:var(--p)">exit rush ${m12(w.exit)}</b></div>${w.tip?`<span class="tip">\u{1F4A1} ${esc(w.tip)}</span>`:''}</div>`).join(''):'<div class="empty">No shows here.</div>'
 }
-function ckRow(k,t){return `<div class="item ${t.done?'done':''}"><input type="checkbox" data-a="ckT" data-k="${k}" data-id="${t.id}" ${t.done?'checked':''}><div class="tt">${t.phase?`<span class="tag">${esc(t.phase)}</span><br>`:''}${tx(t.text)}</div><button class="x mgr" data-a="ckD" data-k="${k}" data-id="${t.id}">✕</button></div>`}
+function ckRow(k,t){return `<div class="item ${t.done?'done':''}"><input type="checkbox" data-a="ckT" data-k="${k}" data-id="${t.id}" ${t.done?'checked':''}><div class="tt">${t.phase?`<span class="tag">${esc(t.phase)}</span><br>`:''}${tx(t.text)}</div>${k==='tasks'?`<button class="btn sm alt mgr" data-a="edTask" data-id="${t.id}">Edit</button>`:''}<button class="x mgr" data-a="ckD" data-k="${k}" data-id="${t.id}">✕</button></div>`}
 function renderTasks(){
  $('phaseFilter').innerHTML=['ALL','Opening','Mid-Day Rush','Closing'].map(p=>`<button class="pill ${S.phase===p?'on':''}" data-a="ph" data-v="${p}">${p==='ALL'?'All':p}</button>`).join('');
  const l=S.tasks.filter(t=>S.phase==='ALL'||t.phase===S.phase);$('taskList').innerHTML=l.length?l.map(t=>ckRow('tasks',t)).join(''):'<div class="empty">Nothing here.</div>';
@@ -1435,7 +1442,7 @@ const CKL={tasks:()=>S.tasks,mod:()=>S.mod.walk,event:()=>S.ev.tasks,close:()=>S
 function renderStock(){
  lsLists();
  const sts=['Need on Floor','Pulled from Back','Restocked'];
- $('restockList').innerHTML=S.restock.length?S.restock.map(r=>`<div class="item"><div class="tt"><b>${tx(r.item)}</b><div class="small">${esc(r.cat)}${r.sku?' &bull; SKU '+esc(r.sku):''}${r.qty!=null?' &bull; '+r.qty+' in stock':''}</div><div class="pills" style="margin:.4rem 0 0">${sts.map(s=>`<button class="pill ${r.status===s?'on':''}" data-a="rsS" data-id="${r.id}" data-v="${s}">${s}</button>`).join('')}</div></div><button class="x mgr" data-a="rsD" data-id="${r.id}">✕</button></div>`).join(''):'<div class="empty">Nothing flagged.</div>';
+ $('restockList').innerHTML=S.restock.length?S.restock.map(r=>`<div class="item"><div class="tt"><b>${tx(r.item)}</b><div class="small">${esc(r.cat)}${r.sku?' &bull; SKU '+esc(r.sku):''}${r.qty!=null?' &bull; '+r.qty+' in stock':''}</div><div class="pills" style="margin:.4rem 0 0">${sts.map(s=>`<button class="pill ${r.status===s?'on':''}" data-a="rsS" data-id="${r.id}" data-v="${s}">${s}</button>`).join('')}</div></div><button class="btn sm alt mgr" data-a="edRs" data-id="${r.id}">Edit</button><button class="x mgr" data-a="rsD" data-id="${r.id}">✕</button></div>`).join(''):'<div class="empty">Nothing flagged.</div>';
  $('orderList').innerHTML=S.orders.length?S.orders.map(o=>`<div class="item"><div class="tt"><b>${tx(o.guest)}</b> <span class="badge">${esc(o.type)}</span><div class="small">${esc(o.items)} &bull; ${esc(o.phone)}</div><button class="pill" style="margin-top:.4rem" data-a="orN" data-id="${o.id}">Status: <b>${esc(o.status)}</b> &rarr;</button></div><button class="x" data-a="orD" data-id="${o.id}">✕</button></div>`).join(''):'<div class="empty">No orders or holds.</div>';
  renderStk()
 }
@@ -1448,12 +1455,14 @@ function imxHours(iso){
   if(hol)return hol.closed?{closed:true,why:hol.label||'Closed'}:{open:hol.open,close:hol.close,why:hol.label||''};
   const w=MSCH.weekly||{},r=dow===1?w.mon:(dow>=2&&dow<=5)?w.tuefri:w.satsun;
   if(r)return r.closed?{closed:true,why:'Closed'}:{open:r.open,close:r.close,why:''}}}catch(e){}
+ if(dow===1)return {closed:true,why:'Closed Mondays'};
  const h=S.hrs||{wd:[600,960],we:[600,1020]},r=([0,6].includes(dow)?h.we:h.wd)||[600,960];return {open:r[0],close:r[1],why:''}}
 function imxPlan(films,h,gap,vr){
  const prob=[];if(!h||h.closed)return {shows:[],prob:[],closed:true,why:(h&&h.why)||'Closed'};
  const op=h.open,cl=h.close,g=Math.max(0,+gap||0),fx=[],oth=[],must=[];let first=null,last=null;
  const dur=f=>Math.max(5,+f.dur||40);
- (films||[]).forEach(f=>{if(f.rule==='first'&&!first)first=f;else if(f.rule==='last'&&!last)last=f;else if(f.rule==='at'&&f.at)fx.push({f,st:t2m(f.at)});else if(f.rule==='must')must.push(f);else oth.push(f)});
+ films=(films||[]).filter(f=>f&&typeof f==='object');
+ (films||[]).forEach(f=>{if(f.rule==='first'&&!first)first=f;else if(f.rule==='first')prob.push(f.title+': only one film can be "Show first". It was treated as Anywhere.');else if(f.rule==='last'&&!last)last=f;else if(f.rule==='last')prob.push(f.title+': only one film can be "Show last". It was treated as Anywhere.');else if(f.rule==='at'&&f.at)fx.push({f,st:t2m(f.at)});else if(f.rule==='must')must.push(f);else oth.push(f)});
  if(first)fx.push({f:first,st:op});
  if(last)fx.push({f:last,st:Math.floor((cl-dur(last))/5)*5});
  fx.sort((a,b)=>a.st-b.st);
@@ -1466,7 +1475,7 @@ function imxPlan(films,h,gap,vr){
   while(q.length){let pick=-1;for(let k=0;k<q.length;k++){const j=(ptr+k)%q.length;if(a+dur(q[j])<=b){pick=j;break}}
    if(pick<0)break;const f=q[pick];out.push({id:f.id,title:f.title,start:imxT(a),dur:dur(f)});a+=dur(f)+g;ptr=pick+1}};
  let cur=op;
- fx.forEach(x=>{fill(cur,x.st-g);out.push({id:x.f.id,title:x.f.title,start:imxT(x.st),dur:dur(x.f)});cur=Math.max(cur,x.st+dur(x.f)+g)});
+ fx.forEach(x=>{const okf=x.st>=op&&x.st+dur(x.f)<=cl;fill(cur,Math.min(x.st-g,cl));if(okf){out.push({id:x.f.id,title:x.f.title,start:imxT(x.st),dur:dur(x.f)});cur=Math.max(cur,x.st+dur(x.f)+g)}});
  fill(cur,cl);
  out.sort((a,b)=>t2m(a.start)-t2m(b.start));
  must.forEach(f=>{if(!out.some(o=>o.id===f.id))prob.push(f.title+' is marked "Must be in" but did not fit.')});
@@ -1478,11 +1487,11 @@ var imxKnown={};
 function renderImx(){
  const I=S.imax,el=$('imxFilms');if(!el)return;
  if(!I.week){const d=new Date();let n=(8-d.getDay())%7||7;I.week=imxAdd(todayISO(),n)}
- if(document.activeElement!==$('imxWeek'))$('imxWeek').value=I.week;if(document.activeElement!==$('imxGap'))$('imxGap').value=I.gap;
- el.innerHTML=I.films.length?I.films.map(f=>`<div class="item"><div class="tt"><b>${esc(f.title)}</b> <span class="badge">${esc(IMX_RULES[f.rule]||'Anywhere')}${f.rule==='at'&&f.at?' '+esc(m12(t2m(f.at))):''}</span><div class="small">${f.dur} min</div></div><button class="x" data-a="imxD" data-id="${f.id}">✕</button></div>`).join(''):'<div class="empty">No films yet. Add the films that are playing.</div>';
+ if(document.activeElement!==$('imxDay'))$('imxDay').value=String(I.day==null?'':I.day);if(document.activeElement!==$('imxWeek'))$('imxWeek').value=I.week;if(document.activeElement!==$('imxGap'))$('imxGap').value=I.gap;
+ el.innerHTML=I.films.length?I.films.map(f=>`<div class="item"><div class="tt"><b>${esc(f.title)}</b> <span class="badge">${esc(IMX_RULES[f.rule]||'Anywhere')}${f.rule==='at'&&f.at?' '+esc(m12(t2m(f.at))):''}</span><div class="small">${esc(f.dur)} min</div></div><button class="x" data-a="imxD" data-id="${esc(f.id)}">✕</button></div>`).join(''):'<div class="empty">No films yet. Add the films that are playing.</div>';
  const days=Object.keys(I.plans).filter(d=>d>=I.week&&d<=imxAdd(I.week,6)).sort(),today=todayISO();
- $('imxOut').innerHTML=days.map(d=>{const p=I.plans[d],lbl=new Date(d+'T12:00:00').toLocaleDateString([],{weekday:'long',month:'short',day:'numeric'});
-  return `<div class="item" style="display:block;margin-top:.5rem"><div class="row" style="justify-content:space-between"><b>${esc(lbl)}</b><span>${p.closed?'<span class="small">'+esc(p.why||'Closed')+'</span>':`<button class="btn sm alt" data-a="imxAnother" data-d="${d}">Make another</button>`}${d===today&&!p.closed&&p.shows.length?` <button class="btn sm" data-a="imxUse" data-d="${d}">Use for my day</button>`:''}</span></div>${p.closed?'':(p.shows.length?p.shows.map(x=>`<div>${esc(m12(t2m(x.start)))} &bull; ${esc(x.title)} <span class="small">(${x.dur} min)</span></div>`).join(''):'<div class="small">No shows.</div>')}${(p.prob||[]).map(t=>'<div class="small" style="color:#a3153f">&#9888; '+esc(t)+'</div>').join('')}</div>`}).join('')}
+ $('imxOut').innerHTML=days.map(d=>{const p=I.plans[d]&&typeof I.plans[d]==='object'&&Array.isArray(I.plans[d].shows||[])?I.plans[d]:{closed:true,why:'Plan not readable. Tap Make the week.'},lbl=new Date(d+'T12:00:00').toLocaleDateString([],{weekday:'long',month:'short',day:'numeric'});
+  return `<div class="item" style="display:block;margin-top:.5rem"><div class="row" style="justify-content:space-between"><b>${esc(lbl)}</b><span>${p.closed?'<span class="small">'+esc(p.why||'Closed')+'</span>':`<button class="btn sm alt" data-a="imxAnother" data-d="${d}">Make another</button>`}${d===today&&!p.closed&&p.shows.length?` <button class="btn sm" data-a="imxUse" data-d="${d}">Use for my day</button>`:''}</span></div>${p.closed?'':(p.shows.length?p.shows.map(x=>`<div>${esc(m12(t2m(x.start)))} &bull; ${esc(x.title)} <span class="small">(${esc(x.dur)} min)</span></div>`).join(''):'<div class="small">No shows.</div>')}${(p.prob||[]).map(t=>'<div class="small" style="color:#a3153f">&#9888; '+esc(t)+'</div>').join('')}</div>`}).join('')}
 function imxRun(d,keep){const I=S.imax,h=imxHours(d);I.plans[d]=imxPlan(I.films,h,I.gap,(I.vr[d]||0))}
 const stkLow=r=>r.qty<=r.pt;
 function renderStk(){
@@ -2056,14 +2065,18 @@ function act(a,el){const id=el.dataset.id,v=el.dataset.v,k=el.dataset.k;if(GUARD
  case'rsS':find(S.restock,id).status=v;renderStock();renderDyn();break;
  case'rsD':del(S.restock,id);renderStock();renderDyn();break;
  case'skD':del(S.stock,id);renderStock();break;
- case'imxD':del(S.imax.films,id);renderImx();break;
- case'imxMake':{const I=S.imax;if(!I.films.length){toast('Add at least one film first');break}const w=$('imxWeek').value,g=Math.round(parseFloat($('imxGap').value));if(!/^\d{4}-\d{2}-\d{2}$/.test(w)){toast('Pick the first day of the week');break}I.week=w;I.gap=isFinite(g)&&g>=0&&g<=120?g:20;I.vr={};for(let i=0;i<7;i++)imxRun(imxAdd(w,i));const ks=Object.keys(I.plans).sort();while(ks.length>28)delete I.plans[ks.shift()];renderImx();toast('The week is ready');break}
+ case'imxD':del(S.imax.films,id);S.imax.plans={};S.imax.vr={};renderImx();break;
+ case'imxMake':{const I=S.imax;if(!I.films.length){toast('Add at least one film first');break}const w=$('imxWeek').value,g=Math.round(parseFloat($('imxGap').value));if(!/^\d{4}-\d{2}-\d{2}$/.test(w)){toast('Pick the first day of the week');break}I.madeOn=todayISO();I.week=w;I.gap=isFinite(g)&&g>=0&&g<=120?g:20;I.vr={};for(let i=0;i<7;i++)imxRun(imxAdd(w,i));const ks=Object.keys(I.plans).sort();while(ks.length>28)delete I.plans[ks.shift()];renderImx();toast('The week is ready');break}
  case'imxAnother':{const d=el.dataset.d,I=S.imax,b=JSON.stringify((I.plans[d]||{}).shows),v0=I.vr[d]||0;let ch=false;for(let k=1;k<=8&&!ch;k++){I.vr[d]=v0+k;imxRun(d);ch=JSON.stringify(I.plans[d].shows)!==b}if(!ch){I.vr[d]=v0;imxRun(d);toast('No other order works with these rules')}renderImx();break}
  case'imxUse':{const d=el.dataset.d,p=S.imax.plans[d];if(!p||d!==todayISO()||!p.shows.length)break;const hasI=S.shows.some(x=>x.venue==='IMAX'&&String(x.title||'').indexOf(EX)!==0);
   if(hasI&&!el.dataset.arm){el.dataset.arm='1';el.textContent='Tap again to replace today\'s IMAX shows';setTimeout(()=>{el.dataset.arm='';el.textContent='Use for my day'},3500);return}
   el.dataset.arm='';S.shows=S.shows.filter(x=>x.venue!=='IMAX').concat(p.shows.map(x=>({id:uid(),title:x.title,venue:'IMAX',start:x.start,dur:x.dur,tip:''})));S.showsSrc='planned';save();renderShows();renderDyn();toast('Today\'s IMAX shows are set ('+p.shows.length+')');break}
- case'skCount':{const r=find(S.stock,id),i=$('skq-'+id);if(!r||!i)break;const q=Math.round(parseFloat(i.value));if(!isFinite(q)||q<0){toast('Type a number, 0 or more');break}r.qty=q;renderStock();toast('Count saved');break}
+ case'skCount':{const r=find(S.stock,id),i=$('skq-'+id);if(!r||!i)break;const q=Math.round(parseFloat(i.value));if(!isFinite(q)||q<0){toast('Type a number, 0 or more');break}r.qty=q;const kp={};document.querySelectorAll('[id^="skq-"]').forEach(x=>{kp[x.id]=x.value});renderStock();Object.keys(kp).forEach(k=>{const x=$(k);if(x&&k!=='skq-'+id)x.value=kp[k]});toast('Count saved');break}
  case'vnD':del(S.vendors,id);S.stock.forEach(r=>{if(r.ven===id)r.ven=''});renderStock();break;
+ case'edStaff':{const p=find(S.staff[S.day]||[],id);if(!p)break;edStart('staff',id,()=>{$('sName').value=p.name.replace(EX,'');$('sRole').value=p.role;$('sZone').value=p.zone;$('sShift').value=p.shift||'';$('sBreak').value=p.brk||'';$('sPhone').value=p.phone||''});break}
+ case'edShow':{const w=find(S.shows,id);if(!w)break;edStart('show',id,()=>{$('shTitle').value=String(w.title||'').replace(EX,'');$('shVenue').value=w.venue;$('shStart').value=w.start;$('shDur').value=w.dur;$('shTip').value=w.tip||''});break}
+ case'edTask':{const t=find(S.tasks,id);if(!t)break;edStart('task',id,()=>{$('tText').value=String(t.text||'').replace(EX,'');$('tPhase').value=t.phase});break}
+ case'edRs':{const r=find(S.restock,id);if(!r)break;edStart('restock',id,()=>{$('rItem').value=String(r.item||'').replace(EX,'');$('rCat').value=r.cat});break}
  case'skEd':{const r=find(S.stock,id);if(!r)break;$('skName').value=r.item;$('skQty').value=r.qty;$('skPt').value=r.pt;renderStk();$('skVen').value=S.vendors.some(x=>x.id===r.ven)?r.ven:'';popForm($('skName').closest('form'));toast('Change the numbers, then tap Save item');break}
  case'skFlag':{const r=find(S.stock,id);if(!r)break;const c=lsFind(r.item)||{};S.restock.unshift({id:uid(),item:r.item,cat:c.cat||$('rCat').value,sku:r.sku||c.sku||'',qty:r.qty,status:'Need on Floor'});renderStock();renderDyn();toast('Added to the restock queue');break}
  case'lsCounts':{const m=new Map((LS.all||[]).map(x=>[x.nm.toLowerCase(),x.q]));let n=0;S.stock.forEach(r=>{const q=m.get(String(r.item).toLowerCase());if(q!=null&&isFinite(q)){r.qty=Math.max(0,Math.round(q));n++}});renderStock();toast(n?n+' count'+(n===1?'':'s')+' updated':'None of your stock items were in that file');break}
@@ -2228,6 +2241,7 @@ function popClose(noFocus){if(!POP.el)return;const el=POP.el,b=POP.btn;el.classL
  const k=el.matches&&el.matches('form')?el.dataset.f:'';
  if(k==='group'&&S.editGrp){S.editGrp=null;el.reset();$('gDate').value=todayISO();grpEditUI()}
  else if(k==='sop'&&S.editSop){S.editSop=null;$('spTitle').value='';$('spSteps').value='';previewSop();sopEditUI()}
+ else if(EDF[k]&&ED[k])edEnd(k)
  else if(k==='contact'&&S.editCt){S.editCt=null;['kName','kRole','kPhone'].forEach(i=>{$(i).value=''});ctEditUI()}
  PSYNC.forEach(f=>f());popSum();
  if(!noFocus&&b&&b.isConnected&&b.offsetParent!==null){try{b.focus({preventScroll:true})}catch(e){}}}
@@ -2268,6 +2282,7 @@ document.addEventListener('input',e=>{const t=e.target;
  else if(t.id==='spSteps'){previewSop()}
 });
 document.addEventListener('change',e=>{const t=e.target;
+ if(t&&t.id==='imxDay'){S.imax.day=/^[0-6]$/.test(t.value)?t.value:'';save();renderSimple();toast(S.imax.day===''?'Reminder off':'Reminder saved');return}
  if(t&&(t.id==='remEvery'||t.id==='remFrom'||t.id==='remTo')){const d=dsSt();d[t.id]=+t.value;d.next=0;save();toast('Reminder times saved');return}
  if(t.id==='preset'){S.preset=t.value;renderHeaderInputs();renderDyn();save()}
  else if(t.dataset.a==='stTask'){const p=find(S.staff[S.day],t.dataset.id);if(p){p.task=t.value;save();const a=t.parentNode&&t.parentNode.querySelector('a[href^="sms:"]');if(a)a.href=a.href.replace(/body=.*$/,'body='+encodeURIComponent((p.task||'Hi '+p.name.replace(EX,'').split(' ')[0]+', quick task:')+' - Amber'))}}
@@ -2283,11 +2298,11 @@ document.addEventListener('submit',e=>{e.preventDefault();const f=e.target.datas
  for(const el of e.target.querySelectorAll('input[type=text],input[type=tel],input[type=url],input:not([type]),textarea')){if(el.value&&el.value!==el.value.trim())el.value=el.value.trim();if(el.required&&!el.value.trim()){toast('Please fill in the empty box');try{el.focus()}catch(_){}return}}
  switch(f){
  case'note':S.notes.unshift({id:uid(),text:v('noteText'),tag:$('noteTag').value,done:false});renderNotes();break;
- case'staff':(S.staff[S.day]=S.staff[S.day]||[]).push(mk(v('sName'),$('sRole').value,$('sZone').value,v('sShift'),v('sBreak'),v('sPhone')));renderStaff();renderDyn();break;
+ case'staff':{const q=ED.staff&&find(S.staff[S.day]||[],ED.staff);if(q)Object.assign(q,{name:v('sName'),role:$('sRole').value,zone:$('sZone').value,shift:v('sShift'),brk:v('sBreak'),phone:v('sPhone')});else(S.staff[S.day]=S.staff[S.day]||[]).push(mk(v('sName'),$('sRole').value,$('sZone').value,v('sShift'),v('sBreak'),v('sPhone')));edEnd('staff');renderStaff();renderDyn();break}
  case'live':S.live_tasks.unshift({id:uid(),text:v('lText'),who:v('lWho'),pri:$('lPri').value,done:false});renderStaff();break;
- case'show':S.shows.push({id:uid(),title:v('shTitle'),venue:$('shVenue').value,start:$('shStart').value,dur:+$('shDur').value||40,tip:v('shTip')});renderShows();renderDyn();break;
- case'task':S.tasks.push({id:uid(),text:v('tText'),phase:$('tPhase').value,done:false});renderTasks();renderDyn();break;
- case'restock':S.restock.unshift({id:uid(),item:v('rItem'),cat:$('rCat').value,sku:(lsFind(v('rItem'))||{}).sku||'',status:'Need on Floor'});renderStock();renderDyn();break;
+ case'show':{const o={title:v('shTitle'),venue:$('shVenue').value,start:$('shStart').value,dur:+$('shDur').value||40,tip:v('shTip')},q=ED.show&&find(S.shows,ED.show);if(q)Object.assign(q,o);else S.shows.push(Object.assign({id:uid()},o));edEnd('show');renderShows();renderDyn();break}
+ case'task':{const q=ED.task&&find(S.tasks,ED.task);if(q){q.text=v('tText');q.phase=$('tPhase').value}else S.tasks.push({id:uid(),text:v('tText'),phase:$('tPhase').value,done:false});edEnd('task');renderTasks();renderDyn();break}
+ case'restock':{const q=ED.restock&&find(S.restock,ED.restock),sk=(lsFind(v('rItem'))||{}).sku||'';if(q){q.item=v('rItem');q.cat=$('rCat').value;if(sk)q.sku=sk}else S.restock.unshift({id:uid(),item:v('rItem'),cat:$('rCat').value,sku:sk,status:'Need on Floor'});edEnd('restock');renderStock();renderDyn();break}
  case'stk':{const q=Math.round(parseFloat($('skQty').value)),p=Math.round(parseFloat($('skPt').value));if(!isFinite(q)||!isFinite(p)||q<0||p<0){toast('Type the numbers, 0 or more');return}const nm=v('skName'),ex=S.stock.find(x=>String(x.item).toLowerCase()===nm.toLowerCase());if(ex){ex.qty=q;ex.pt=p;ex.ven=$('skVen').value}else{if(S.stock.length>=500){toast('The list is full (500 items)');return}S.stock.unshift({id:uid(),item:nm.slice(0,80),sku:(lsFind(nm)||{}).sku||'',qty:q,pt:p,ven:$('skVen').value})}renderStock();toast('Saved');break}
  case'imf':{const dur=Math.round(parseFloat($('imDur').value)),rule=$('imRule').value,at=$('imAt').value,nm=v('imTitle');if(!isFinite(dur)||dur<5||dur>180){toast('Runtime must be 5 to 180 minutes');return}if(rule==='at'&&!at){toast('Pick the set time');return}const ex=S.imax.films.find(x=>x.title.toLowerCase()===nm.toLowerCase());if(ex){ex.dur=dur;ex.rule=rule;ex.at=rule==='at'?at:''}else{if(S.imax.films.length>=30){toast('The list is full (30 films)');return}S.imax.films.push({id:uid(),title:nm.slice(0,80),dur,rule,at:rule==='at'?at:''})}renderImx();break}
  case'ven':if(S.vendors.length>=60){toast('The list is full (60 vendors)');return}S.vendors.push({id:uid(),name:v('vnName').slice(0,60),phone:v('vnPhone').slice(0,30),note:v('vnNote').slice(0,100)});renderStk();break;
@@ -2344,7 +2359,7 @@ const TOUR=/*TOUR*/[
 {t:'today',k:'e',since:1,h:"That is it!",x:"Tap Menu, then Help, any time to replay this tour, hear about one tab, or see what is new. A small ? next to a card title tells you what that card is for."}
 ]/*ENDTOUR*/;
 const HINTS=/*HINTS*/[
-['IMAX Week Planner',"Add the films that are playing and say where each one goes. Then pick the first day of the week and tap Make the week. Tap Make another on a day to see a different order. On the day itself, tap Use for my day."],
+['IMAX Week Planner',"Add the films that are playing and say where each one goes. Then pick the first day of the week and tap Make the week. Tap Make another on a day to see a different order. On the day itself, tap Use for my day. Pick a planning day at the bottom and Today will remind you."],
 ['Stock Counts',"Type how many of an item you have and the number to reorder at. Items at or below that number show Low. Anyone can change the On hand number and tap Save count. Tap Add to restock queue to flag a Low item. Counts are typed by hand, or tap Update my Stock Counts after picking a Lightspeed file above."],
 ['Vendors',"A short list of who you order from, with a phone number. Pick a vendor on each stock item and tap Call to reach them."],
 ['Past Days',"Shows how many steps were done on earlier days. Tap Open on a day for details. Tap Save today's close-out to also keep today's till total and safe drop."],
