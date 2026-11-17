@@ -565,6 +565,17 @@ body[data-edge=era] .card::after,body[data-edge=era] #menuPanel::after{content:"
    <div><label class="l">Put out front (optional)</label><input type="text" id="shTip" placeholder="e.g. jets, space kits"></div>
    <div style="align-self:end"><button class="btn" style="width:100%" type="submit">+ Add show</button></div></form>
   <div class="grid g2" id="showList"></div></div>
+  <div class="card mgr" id="imxCard" style="margin-top:.8rem"><div class="hd"><div><h2>&#128467; IMAX Week Planner</h2><div class="sub">Add the films, say which ones need a special spot, then make the week. About once a week.</div></div></div>
+   <form class="form f2" data-f="imf">
+    <div style="grid-column:1/-1"><label class="l">Film title</label><input type="text" id="imTitle" list="imxTitles" required placeholder="Pick from the list or type"><datalist id="imxTitles"></datalist></div>
+    <div><label class="l">Runtime (min)</label><input type="number" id="imDur" value="40" min="5" max="180" required></div>
+    <div><label class="l">Where it goes</label><select id="imRule"><option value="n">Anywhere</option><option value="must">Must be in</option><option value="first">Show first</option><option value="last">Show last</option><option value="at">At a set time</option></select></div>
+    <div><label class="l">Set time (only for "At a set time")</label><input type="time" id="imAt"></div>
+    <div style="align-self:end"><button class="btn" style="width:100%" type="submit">+ Add film</button></div></form>
+   <div id="imxFilms"></div>
+   <div class="grid" style="grid-template-columns:1fr 1fr;gap:.5rem;margin-top:.6rem"><div><label class="l">Week starting</label><input type="date" id="imxWeek"></div><div><label class="l">Gap between shows (min)</label><input type="number" id="imxGap" min="0" max="120" step="5" value="20"></div></div>
+   <div class="row" style="margin-top:.5rem"><button class="btn" type="button" data-a="imxMake">Make the week</button></div>
+   <div id="imxOut"></div></div>
 </section>
 
 <!-- CHECKLISTS & REGISTER -->
@@ -591,12 +602,21 @@ body[data-edge=era] .card::after,body[data-edge=era] #menuPanel::after{content:"
 <!-- STOCK -->
 <section class="pane" id="p-stock">
  <div class="grid g2">
-  <div class="card c2"><div class="hd"><div><h2>&#128451; Import a Lightspeed stock file</h2><div class="sub">In Lightspeed, export your inventory as CSV or Excel. Pick that file here. It is read on this device only. Nothing is uploaded.</div></div></div>
+  <div class="card c2 mgr"><div class="hd"><div><h2>&#128451; Import a Lightspeed stock file</h2><div class="sub">In Lightspeed, export your inventory as CSV or Excel. Pick that file here. It is read on this device only. Nothing is uploaded.</div></div></div>
    <div class="row"><input type="file" id="lsFile" accept=".csv,.xlsx,.txt" style="flex:1"></div>
    <div id="lsOpts"></div><div id="lsOut"></div><div class="small" id="lsCat" style="margin-top:.5rem"></div></div>
   <div class="card"><div class="hd"><div><h2>&#129430; Hot-Seller Restock Queue</h2><div class="sub">Keep the displays full before each exit wave.</div></div></div>
    <form class="form mgr" data-f="restock"><input type="text" id="rItem" placeholder="Item name (pick from the list or type)" list="itemList" autocomplete="off" required><datalist id="itemList"></datalist><div class="row"><select id="rCat" style="flex:1"><option>Space &amp; Planetarium</option><option>IMAX Feature Tie-In</option><option>Dino &amp; Fossils</option><option>STEM &amp; Chemistry Kits</option><option>Plush &amp; Apparel</option><option>Other</option></select><button class="btn" type="submit">+ Flag</button></div></form>
    <div id="restockList"></div></div>
+  <div class="card c2" id="stkCard"><div class="hd"><div><h2>&#128202; Stock Counts</h2><div class="sub">Type how many you have and the number to reorder at. Items at or below that number show Low.</div></div></div>
+    <div class="small" id="stkSum" style="margin-bottom:.4rem"></div>
+    <form class="form mgr" data-f="stk"><input type="text" id="skName" placeholder="Item name (pick from the list or type)" list="itemList" autocomplete="off" required>
+     <div class="grid" style="grid-template-columns:1fr 1fr 1fr;gap:.5rem"><input type="number" id="skQty" placeholder="On hand" min="0" step="1" inputmode="numeric" required><input type="number" id="skPt" placeholder="Reorder at" min="0" step="1" inputmode="numeric" required><select id="skVen" aria-label="Vendor"></select></div>
+     <button class="btn" type="submit">Save item</button></form>
+    <div id="stkList"></div></div>
+  <div class="card c2" id="venCard"><div class="hd"><div><h2>&#128222; Vendors</h2><div class="sub">Who you order from. Pick one on each stock item.</div></div></div>
+    <form class="form mgr" data-f="ven"><div class="grid" style="grid-template-columns:1fr 1fr;gap:.5rem"><input type="text" id="vnName" placeholder="Vendor name" required><input type="tel" id="vnPhone" placeholder="Phone"></div><input type="text" id="vnNote" placeholder="Note (order day, contact name...)"><button class="btn" type="submit">+ Add vendor</button></form>
+    <div id="venList"></div></div>
   <div class="card c2"><div class="hd"><div><h2>&#128230; Phone Orders &amp; Guest Holds</h2><div class="sub">Store line 410-545-5924. Tap a status to move it along.</div></div></div>
    <form class="form" data-f="order"><div class="grid" style="grid-template-columns:1fr 1fr;gap:.5rem"><input type="text" id="oGuest" placeholder="Guest name" required><input type="tel" id="oPhone" placeholder="Phone" required></div>
     <div class="grid" style="grid-template-columns:2fr 1fr;gap:.5rem"><input type="text" id="oItems" placeholder="Items ordered / held (pick or type)" list="itemList" autocomplete="off" required><select id="oType"><option>Ship Order</option><option>Lobby Pickup</option></select></div>
@@ -1090,7 +1110,7 @@ function renderShowUI(){
  slideSync()
 }
 /* swipe between pages */
-const FLOORHIDE=['mod','stock','events','docs','music'];
+const FLOORHIDE=['mod','events','docs','music'];
 function visTabs(){return TABS.filter(t=>!(S.role==='floor'&&FLOORHIDE.includes(t[0]))&&!(t[0]==='stock'&&!S.invOn))}
 function swipePage(dir){const vt=visTabs(),i=vt.findIndex(t=>t[0]===S.tab);if(i<0||vt.length<2)return;const n=vt[(i+dir+vt.length)%vt.length];S.tab=n[0];save();renderTabs();scrollTo(0,0);tourBanner();const p=$('p-'+S.tab);if(p&&!REDUCE()){p.classList.remove('sw-n','sw-p');void p.offsetWidth;p.classList.add(dir>0?'sw-n':'sw-p');p.addEventListener('animationend',()=>p.classList.remove('sw-n','sw-p'),{once:true})}}
 function swipeBlocked(el){if(!el||!el.closest)return true;if(el.closest('input,select,textarea,video,iframe,[contenteditable],[data-drag],.modal,#menuPanel,#tourBar,#pgBand'))return true;for(let n=el;n&&n!==document.body&&n!==document.documentElement;n=n.parentElement){if(n.scrollWidth>n.clientWidth+4){const o=getComputedStyle(n).overflowX;if(o==='auto'||o==='scroll')return true}}return false}
@@ -1119,6 +1139,8 @@ function defaults(){
  shows:[],
  tasks:[...ck(['Count the starting cash bank into Register 1 & 2 before doors open','Check the Box Office board for today\'s IMAX & Planetarium schedule changes','Check voicemail on the Science Store line (410-545-5924) for overnight orders','Front & face the feature displays by the entrance'],'Opening'),...ck(['Both registers staffed 5 minutes before each theater exit wave','Rotate staff lunches outside the big exit waves','Restock impulse items after each school group wave'],'Mid-Day Rush'),...ck(['Package & label phone orders for outgoing mail','Run POS Z-out reports, count drawers with the Till Counter, drop safe deposit','Lock glass display cases and secure the store gates'],'Closing')],
  restock:[],
+ stock:[],vendors:[],
+ imax:{films:[],gap:20,week:'',plans:{},vr:{}},
  orders:[],
  till:{b100:'',b50:'',b20:'',b10:'',b5:'',b1:'',qua:'',dim:'',nic:'',pen:'',start:''},calc:{price:'0',disc:'10'},
  mod:{name:'Amber',radio:'',hand:'',walk:[],log:[]},
@@ -1128,7 +1150,7 @@ function defaults(){
  contacts:[{id:uid(),name:'Science Store (direct)',role:'Gift shop line',phone:'410-545-5924'},{id:uid(),name:'Museum Operator',role:'Main desk',phone:'410-685-2370'}],
  stickies:[],alarms:[],lastBackup:0,born:Date.now(),bkSnooze:0,big:false,hist:{},staleSnooze:'',dstart:{date:'',off:false},lock:{h:'',s:''},setupDone:false};
 }
-const OBJARR=['notes','live_tasks','shows','tasks','restock','orders','docs','contacts','groups','closeList','sops','stickies','alarms','playlists','tracks','media','walls','customLooks','team'];
+const OBJARR=['notes','live_tasks','shows','tasks','restock','stock','vendors','orders','docs','contacts','groups','closeList','sops','stickies','alarms','playlists','tracks','media','walls','customLooks','team'];
 let LOADWARN='',RAWBAD='',BKPEND=null,SAVEFAIL=false,lastPrev=0;
 const isObj=x=>x&&typeof x==='object'&&!Array.isArray(x);
 const objs=a=>Array.isArray(a)?a.filter(x=>x&&typeof x==='object'):[];
@@ -1396,6 +1418,7 @@ function renderStaff(){
  $('liveList').innerHTML=S.live_tasks.length?S.live_tasks.map(t=>`<div class="item ${t.done?'done':''}"><input type="checkbox" data-a="liveT" data-id="${t.id}" ${t.done?'checked':''}><div class="tt">${t.pri==='Urgent'?'<span class="badge hot">URGENT</span> ':''}${tx(t.text)}<div class="small">For: ${esc(t.who||'Anyone')}</div></div><button class="x mgr" data-a="liveD" data-id="${t.id}">✕</button></div>`).join(''):'<div class="empty">No live tasks.</div>'
 }
 function renderShows(){
+ try{renderImx()}catch(e){}
  const f=S.showFilter;$('showFilter').innerHTML=[['ALL','All'],['IMAX','\u{1F3A5} IMAX'],['Planetarium','\u{1FA90} Planetarium'],['Group / Event','\u{1F68C} Groups & Events']].map(a=>`<button class="pill ${f===a[0]?'on':''}" data-a="shF" data-v="${a[0]}">${a[1]}</button>`).join('');
  const l=waves().filter(w=>f==='ALL'||w.venue===f);
  $('showList').innerHTML=l.length?l.map(w=>`<div class="wave"><div class="row" style="justify-content:space-between"><div class="row"><span class="venue ${w.venue==='Planetarium'?'pl':w.venue==='IMAX'?'':'ev'}">${esc(w.venue)}</span><b>${tx(w.title)}</b></div><button class="x mgr" data-a="shD" data-id="${w.id}">✕</button></div>
@@ -1413,7 +1436,65 @@ function renderStock(){
  lsLists();
  const sts=['Need on Floor','Pulled from Back','Restocked'];
  $('restockList').innerHTML=S.restock.length?S.restock.map(r=>`<div class="item"><div class="tt"><b>${tx(r.item)}</b><div class="small">${esc(r.cat)}${r.sku?' &bull; SKU '+esc(r.sku):''}${r.qty!=null?' &bull; '+r.qty+' in stock':''}</div><div class="pills" style="margin:.4rem 0 0">${sts.map(s=>`<button class="pill ${r.status===s?'on':''}" data-a="rsS" data-id="${r.id}" data-v="${s}">${s}</button>`).join('')}</div></div><button class="x mgr" data-a="rsD" data-id="${r.id}">✕</button></div>`).join(''):'<div class="empty">Nothing flagged.</div>';
- $('orderList').innerHTML=S.orders.length?S.orders.map(o=>`<div class="item"><div class="tt"><b>${tx(o.guest)}</b> <span class="badge">${esc(o.type)}</span><div class="small">${esc(o.items)} &bull; ${esc(o.phone)}</div><button class="pill" style="margin-top:.4rem" data-a="orN" data-id="${o.id}">Status: <b>${esc(o.status)}</b> &rarr;</button></div><button class="x" data-a="orD" data-id="${o.id}">✕</button></div>`).join(''):'<div class="empty">No orders or holds.</div>'
+ $('orderList').innerHTML=S.orders.length?S.orders.map(o=>`<div class="item"><div class="tt"><b>${tx(o.guest)}</b> <span class="badge">${esc(o.type)}</span><div class="small">${esc(o.items)} &bull; ${esc(o.phone)}</div><button class="pill" style="margin-top:.4rem" data-a="orN" data-id="${o.id}">Status: <b>${esc(o.status)}</b> &rarr;</button></div><button class="x" data-a="orD" data-id="${o.id}">✕</button></div>`).join(''):'<div class="empty">No orders or holds.</div>';
+ renderStk()
+}
+const IMX_RULES={n:'Anywhere',must:'Must be in',first:'Show first',last:'Show last',at:'At a set time'};
+const imxT=m=>String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0');
+const imxAdd=(iso,n)=>{const d=new Date(iso+'T12:00:00');d.setDate(d.getDate()+n);return new Date(d-d.getTimezoneOffset()*60000).toISOString().slice(0,10)};
+function imxHours(iso){
+ const dow=new Date(iso+'T12:00:00').getDay();
+ try{if(typeof MSCH!=='undefined'&&MSCH){const hol=(MSCH.holidays||[]).find(x=>x.date===iso);
+  if(hol)return hol.closed?{closed:true,why:hol.label||'Closed'}:{open:hol.open,close:hol.close,why:hol.label||''};
+  const w=MSCH.weekly||{},r=dow===1?w.mon:(dow>=2&&dow<=5)?w.tuefri:w.satsun;
+  if(r)return r.closed?{closed:true,why:'Closed'}:{open:r.open,close:r.close,why:''}}}catch(e){}
+ const h=S.hrs||{wd:[600,960],we:[600,1020]},r=([0,6].includes(dow)?h.we:h.wd)||[600,960];return {open:r[0],close:r[1],why:''}}
+function imxPlan(films,h,gap,vr){
+ const prob=[];if(!h||h.closed)return {shows:[],prob:[],closed:true,why:(h&&h.why)||'Closed'};
+ const op=h.open,cl=h.close,g=Math.max(0,+gap||0),fx=[],oth=[],must=[];let first=null,last=null;
+ const dur=f=>Math.max(5,+f.dur||40);
+ (films||[]).forEach(f=>{if(f.rule==='first'&&!first)first=f;else if(f.rule==='last'&&!last)last=f;else if(f.rule==='at'&&f.at)fx.push({f,st:t2m(f.at)});else if(f.rule==='must')must.push(f);else oth.push(f)});
+ if(first)fx.push({f:first,st:op});
+ if(last)fx.push({f:last,st:Math.floor((cl-dur(last))/5)*5});
+ fx.sort((a,b)=>a.st-b.st);
+ fx.forEach((x,i)=>{const e=x.st+dur(x.f);
+  if(x.st<op||e>cl)prob.push(x.f.title+' at '+m12(x.st)+' does not fit in the opening hours ('+m12(op)+' to '+m12(cl)+').');
+  const p=fx[i-1];if(p&&x.st<p.st+dur(p.f)+g)prob.push(x.f.title+' and '+p.f.title+' are too close together.')});
+ const rot=(a,n)=>a.length?a.slice(n%a.length).concat(a.slice(0,n%a.length)):a;
+ const q=rot(must,vr||0).concat(rot(oth,vr||0));let ptr=0;const out=[];
+ const fill=(a,b)=>{a=Math.ceil(a/5)*5;
+  while(q.length){let pick=-1;for(let k=0;k<q.length;k++){const j=(ptr+k)%q.length;if(a+dur(q[j])<=b){pick=j;break}}
+   if(pick<0)break;const f=q[pick];out.push({id:f.id,title:f.title,start:imxT(a),dur:dur(f)});a+=dur(f)+g;ptr=pick+1}};
+ let cur=op;
+ fx.forEach(x=>{fill(cur,x.st-g);out.push({id:x.f.id,title:x.f.title,start:imxT(x.st),dur:dur(x.f)});cur=Math.max(cur,x.st+dur(x.f)+g)});
+ fill(cur,cl);
+ out.sort((a,b)=>t2m(a.start)-t2m(b.start));
+ must.forEach(f=>{if(!out.some(o=>o.id===f.id))prob.push(f.title+' is marked "Must be in" but did not fit.')});
+ if(!out.length&&(films||[]).length)prob.push('No film fits in the opening hours.');
+ return {shows:out,prob,closed:false,why:h.why||''}}
+function imxTitlesFill(){const dl=$('imxTitles');if(!dl)return;const m={};try{const d=(MSCS&&MSCS.days)||{};Object.keys(d).forEach(k=>(d[k]||[]).forEach(r=>{if(r.venue==='IMAX'&&r.title)m[r.title]=r.dur}))}catch(e){}
+ imxKnown=m;dl.innerHTML=Object.keys(m).map(t=>'<option value="'+esc(t)+'"></option>').join('')}
+var imxKnown={};
+function renderImx(){
+ const I=S.imax,el=$('imxFilms');if(!el)return;
+ if(!I.week){const d=new Date();let n=(8-d.getDay())%7||7;I.week=imxAdd(todayISO(),n)}
+ if(document.activeElement!==$('imxWeek'))$('imxWeek').value=I.week;if(document.activeElement!==$('imxGap'))$('imxGap').value=I.gap;
+ el.innerHTML=I.films.length?I.films.map(f=>`<div class="item"><div class="tt"><b>${esc(f.title)}</b> <span class="badge">${esc(IMX_RULES[f.rule]||'Anywhere')}${f.rule==='at'&&f.at?' '+esc(m12(t2m(f.at))):''}</span><div class="small">${f.dur} min</div></div><button class="x" data-a="imxD" data-id="${f.id}">✕</button></div>`).join(''):'<div class="empty">No films yet. Add the films that are playing.</div>';
+ const days=Object.keys(I.plans).filter(d=>d>=I.week&&d<=imxAdd(I.week,6)).sort(),today=todayISO();
+ $('imxOut').innerHTML=days.map(d=>{const p=I.plans[d],lbl=new Date(d+'T12:00:00').toLocaleDateString([],{weekday:'long',month:'short',day:'numeric'});
+  return `<div class="item" style="display:block;margin-top:.5rem"><div class="row" style="justify-content:space-between"><b>${esc(lbl)}</b><span>${p.closed?'<span class="small">'+esc(p.why||'Closed')+'</span>':`<button class="btn sm alt" data-a="imxAnother" data-d="${d}">Make another</button>`}${d===today&&!p.closed&&p.shows.length?` <button class="btn sm" data-a="imxUse" data-d="${d}">Use for my day</button>`:''}</span></div>${p.closed?'':(p.shows.length?p.shows.map(x=>`<div>${esc(m12(t2m(x.start)))} &bull; ${esc(x.title)} <span class="small">(${x.dur} min)</span></div>`).join(''):'<div class="small">No shows.</div>')}${(p.prob||[]).map(t=>'<div class="small" style="color:#a3153f">&#9888; '+esc(t)+'</div>').join('')}</div>`}).join('')}
+function imxRun(d,keep){const I=S.imax,h=imxHours(d);I.plans[d]=imxPlan(I.films,h,I.gap,(I.vr[d]||0))}
+const stkLow=r=>r.qty<=r.pt;
+function renderStk(){
+ const sel=$('skVen');if(!sel)return;const cur=sel.value;
+ sel.innerHTML='<option value="">No vendor</option>'+S.vendors.map(x=>`<option value="${x.id}">${esc(x.name)}</option>`).join('');
+ if(S.vendors.some(x=>x.id===cur))sel.value=cur;
+ const low=S.stock.filter(stkLow).length;
+ $('stkSum').textContent=S.stock.length?(low?low+' of '+S.stock.length+' items are low.':'No items are low.'):'';
+ const rows=[...S.stock].sort((a,b)=>(stkLow(b)-stkLow(a))||String(a.item).localeCompare(String(b.item)));
+ $('stkList').innerHTML=rows.length?rows.map(r=>{const vn=S.vendors.find(x=>x.id===r.ven),lw=stkLow(r),fl=S.restock.some(q=>q.status!=='Restocked'&&String(q.item).toLowerCase()===String(r.item).toLowerCase());
+  return `<div class="item"><div class="tt"><b>${esc(r.item)}</b> ${lw?'<span class="badge" style="background:#ffe3ec;color:#a3153f">Low</span>':''}<div class="small">reorder at ${r.pt}${vn?' &bull; '+esc(vn.name)+(vn.phone?' <a href="tel:'+esc(String(vn.phone).replace(/[^0-9+]/g,''))+'">Call</a>':''):''}</div><div class="row" style="margin:.4rem 0 0;gap:.4rem;align-items:center"><label class="small" for="skq-${r.id}">On hand</label><input type="number" id="skq-${r.id}" min="0" step="1" inputmode="numeric" value="${esc(String(r.qty))}" style="width:5.5rem"><button class="pill" data-a="skCount" data-id="${r.id}">Save count</button></div>${lw&&!fl?'<button class="pill mgr" style="margin-top:.4rem" data-a="skFlag" data-id="'+r.id+'">+ Add to restock queue</button>':''}${lw&&fl?'<div class="small">In the restock queue</div>':''}</div><button class="pill mgr" data-a="skEd" data-id="${r.id}">Edit</button><button class="x mgr" data-a="skD" data-id="${r.id}">✕</button></div>`}).join(''):'<div class="empty">No items yet. A manager can add one above.</div>';
+ $('venList').innerHTML=S.vendors.length?S.vendors.map(x=>`<div class="item"><div class="tt"><b>${esc(x.name)}</b><div class="small">${x.phone?'<a href="tel:'+esc(String(x.phone).replace(/[^0-9+]/g,''))+'">'+esc(x.phone)+'</a>':'No phone'}${x.note?' &bull; '+esc(x.note):''}</div></div><button class="x mgr" data-a="vnD" data-id="${x.id}">✕</button></div>`).join(''):'<div class="empty">No vendors yet.</div>'
 }
 function renderMod(){
  renderQuick();renderHint();$('modName').value=S.mod.name||'';$('modRadio').value=S.mod.radio||'';$('modHand').value=S.mod.hand||'';renderLog()
@@ -1974,6 +2055,18 @@ function act(a,el){const id=el.dataset.id,v=el.dataset.v,k=el.dataset.k;if(GUARD
  case'lsAll':lsAdd(LS.low.map((x,i)=>i));break;
  case'rsS':find(S.restock,id).status=v;renderStock();renderDyn();break;
  case'rsD':del(S.restock,id);renderStock();renderDyn();break;
+ case'skD':del(S.stock,id);renderStock();break;
+ case'imxD':del(S.imax.films,id);renderImx();break;
+ case'imxMake':{const I=S.imax;if(!I.films.length){toast('Add at least one film first');break}const w=$('imxWeek').value,g=Math.round(parseFloat($('imxGap').value));if(!/^\d{4}-\d{2}-\d{2}$/.test(w)){toast('Pick the first day of the week');break}I.week=w;I.gap=isFinite(g)&&g>=0&&g<=120?g:20;I.vr={};for(let i=0;i<7;i++)imxRun(imxAdd(w,i));const ks=Object.keys(I.plans).sort();while(ks.length>28)delete I.plans[ks.shift()];renderImx();toast('The week is ready');break}
+ case'imxAnother':{const d=el.dataset.d,I=S.imax,b=JSON.stringify((I.plans[d]||{}).shows),v0=I.vr[d]||0;let ch=false;for(let k=1;k<=8&&!ch;k++){I.vr[d]=v0+k;imxRun(d);ch=JSON.stringify(I.plans[d].shows)!==b}if(!ch){I.vr[d]=v0;imxRun(d);toast('No other order works with these rules')}renderImx();break}
+ case'imxUse':{const d=el.dataset.d,p=S.imax.plans[d];if(!p||d!==todayISO()||!p.shows.length)break;const hasI=S.shows.some(x=>x.venue==='IMAX'&&String(x.title||'').indexOf(EX)!==0);
+  if(hasI&&!el.dataset.arm){el.dataset.arm='1';el.textContent='Tap again to replace today\'s IMAX shows';setTimeout(()=>{el.dataset.arm='';el.textContent='Use for my day'},3500);return}
+  el.dataset.arm='';S.shows=S.shows.filter(x=>x.venue!=='IMAX').concat(p.shows.map(x=>({id:uid(),title:x.title,venue:'IMAX',start:x.start,dur:x.dur,tip:''})));S.showsSrc='planned';save();renderShows();renderDyn();toast('Today\'s IMAX shows are set ('+p.shows.length+')');break}
+ case'skCount':{const r=find(S.stock,id),i=$('skq-'+id);if(!r||!i)break;const q=Math.round(parseFloat(i.value));if(!isFinite(q)||q<0){toast('Type a number, 0 or more');break}r.qty=q;renderStock();toast('Count saved');break}
+ case'vnD':del(S.vendors,id);S.stock.forEach(r=>{if(r.ven===id)r.ven=''});renderStock();break;
+ case'skEd':{const r=find(S.stock,id);if(!r)break;$('skName').value=r.item;$('skQty').value=r.qty;$('skPt').value=r.pt;renderStk();$('skVen').value=S.vendors.some(x=>x.id===r.ven)?r.ven:'';popForm($('skName').closest('form'));toast('Change the numbers, then tap Save item');break}
+ case'skFlag':{const r=find(S.stock,id);if(!r)break;const c=lsFind(r.item)||{};S.restock.unshift({id:uid(),item:r.item,cat:c.cat||$('rCat').value,sku:r.sku||c.sku||'',qty:r.qty,status:'Need on Floor'});renderStock();renderDyn();toast('Added to the restock queue');break}
+ case'lsCounts':{const m=new Map((LS.all||[]).map(x=>[x.nm.toLowerCase(),x.q]));let n=0;S.stock.forEach(r=>{const q=m.get(String(r.item).toLowerCase());if(q!=null&&isFinite(q)){r.qty=Math.max(0,Math.round(q));n++}});renderStock();toast(n?n+' count'+(n===1?'':'s')+' updated':'None of your stock items were in that file');break}
  case'orN':{const o=find(S.orders,id);const st=o.type==='Ship Order'?['Paid - Needs Packing','Packed','Shipped']:['Holding at Register 1','Picked Up'];o.status=st[(st.indexOf(o.status)+1)%st.length];renderStock();break}
  case'orD':del(S.orders,id);renderStock();renderDyn();break;
  case'acc':$(v).classList.toggle('open');break;
@@ -2102,7 +2195,7 @@ async function checkTeamLink(){const h=location.hash;if(h.indexOf('#team=')!==0)
 window.addEventListener('hashchange',checkTeamLink);
 /* pop-out: a card or an add-form moves into one shared sheet when opened and goes back when closed. Live players are left where they are, because moving them would stop the music. */
 const PCARDS=[['teamCard','',''],['alarmCard','','#alarmCount'],['brkCard','#brkBox',''],['mscEv','',''],['mpCard','','']];
-const PFORMS={note:'Pin a note',staff:'Add a person',live:'Add a floor task',show:'Add a showtime',task:'Add a store task',restock:'Add a restock item',order:'Log a phone order',modtask:'Add a sweep',log:'Write a log entry',mile:'Add a schedule step',evtask:'Add a setup task',track:'Add a clean song',doc:'Add a document link',contact:'Add a number',group:'Add a group',wrist:'Add a wristband',closeadd:'Add a closing step',walkadd:'Add a walkthrough step',sop:'Build a procedure'};
+const PFORMS={note:'Pin a note',staff:'Add a person',live:'Add a floor task',show:'Add a showtime',task:'Add a store task',restock:'Add a restock item',imf:'Add a film',stk:'Save a stock item',ven:'Add a vendor',order:'Log a phone order',modtask:'Add a sweep',log:'Write a log entry',mile:'Add a schedule step',evtask:'Add a setup task',track:'Add a clean song',doc:'Add a document link',contact:'Add a number',group:'Add a group',wrist:'Add a wristband',closeadd:'Add a closing step',walkadd:'Add a walkthrough step',sop:'Build a procedure'};
 const POP={el:null,home:null,par:null,btn:null,sec:null};
 const PSYNC=[],ALOPEN={};
 function popLabel(c){const h=c.querySelector('h2');if(!h)return c.id;const x=h.cloneNode(true);x.querySelectorAll('.qh,.badge,button').forEach(n=>n.remove());return x.textContent.trim()}
@@ -2195,6 +2288,9 @@ document.addEventListener('submit',e=>{e.preventDefault();const f=e.target.datas
  case'show':S.shows.push({id:uid(),title:v('shTitle'),venue:$('shVenue').value,start:$('shStart').value,dur:+$('shDur').value||40,tip:v('shTip')});renderShows();renderDyn();break;
  case'task':S.tasks.push({id:uid(),text:v('tText'),phase:$('tPhase').value,done:false});renderTasks();renderDyn();break;
  case'restock':S.restock.unshift({id:uid(),item:v('rItem'),cat:$('rCat').value,sku:(lsFind(v('rItem'))||{}).sku||'',status:'Need on Floor'});renderStock();renderDyn();break;
+ case'stk':{const q=Math.round(parseFloat($('skQty').value)),p=Math.round(parseFloat($('skPt').value));if(!isFinite(q)||!isFinite(p)||q<0||p<0){toast('Type the numbers, 0 or more');return}const nm=v('skName'),ex=S.stock.find(x=>String(x.item).toLowerCase()===nm.toLowerCase());if(ex){ex.qty=q;ex.pt=p;ex.ven=$('skVen').value}else{if(S.stock.length>=500){toast('The list is full (500 items)');return}S.stock.unshift({id:uid(),item:nm.slice(0,80),sku:(lsFind(nm)||{}).sku||'',qty:q,pt:p,ven:$('skVen').value})}renderStock();toast('Saved');break}
+ case'imf':{const dur=Math.round(parseFloat($('imDur').value)),rule=$('imRule').value,at=$('imAt').value,nm=v('imTitle');if(!isFinite(dur)||dur<5||dur>180){toast('Runtime must be 5 to 180 minutes');return}if(rule==='at'&&!at){toast('Pick the set time');return}const ex=S.imax.films.find(x=>x.title.toLowerCase()===nm.toLowerCase());if(ex){ex.dur=dur;ex.rule=rule;ex.at=rule==='at'?at:''}else{if(S.imax.films.length>=30){toast('The list is full (30 films)');return}S.imax.films.push({id:uid(),title:nm.slice(0,80),dur,rule,at:rule==='at'?at:''})}renderImx();break}
+ case'ven':if(S.vendors.length>=60){toast('The list is full (60 vendors)');return}S.vendors.push({id:uid(),name:v('vnName').slice(0,60),phone:v('vnPhone').slice(0,30),note:v('vnNote').slice(0,100)});renderStk();break;
  case'order':{const ty=$('oType').value;S.orders.unshift({id:uid(),guest:v('oGuest'),phone:v('oPhone'),items:v('oItems'),type:ty,status:ty==='Ship Order'?'Paid - Needs Packing':'Holding at Register 1'});renderStock();renderDyn();break}
  case'modtask':S.mod.walk.push({id:uid(),text:v('mText'),done:false});renderTasks();break;
  case'log':{const d=new Date();S.mod.log.push({id:uid(),time:d.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'}),place:v('gPlace'),type:$('gType').value,text:v('gText'),status:'Open'});renderLog();break}
@@ -2248,6 +2344,9 @@ const TOUR=/*TOUR*/[
 {t:'today',k:'e',since:1,h:"That is it!",x:"Tap Menu, then Help, any time to replay this tour, hear about one tab, or see what is new. A small ? next to a card title tells you what that card is for."}
 ]/*ENDTOUR*/;
 const HINTS=/*HINTS*/[
+['IMAX Week Planner',"Add the films that are playing and say where each one goes. Then pick the first day of the week and tap Make the week. Tap Make another on a day to see a different order. On the day itself, tap Use for my day."],
+['Stock Counts',"Type how many of an item you have and the number to reorder at. Items at or below that number show Low. Anyone can change the On hand number and tap Save count. Tap Add to restock queue to flag a Low item. Counts are typed by hand, or tap Update my Stock Counts after picking a Lightspeed file above."],
+['Vendors',"A short list of who you order from, with a phone number. Pick a vendor on each stock item and tap Call to reach them."],
 ['Past Days',"Shows how many steps were done on earlier days. Tap Open on a day for details. Tap Save today's close-out to also keep today's till total and safe drop."],
 ['When crowds come in',"Shows when IMAX, Planetarium and school groups let out toward the store, so you can see a rush coming."],
 ['Notes',"Write notes for yourself or the team. They are saved on this device."],
@@ -2431,14 +2530,14 @@ function lsLoad(rows){
  $('lsOpts').innerHTML=`<div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(9rem,1fr));gap:.5rem;margin-top:.5rem"><div><label class="l">Item name</label><select id="lsName">${opt(nc)}</select></div><div><label class="l">Quantity</label><select id="lsQty">${opt(qc)}</select></div><div><label class="l">Category</label><select id="lsCatC">${opt(cc,1)}</select></div><div><label class="l">SKU / code</label><select id="lsSku">${opt(kc,1)}</select></div><div><label class="l">Low at or below</label><input type="number" id="lsTh" value="5" min="0" step="1"></div></div>`;
  lsShow()}
 function lsShow(){
- const nc=+$('lsName').value,qc=+$('lsQty').value,cc=+$('lsCatC').value,kc=+$('lsSku').value,th=parseFloat($('lsTh').value),t=isNaN(th)?5:th,items=[],cat=[];let bad=0;
+ const nc=+$('lsName').value,qc=+$('lsQty').value,cc=+$('lsCatC').value,kc=+$('lsSku').value,th=parseFloat($('lsTh').value),t=isNaN(th)?5:th,items=[],cat=[],all=[];let bad=0;
  LS.rows.forEach(r=>{const nm=String(r[nc]||'').trim();if(!nm)return;
   const o={nm:nm.slice(0,80),cat:cc>=0?lsMapCat(r[cc]):'Other',sku:kc>=0?String(r[kc]||'').trim().slice(0,40):''};
   if(cat.length<3000)cat.push({nm:o.nm,cat:o.cat,sku:o.sku});
-  const q=parseFloat(String(r[qc]||'').replace(/,/g,'').trim());if(isNaN(q)){bad++;return}o.q=q;if(q<=t)items.push(o)});
- items.sort((a,b)=>a.q-b.q);LS.low=items;LS.cat=cat;
+  const q=parseFloat(String(r[qc]||'').replace(/,/g,'').trim());if(isNaN(q)){bad++;return}o.q=q;if(all.length<6000)all.push({nm:o.nm,q:q});if(q<=t)items.push(o)});
+ items.sort((a,b)=>a.q-b.q);LS.low=items;LS.cat=cat;LS.all=all;
  $('lsOut').innerHTML='<div class="small" style="margin:.5rem 0">'+LS.rows.length+' rows read. '+items.length+' at or below '+t+'.'+(bad?' '+bad+' rows had no quantity number and were skipped.':'')+' Check the columns above are the right ones.</div>'
-  +'<div class="row" style="margin:.4rem 0">'+(items.length?'<button class="btn sm" data-a="lsAll">+ Flag all shown</button>':'')+'<button class="btn sm alt" data-a="lsSave">Save all '+cat.length+' items as pick-lists</button></div>'
+  +'<div class="row" style="margin:.4rem 0">'+(items.length?'<button class="btn sm" data-a="lsAll">+ Flag all shown</button>':'')+(S.stock.length?'<button class="btn sm" data-a="lsCounts">Update my Stock Counts from this file</button>':'')+'<button class="btn sm alt" data-a="lsSave">Save all '+cat.length+' items as pick-lists</button></div>'
   +items.slice(0,100).map((x,i)=>`<div class="item"><div class="tt"><b>${esc(x.nm)}</b><div class="small">${esc(x.cat)}${x.sku?' &bull; SKU '+esc(x.sku):''} &bull; ${x.q} in stock</div></div><button class="btn sm" data-a="lsAdd" data-id="${i}">+ Flag</button></div>`).join('')
   +(items.length>100?'<div class="small">Showing the lowest 100.</div>':'')}
 function lsAdd(idx){let n=0;const have=new Set(S.restock.filter(r=>r.status!=='Restocked').map(r=>r.item.toLowerCase()));
@@ -2448,6 +2547,7 @@ function lsAdd(idx){let n=0;const have=new Set(S.restock.filter(r=>r.status!=='R
 $('lsFile').addEventListener('change',async e=>{const f=e.target.files[0];if(!f)return;
  if(f.size>20*1024*1024){toast('That file is too big (max 20 MB)');return}
  try{const rows=await lsRead(f);if(rows.length<2){toast('No rows found in that file');return}lsLoad(rows)}catch(err){toast('Could not read that file')}});
+$('imTitle').addEventListener('focus',imxTitlesFill);$('imTitle').addEventListener('input',()=>{const k=imxKnown[$('imTitle').value];if(k)$('imDur').value=k});
 $('rItem').addEventListener('input',()=>{const c=lsFind($('rItem').value);if(c&&c.cat&&[...$('rCat').options].some(o=>o.value===c.cat))$('rCat').value=c.cat});
 $('lsOpts').addEventListener('change',lsShow);$('lsOpts').addEventListener('input',lsShow);
 $('impFile').addEventListener('change',async e=>{
