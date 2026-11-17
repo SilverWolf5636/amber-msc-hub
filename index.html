@@ -1090,7 +1090,8 @@ function renderShowUI(){
  slideSync()
 }
 /* swipe between pages */
-function visTabs(){return TABS.filter(t=>!(S.role==='floor'&&t[0]==='mod')&&!(t[0]==='stock'&&!S.invOn))}
+const FLOORHIDE=['mod','stock','events','docs','music'];
+function visTabs(){return TABS.filter(t=>!(S.role==='floor'&&FLOORHIDE.includes(t[0]))&&!(t[0]==='stock'&&!S.invOn))}
 function swipePage(dir){const vt=visTabs(),i=vt.findIndex(t=>t[0]===S.tab);if(i<0||vt.length<2)return;const n=vt[(i+dir+vt.length)%vt.length];S.tab=n[0];save();renderTabs();scrollTo(0,0);tourBanner();const p=$('p-'+S.tab);if(p&&!REDUCE()){p.classList.remove('sw-n','sw-p');void p.offsetWidth;p.classList.add(dir>0?'sw-n':'sw-p');p.addEventListener('animationend',()=>p.classList.remove('sw-n','sw-p'),{once:true})}}
 function swipeBlocked(el){if(!el||!el.closest)return true;if(el.closest('input,select,textarea,video,iframe,[contenteditable],[data-drag],.modal,#menuPanel,#tourBar,#pgBand'))return true;for(let n=el;n&&n!==document.body&&n!==document.documentElement;n=n.parentElement){if(n.scrollWidth>n.clientWidth+4){const o=getComputedStyle(n).overflowX;if(o==='auto'||o==='scroll')return true}}return false}
 (function(){let sx=0,sy=0,st=0,ok=false;
@@ -1238,6 +1239,7 @@ function menuSet(o){document.body.classList.toggle('menu-open',o);$('menuBtn').s
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&document.body.classList.contains('menu-open'))menuSet(false)});
 function renderTabs(){
  if(!S.invOn&&S.tab==='stock')S.tab='today';{const kk=$('kStock'),kp=kk&&kk.closest('.kpi');if(kp)kp.style.display=S.invOn?'':'none'}
+ if(S.role==='floor'&&FLOORHIDE.includes(S.tab))S.tab='today';
  const vt=visTabs();
  {const row=(t,big)=>`<button class="tab ${big?'bigtab ':''}${S.tab===t[0]?'on':''}" data-a="tab" data-v="${t[0]}"${S.tab===t[0]?' aria-current="page"':''}><span class="mr-ico" aria-hidden="true">${t[1]}</span><span class="mr-t">${t[2]}</span>${S.tab===t[0]?'<span class="mr-ok" aria-hidden="true">✓</span>':''}</button>`;
   $('tabs').innerHTML=vt.filter(t=>BIGTABS.includes(t[0])).map(t=>row(t,1)).join('')+'<div class="mp-sub">Everything else</div>'+vt.filter(t=>!BIGTABS.includes(t[0])).map(t=>row(t,0)).join('')}
