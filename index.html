@@ -649,6 +649,9 @@ body .modal .sheet>.hd:first-child>h2{margin-top:0;padding-right:5rem}
      <div class="grid" style="grid-template-columns:1fr 1fr 1fr;gap:.5rem"><input type="number" id="skQty" placeholder="On hand" min="0" step="1" inputmode="numeric" required><input type="number" id="skPt" placeholder="Reorder at" min="0" step="1" inputmode="numeric" required><select id="skVen" aria-label="Vendor"></select></div>
      <button class="btn" type="submit">Save item</button></form>
     <div id="stkList"></div></div>
+  <div class="card c2 mgr" id="lxCard"><div class="hd"><div><h2>&#128260; Send counts back to Lightspeed</h2><div class="sub">Pick a fresh Lightspeed product file (Catalog, Products, Export list). The app shows what is different from your Stock Counts. You tick what to send and get a file to import in Lightspeed. Read on this device only.</div></div></div>
+    <div class="row"><input type="file" id="lxFile" accept=".csv,.xlsx,.txt" style="flex:1"></div>
+    <div id="lxOut"></div></div>
   <div class="card c2" id="venCard"><div class="hd"><div><h2>&#128222; Vendors</h2><div class="sub">Who you order from. Pick one on each stock item.</div></div></div>
     <form class="form mgr" data-f="ven"><div class="grid" style="grid-template-columns:1fr 1fr;gap:.5rem"><input type="text" id="vnName" placeholder="Vendor name" required><input type="tel" id="vnPhone" placeholder="Phone"></div><input type="text" id="vnNote" placeholder="Note (order day, contact name...)"><button class="btn" type="submit">+ Add vendor</button></form>
     <div id="venList"></div></div>
@@ -976,6 +979,7 @@ body .modal .sheet>.hd:first-child>h2{margin-top:0;padding-right:5rem}
    <p><b>Import a document:</b> on the Docs tab, pick a Word, Excel, PDF, CSV or text file (or paste text). Tap "Auto-sort it for me" and the app guesses where each part belongs: showtimes, groups, contacts or steps. You see a preview first. Nothing is saved until you confirm.</p>
    <p><b>Send app link:</b> on the Staff tab, tap Send app link under a person who has a cell number. It opens a text with a link. When they open it, their app is named for them (for example Dave's Science Store app).</p>
    <p><b>Rename the app:</b> tap the name at the very top, type your own name, and tap Save. It is saved on this phone only.</p>
+   <p><b>Send counts to Lightspeed:</b> on Stock & Orders, use the Send counts back card. Pick a fresh Lightspeed product file, tick the counts to send, and tap Make the Lightspeed file. Then import that file in Lightspeed.</p>
    <p><b>Small header on phones:</b> the "Store info" button shows or hides the phone chips and hours so your screen has more room.</p>
    <p><b>Museum showtimes:</b> a helper reads the public IMAX and Planetarium schedule once a day. Today's shows fill in by themselves, unless you made your own list. To use another day, pick it on the Showtimes tab and tap "Use these shows for my day". Your own shows are replaced, so the app asks you to tap twice.</p>
    <p><b>Museum hours:</b> a helper refreshes them once a day. The card shows when it last updated.</p></div></div>
@@ -2148,7 +2152,7 @@ function act(a,el){const id=el.dataset.id,v=el.dataset.v,k=el.dataset.k;if(GUARD
  case'edRs':{const r=find(S.restock,id);if(!r)break;edStart('restock',id,()=>{$('rItem').value=String(r.item||'').replace(EX,'');$('rCat').value=r.cat});break}
  case'skEd':{const r=find(S.stock,id);if(!r)break;$('skName').value=r.item;$('skQty').value=r.qty;$('skPt').value=r.pt;renderStk();$('skVen').value=S.vendors.some(x=>x.id===r.ven)?r.ven:'';popForm($('skName').closest('form'));toast('Change the numbers, then tap Save item');break}
  case'skFlag':{const r=find(S.stock,id);if(!r)break;const c=lsFind(r.item)||{};S.restock.unshift({id:uid(),item:r.item,cat:c.cat||$('rCat').value,sku:r.sku||c.sku||'',qty:r.qty,status:'Need on Floor'});renderStock();renderDyn();toast('Added to the restock queue');break}
- case'lsCounts':{const m=new Map((LS.all||[]).map(x=>[x.nm.toLowerCase(),x.q]));let n=0;S.stock.forEach(r=>{const q=m.get(String(r.item).toLowerCase());if(q!=null&&isFinite(q)){r.qty=Math.max(0,Math.round(q));n++}});renderStock();toast(n?n+' count'+(n===1?'':'s')+' updated':'None of your stock items were in that file');break}
+ case'lsCounts':{const bs=new Map(),bn=new Map();(LS.all||[]).forEach(x=>{if(x.sku)bs.set(String(x.sku).toLowerCase(),x);const k=x.nm.toLowerCase();bn.set(k,bn.has(k)?null:x)});let n=0,sk=0;S.stock.forEach(r=>{const ks=String(r.sku||'').toLowerCase();let x=ks&&bs.has(ks)?bs.get(ks):bn.get(String(r.item).toLowerCase());if(x===null){sk++;return}if(x&&isFinite(x.q)){r.qty=Math.max(0,Math.round(x.q));if(!r.sku&&x.sku)r.sku=String(x.sku).slice(0,40);n++}});renderStock();toast((n?n+' count'+(n===1?'':'s')+' updated':'None of your stock items were in that file')+(sk?'. '+sk+' skipped: more than one product has that name':''));break}
  case'orN':{const o=find(S.orders,id);const st=o.type==='Ship Order'?['Paid - Needs Packing','Packed','Shipped']:['Holding at Register 1','Picked Up'];o.status=st[(st.indexOf(o.status)+1)%st.length];renderStock();break}
  case'orD':del(S.orders,id);renderStock();renderDyn();break;
  case'acc':$(v).classList.toggle('open');break;
@@ -2419,7 +2423,7 @@ const TOUR=/*TOUR*/[
 {t:'tasks',since:1,h:"Checklists & Register",x:"Store checklists, a register and phone order calculator, and a till and safe drop counter. Tap a box to tick a job off."},
 {t:'lists',since:1,h:"Closing & Walks",x:"Your closing checklist and the walkthrough checklists for the floor."},
 {t:'sop',since:1,h:"How-to steps",x:"Your written store how-to steps. Use Build a How-to to add your own."},
-{t:'stock',since:1,h:"Stock & Orders",x:"Keep a restock list and log phone orders. Import a stock file from Lightspeed and the app fills in the items for you."},
+{t:'stock',since:1,h:"Stock & Orders",x:"Keep a restock list and log phone orders. Import a stock file from Lightspeed and the app fills in the items for you. Send your counts back to Lightspeed with a file when you are ready."},
 {t:'mod',since:1,h:"Who's in charge today",x:"Building walks, radio channels, and a shift log for whoever is in charge today."},
 {t:'events',since:1,h:"Events",x:"Event details, the event schedule, and setup and breakdown."},
 {t:'music',since:1,h:"Music",x:"A family-friendly store player. Save your playlists as buttons so one tap loads them. Import a playlist file to fill the approved list, and send your music to another phone."},
@@ -2439,6 +2443,7 @@ const TOUR=/*TOUR*/[
 const HINTS=/*HINTS*/[
 ['IMAX Week Planner',"Add the films that are playing and say where each one goes. Then pick the first day of the week and tap Make the week. Tap Make another on a day to see a different order. On the day itself, tap Use for my day. Pick a planning day at the bottom and Today will remind you."],
 ['Stock Counts',"Type how many of an item you have and the number to reorder at. Items at or below that number show Low. Anyone can change the On hand number and tap Save count. Tap Add to restock queue to flag a Low item. Counts are typed by hand, or tap Update my Stock Counts after picking a Lightspeed file above."],
+['Send counts back to Lightspeed',"Pick a fresh product file from Lightspeed (Catalog, Products, Export list). The app lists each Stock Count that is different from Lightspeed. Untick any you do not want to send, then tap Make the Lightspeed file. In Lightspeed, go to Catalog, Products, Import and pick that file. The file only has the items you ticked."],
 ['Vendors',"A short list of who you order from, with a phone number. Pick a vendor on each stock item and tap Call to reach them."],
 ['Past Days',"Shows how many steps were done on earlier days. Tap Open on a day for details. Tap Save today's close-out to also keep today's till total and safe drop."],
 ['When crowds come in',"Shows when IMAX, Planetarium and school groups let out toward the store, so you can see a rush coming."],
@@ -2607,7 +2612,7 @@ async function lsRead(file){const n=file.name.toLowerCase();
  return csvRows(await file.text())}
 const LSCATS=[['Dino & Fossils',/dino|fossil|rock|mineral|gem/i],['Space & Planetarium',/space|astro|planet|rocket|moon|star|nasa/i],['IMAX Feature Tie-In',/imax|film|movie/i],['Plush & Apparel',/plush|stuffed|apparel|shirt|hoodie|hat|cloth|sock|toy/i],['STEM & Chemistry Kits',/kit|stem|chem|science|experiment|lab|magnet|crystal|puzzle|game/i]];
 function lsMapCat(txt){txt=String(txt||'').trim();if(!txt)return 'Other';const m=LSCATS.find(c=>c[1].test(txt));return m?m[0]:txt.slice(0,40)}
-function lsFind(nm){nm=String(nm||'').trim().toLowerCase();return nm?S.catalog.find(x=>x.nm.toLowerCase()===nm):null}
+function lsFind(nm){nm=String(nm||'').trim().toLowerCase();if(!nm)return null;const m=S.catalog.filter(x=>x.nm.toLowerCase()===nm);return m.length===1?m[0]:(m.length>1?{nm:m[0].nm,cat:m[0].cat,sku:''}:null)}
 function lsLists(){const names=new Set();S.catalog.forEach(x=>names.add(x.nm));S.restock.forEach(r=>names.add(r.item.replace(EX,'')));
  const dl=$('itemList');if(dl)dl.innerHTML=[...names].slice(0,3000).map(n=>'<option value="'+esc(n)+'"></option>').join('');
  const c=$('lsCat');if(c)c.innerHTML=S.catalog.length?S.catalog.length+' items saved on this device from your last import. They show up as pick-lists in the forms below. <button class="btn sm alt" data-a="lsClear">Clear this list</button>':''}
@@ -2615,19 +2620,19 @@ function lsLoad(rows){
  const nameRe=/^(item|product|description|name|title)/i,qtyRe=/(on.?hand|qty|quantity|stock|inventory|count)/i,catRe=/(category|department|dept|^type|^group)/i,skuRe=/(sku|upc|barcode|ean|code|system id)/i;
  let hi=0;for(let i=0;i<Math.min(10,rows.length);i++){if(rows[i].filter(x=>String(x).trim()).length>=2&&rows[i].some(x=>nameRe.test(String(x).trim()))){hi=i;break}}
  LS.head=rows[hi].map(x=>String(x).trim());LS.rows=rows.slice(hi+1);
- let nc=LS.head.findIndex(h=>nameRe.test(h));if(nc<0)nc=0;
- let qc=LS.head.findIndex((h,i)=>i!==nc&&qtyRe.test(h));if(qc<0)qc=Math.min(1,LS.head.length-1);
+ let nc=LS.head.findIndex(h=>/^name$/i.test(h));if(nc<0)nc=LS.head.findIndex(h=>nameRe.test(h));if(nc<0)nc=0;
+ let qc=LS.head.findIndex((h,i)=>i!==nc&&/^inventory_/i.test(h));if(qc<0)qc=LS.head.findIndex((h,i)=>i!==nc&&qtyRe.test(h)&&!/composite|reorder|^min_|^max_|special/i.test(h));if(qc<0)qc=Math.min(1,LS.head.length-1);
  let cc=LS.head.findIndex((h,i)=>i!==nc&&i!==qc&&catRe.test(h));
- let kc=LS.head.findIndex((h,i)=>i!==nc&&i!==qc&&i!==cc&&skuRe.test(h));
+ let kc=LS.head.findIndex((h,i)=>i!==nc&&i!==qc&&i!==cc&&/^sku$/i.test(h));if(kc<0)kc=LS.head.findIndex((h,i)=>i!==nc&&i!==qc&&i!==cc&&skuRe.test(h));
  const opt=(sel,none)=>(none?`<option value="-1"${sel<0?' selected':''}>(none)</option>`:'')+LS.head.map((h,i)=>`<option value="${i}"${i===sel?' selected':''}>${esc(h||('Column '+(i+1)))}</option>`).join('');
  $('lsOpts').innerHTML=`<div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(9rem,1fr));gap:.5rem;margin-top:.5rem"><div><label class="l">Item name</label><select id="lsName">${opt(nc)}</select></div><div><label class="l">Quantity</label><select id="lsQty">${opt(qc)}</select></div><div><label class="l">Category</label><select id="lsCatC">${opt(cc,1)}</select></div><div><label class="l">SKU / code</label><select id="lsSku">${opt(kc,1)}</select></div><div><label class="l">Low at or below</label><input type="number" id="lsTh" value="5" min="0" step="1"></div></div>`;
  lsShow()}
 function lsShow(){
  const nc=+$('lsName').value,qc=+$('lsQty').value,cc=+$('lsCatC').value,kc=+$('lsSku').value,th=parseFloat($('lsTh').value),t=isNaN(th)?5:th,items=[],cat=[],all=[];let bad=0;
- LS.rows.forEach(r=>{const nm=String(r[nc]||'').trim();if(!nm)return;
+ LS.rows.forEach(r=>{const nm=lsFullName(LS.head,r,nc);if(!nm)return;
   const o={nm:nm.slice(0,80),cat:cc>=0?lsMapCat(r[cc]):'Other',sku:kc>=0?String(r[kc]||'').trim().slice(0,40):''};
   if(cat.length<3000)cat.push({nm:o.nm,cat:o.cat,sku:o.sku});
-  const q=parseFloat(String(r[qc]||'').replace(/,/g,'').trim());if(isNaN(q)){bad++;return}o.q=q;if(all.length<6000)all.push({nm:o.nm,q:q});if(q<=t)items.push(o)});
+  const q=parseFloat(String(r[qc]||'').replace(/,/g,'').trim());if(isNaN(q)){bad++;return}o.q=q;if(all.length<6000)all.push({nm:o.nm,q:q,sku:o.sku});if(q<=t)items.push(o)});
  items.sort((a,b)=>a.q-b.q);LS.low=items;LS.cat=cat;LS.all=all;
  $('lsOut').innerHTML='<div class="small" style="margin:.5rem 0">'+LS.rows.length+' rows read. '+items.length+' at or below '+t+'.'+(bad?' '+bad+' rows had no quantity number and were skipped.':'')+' Check the columns above are the right ones.</div>'
   +'<div class="row" style="margin:.4rem 0">'+(items.length?'<button class="btn sm" data-a="lsAll">+ Flag all shown</button>':'')+(S.stock.length?'<button class="btn sm" data-a="lsCounts">Update my Stock Counts from this file</button>':'')+'<button class="btn sm alt" data-a="lsSave">Save all '+cat.length+' items as pick-lists</button></div>'
@@ -2637,6 +2642,64 @@ function lsAdd(idx){let n=0;const have=new Set(S.restock.filter(r=>r.status!=='R
  idx.slice(0,100).forEach(i=>{const x=LS.low[i];if(!x||have.has(x.nm.toLowerCase()))return;have.add(x.nm.toLowerCase());S.restock.unshift({id:uid(),item:x.nm,cat:x.cat,sku:x.sku,qty:x.q,status:'Need on Floor'});n++});
  if(LS.cat&&LS.cat.length)S.catalog=LS.cat;
  save();renderStock();renderDyn();toast(n?n+' item'+(n===1?'':'s')+' flagged for restock':'Already flagged')}
+/* ---- Send counts back to Lightspeed (X-Series product file) ---- */
+function lsFullName(head,r,nc){const base=String(r[nc]||'').trim();if(!base)return '';const vv=[];head.forEach((h,i)=>{if(/^variant_option_(one|two|three)_value$/i.test(String(h).trim())){const x=String(r[i]||'').trim();if(x)vv.push(x)}});return (base+(vv.length?' ('+vv.join(', ')+')':'')).slice(0,80)}
+let LX={head:[],rows:[],ic:[],inv:-1,nc:-1,kc:-1,lines:[],same:0,miss:[],csv:''};
+function lxCsv(head,rows){const q=v=>{v=String(v==null?'':v);return /[",\r\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v};return [head].concat(rows).map(r=>r.map(q).join(',')).join('\r\n')+'\r\n'}
+async function lxRead(file){const n=file.name.toLowerCase();
+ if(/\.xlsx$/.test(n)){await loadLib('readxlsx');let r=await readXlsxFile(file);if(r&&r.length&&r[0]&&!Array.isArray(r[0])&&r[0].data)r=r[0].data;return r.map(row=>row.map(c=>c==null?'':(c instanceof Date?xlDate(c):String(c))))}
+ return csvRows(await file.text())}
+function lxLoad(rows,csvIn){
+ let hi=-1;for(let i=0;i<Math.min(10,rows.length);i++){const h=rows[i].map(x=>String(x).trim().toLowerCase());if(h.includes('sku')&&h.includes('name')&&h.some(x=>x.indexOf('inventory_')===0)){hi=i;break}}
+ if(hi<0)return {err:'This does not look like a Lightspeed product file. In Lightspeed, go to Catalog, Products, then Export list.'};
+ const head=rows[hi].map(x=>String(x)),H=head.map(x=>x.trim().toLowerCase()),body=rows.slice(hi+1).filter(r=>r.some(x=>String(x).trim()));
+ if(head.some(x=>x.indexOf('�')>=0)||body.some(r=>r.some(x=>String(x).indexOf('�')>=0)))return {err:'Some letters in this file are damaged (it was probably saved as CSV by Excel). Export it again from Lightspeed and pick that file, or pick the Excel (.xlsx) version.'};
+ if(body.some(r=>(csvIn&&r.length!==head.length)||(r.length>head.length&&r.slice(head.length).some(x=>String(x).trim()))))return {err:'The rows in this file do not line up with the column names. Export it again from Lightspeed and pick the new file.'};
+ LX.head=head;LX.rows=body;
+ LX.ic=H.map((h,i)=>h.indexOf('inventory_')===0?i:-1).filter(i=>i>=0);LX.inv=LX.ic[0];LX.nc=H.indexOf('name');LX.kc=H.indexOf('sku');
+ lxCompare();return {ok:1}}
+function lxSig(){return JSON.stringify(S.stock.map(x=>[x.id,x.sku,x.qty]))}
+function lxCompare(keep){
+ const prev=new Map();if(keep)LX.lines.forEach(x=>prev.set(x.ri,x.on));
+ const bySku=new Map(),skuN=new Map(),byName=new Map();
+ LX.rows.forEach((r,i)=>{const k=String(r[LX.kc]||'').trim().toLowerCase();if(k){skuN.set(k,(skuN.get(k)||0)+1);bySku.set(k,i)}const n=lsFullName(LX.head,r,LX.nc).toLowerCase();if(n)byName.set(n,byName.has(n)?-1:i)});
+ const cand=[],miss=[],bad=[];
+ S.stock.forEach(st=>{let ri=-1;const k=String(st.sku||'').trim().toLowerCase();
+  if(k){ri=(bySku.has(k)&&skuN.get(k)===1)?bySku.get(k):-1}else{const n=String(st.item||'').trim().toLowerCase();ri=byName.has(n)?byName.get(n):-1}
+  if(ri<0){miss.push(st.item);return}
+  const raw=String(st.qty==null?'':st.qty).trim(),nw=/^\d+(\.\d+)?$/.test(raw)?Math.round(+raw):NaN;
+  if(!isFinite(nw)||nw>100000){bad.push(st.item);return}
+  cand.push({ri,st,nw})});
+ const cnt=new Map();cand.forEach(c=>cnt.set(c.ri,(cnt.get(c.ri)||0)+1));
+ const lines=[];let same=0;
+ cand.forEach(c=>{if(cnt.get(c.ri)>1){miss.push(c.st.item);return}
+  const row=LX.rows[c.ri],old=parseFloat(String(row[LX.inv]||'').replace(/,/g,''));
+  if(isFinite(old)&&old===c.nw){same++;return}
+  lines.push({ri:c.ri,name:c.st.item,pname:lsFullName(LX.head,row,LX.nc),sku:String(row[LX.kc]||''),old:isFinite(old)?old:null,nw:c.nw,on:prev.has(c.ri)?prev.get(c.ri):true})});
+ LX.lines=lines;LX.same=same;LX.miss=miss;LX.bad=bad;LX.sig=lxSig()}
+function lxBtnText(){const n=LX.lines.filter(x=>x.on).length;return 'Make the Lightspeed file ('+n+' item'+(n===1?'':'s')+')'}
+function lxRender(err){const o=$('lxOut');if(!o)return;
+ if(err){o.innerHTML='<div class="small" style="margin:.5rem 0">'+esc(err)+'</div>';return}
+ o.innerHTML='<div class="small" style="margin:.5rem 0">'+(LX.file?esc(LX.file)+': ':'')+LX.rows.length+' products read. '+LX.lines.length+' of your Stock Counts differ from Lightspeed'+(LX.same?', '+LX.same+' already match':'')+(LX.miss.length?', '+LX.miss.length+' not found or unclear in this file (left out)':'')+(LX.bad.length?', '+LX.bad.length+' left out because the count is not a usable number':'')+'.</div>'
+ +(LX.ic.length>1?'<label class="l">Store</label><select data-lx="outlet">'+LX.ic.map(i=>`<option value="${i}"${i===LX.inv?' selected':''}>${esc(LX.head[i].trim().replace(/^inventory_/i,'').replace(/_/g,' '))}</option>`).join('')+'</select>':'')
+ +LX.lines.map((x,i)=>`<label class="item" style="display:flex;gap:.6rem;align-items:center;min-height:44px"><input type="checkbox" data-lx="tog" data-i="${i}"${x.on?' checked':''}><span class="tt"><b>${esc(x.name)}</b><span class="small" style="display:block">${x.pname&&x.pname.toLowerCase()!==String(x.name).trim().toLowerCase()?'Lightspeed product: '+esc(x.pname)+' &bull; ':''}${x.sku?'SKU '+esc(x.sku)+' &bull; ':''}Lightspeed ${x.old==null?'(none)':x.old} &rarr; your count ${x.nw}</span></span></label>`).join('')
+ +(LX.lines.length?'<div class="row" style="margin:.5rem 0"><button class="btn" type="button" data-lx="make">'+lxBtnText()+'</button></div><div class="small">Then in Lightspeed: Catalog, Products, Import. Pick the file. Test with ONE item first before sending many.</div>':'')
+ +(LX.miss.length?'<details class="small" style="margin-top:.4rem"><summary>Not found or unclear ('+LX.miss.length+')</summary>'+LX.miss.slice(0,50).map(n=>'<div>'+esc(n)+'</div>').join('')+'</details>':'')
+ +(LX.bad.length?'<details class="small" style="margin-top:.4rem"><summary>Count is not a usable number ('+LX.bad.length+')</summary>'+LX.bad.slice(0,50).map(n=>'<div>'+esc(n)+'</div>').join('')+'</details>':'')}
+function lxMake(){if(LX.sig!==lxSig()){lxCompare(true);lxRender();toast('Your Stock Counts changed. Check the list, then tap Make again.');return}
+ const pick=LX.lines.filter(x=>x.on);if(!pick.length){toast('Tick at least one item');return}
+ const out=pick.map(x=>{const r=LX.rows[x.ri].slice();while(r.length<LX.head.length)r.push('');r[LX.inv]=String(x.nw);return r});
+ LX.csv=lxCsv(LX.head,out);const d=new Date(),nm='lightspeed-update-'+d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')+'.csv';
+ try{const b=new Blob([LX.csv],{type:'text/csv;charset=utf-8'}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=nm;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(u);a.remove()},1500)}catch(e){toast('Could not save the file');return}
+ toast('File made: '+pick.length+' item'+(pick.length===1?'':'s')+' ('+nm+')')}
+$('lxFile').addEventListener('change',async e=>{const inp=e.target,f=inp.files[0];if(!f)return;
+ if(f.size>20*1024*1024){toast('That file is too big (max 20 MB)');return}
+ try{const r=lxLoad(await lxRead(f),!/\.xlsx$/i.test(f.name));LX.file=f.name;lxRender(r.err)}catch(err){toast('Could not read that file')}
+ try{inp.value=''}catch(_){}});
+$('lxOut').addEventListener('change',e=>{const t=e.target,k=t.dataset&&t.dataset.lx;
+ if(k==='tog'){const l=LX.lines[+t.dataset.i];if(l){l.on=t.checked;const b=$('lxOut').querySelector('[data-lx=make]');if(b)b.textContent=lxBtnText()}}
+ else if(k==='outlet'){LX.inv=+t.value;lxCompare();lxRender()}});
+$('lxOut').addEventListener('click',e=>{if(e.target.closest&&e.target.closest('[data-lx=make]'))lxMake()});
 $('lsFile').addEventListener('change',async e=>{const f=e.target.files[0];if(!f)return;
  if(f.size>20*1024*1024){toast('That file is too big (max 20 MB)');return}
  try{const rows=await lsRead(f);if(rows.length<2){toast('No rows found in that file');return}lsLoad(rows)}catch(err){toast('Could not read that file')}});
