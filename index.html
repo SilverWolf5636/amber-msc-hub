@@ -43,6 +43,7 @@ body[data-look=lasergreen]{--p:#15803d;--s:#052e16;--t:#4ade80;--ink:#06240f;--s
 body[data-look=deepspace]{--p:#1e293b;--s:#0e7490;--t:#22d3ee;--ink:#0b1220;--soft:#3b4a63;--muted:#74829a;--bg1:#eef2f7;--bg2:#e2e8f0;--bg3:#f6f9fc;--line:rgba(30,41,59,.25)}
 body[data-look=desert]{--p:#a16207;--s:#1e3a8a;--t:#fcd34d;--ink:#2a1a05;--soft:#6b5230;--muted:#a08a68;--bg1:#fbf3dc;--bg2:#f3e7c8;--bg3:#fdf9ec;--line:rgba(161,98,7,.25)}
 body[data-look=rebel]{--p:#c2410c;--s:#1e3a8a;--t:#fb923c;--ink:#2b1205;--soft:#6b3d22;--muted:#a37a62;--bg1:#fff0e5;--bg2:#fde3d0;--bg3:#fff8f2;--line:rgba(194,65,12,.25)}
+body.stockoff .stkhelp{display:none}
 img.lkwolf{height:1.5em;width:1.5em;vertical-align:-.4em;background:#000;border-radius:.32em;padding:.1em;box-sizing:border-box}
 body[data-look=wolfpurple]{--p:#390039;--s:#7a1f93;--t:#b666d2;--gold:#b8c4d0;--ink:#1a041a;--soft:#4a2a52;--muted:#7f6a86;--bg1:#f6eef8;--bg2:#ecdff0;--bg3:#faf6fb;--line:rgba(57,0,57,.25)}
 body[data-look=wolfnight]{--p:#390039;--s:#0a0a0f;--t:#b666d2;--gold:#b8c4d0;--ink:#12061a;--soft:#3f2a4a;--muted:#7a6a88;--bg1:#f4eef7;--bg2:#e6dcec;--bg3:#f9f6fb;--line:rgba(57,0,57,.25)}
@@ -980,7 +981,7 @@ body .modal .sheet>.hd:first-child>h2{margin-top:0;padding-right:5rem}
    <p><b>Import a document:</b> on the Docs tab, pick a Word, Excel, PDF, CSV or text file (or paste text). Tap "Auto-sort it for me" and the app guesses where each part belongs: showtimes, groups, contacts or steps. You see a preview first. Nothing is saved until you confirm.</p>
    <p><b>Send app link:</b> on the Staff tab, tap Send app link under a person who has a cell number. It opens a text with a link. When they open it, their app is named for them (for example Dave's Science Store app).</p>
    <p><b>Rename the app:</b> tap the name at the very top, type your own name, and tap Save. It is saved on this phone only.</p>
-   <p><b>Send counts to Lightspeed:</b> on Stock & Orders, use the Send counts back card. Pick a fresh Lightspeed product file, tick the counts to send, and tap Make the Lightspeed file. Then import that file in Lightspeed.</p>
+   <p class="stkhelp"><b>Send counts to Lightspeed:</b> on Stock & Orders, use the Send counts back card. Pick a fresh Lightspeed product file, tick the counts to send, and tap Make the Lightspeed file. Then import that file in Lightspeed.</p>
    <p><b>Small header on phones:</b> the "Store info" button shows or hides the phone chips and hours so your screen has more room.</p>
    <p><b>Museum showtimes:</b> a helper reads the public IMAX and Planetarium schedule once a day. Today's shows fill in by themselves, unless you made your own list. To use another day, pick it on the Showtimes tab and tap "Use these shows for my day". Your own shows are replaced, so the app asks you to tap twice.</p>
    <p><b>Museum hours:</b> a helper refreshes them once a day. The card shows when it last updated.</p></div></div>
@@ -1153,7 +1154,8 @@ function renderShowUI(){
 }
 /* swipe between pages */
 const FLOORHIDE=['mod','events','docs','music'];
-function visTabs(){return TABS.filter(t=>!(S.role==='floor'&&FLOORHIDE.includes(t[0]))&&!(t[0]==='stock'&&!S.invOn))}
+let STOCKOFF=true;/* Wolf Nov 18: Lightspeed does stock and orders, so the Stock & Orders tab is hidden. Set to false to show it again. Nothing was deleted. */const invOn=()=>S.invOn&&!STOCKOFF;
+function visTabs(){return TABS.filter(t=>!(S.role==='floor'&&FLOORHIDE.includes(t[0]))&&!(t[0]==='stock'&&!invOn()))}
 function swipePage(dir){const vt=visTabs(),i=vt.findIndex(t=>t[0]===S.tab);if(i<0||vt.length<2)return;const n=vt[(i+dir+vt.length)%vt.length];S.tab=n[0];save();renderTabs();scrollTo(0,0);tourBanner();const p=$('p-'+S.tab);if(p&&!REDUCE()){p.classList.remove('sw-n','sw-p');void p.offsetWidth;p.classList.add(dir>0?'sw-n':'sw-p');p.addEventListener('animationend',()=>p.classList.remove('sw-n','sw-p'),{once:true})}}
 function swipeBlocked(el){if(!el||!el.closest)return true;if(el.closest('input,select,textarea,video,iframe,[contenteditable],[data-drag],.modal,#menuPanel,#tourBar,#pgBand'))return true;for(let n=el;n&&n!==document.body&&n!==document.documentElement;n=n.parentElement){if(n.scrollWidth>n.clientWidth+4){const o=getComputedStyle(n).overflowX;if(o==='auto'||o==='scroll')return true}}return false}
 (function(){let sx=0,sy=0,st=0,ok=false;
@@ -1300,14 +1302,14 @@ function tick(){
  else{$('tkTitle').textContent='★ No more exit rushes on the schedule';$('tkTime').textContent='--:--'}
  if(mi!==lastMin){lastMin=mi;if(S.listDate!==new Date().toDateString()){renderAll()}else renderDyn();try{staleCheck()}catch(e){}try{remCheck()}catch(e){}}
 }
-document.addEventListener('visibilitychange',()=>{if(!document.hidden){try{tick()}catch(e){}try{dsMaybeOpen()}catch(e){}try{remCheck()}catch(e){}}});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden){try{alarmCheck()}catch(e){}try{tick()}catch(e){}try{dsMaybeOpen()}catch(e){}try{remCheck()}catch(e){}}});
 
 /* ---------- render ---------- */
 function menuSet(o){document.body.classList.toggle('menu-open',o);$('menuBtn').setAttribute('aria-expanded',o?'true':'false');$('menuPanel').setAttribute('aria-hidden',o?'false':'true');
  if(o){const c=$('tabs').querySelector('.tab.on')||$('tabs').querySelector('.tab');if(c)setTimeout(()=>{try{c.focus({preventScroll:true});c.scrollIntoView({block:'nearest'})}catch(e){}},60)}else if(document.activeElement&&$('menuPanel').contains(document.activeElement))$('menuBtn').focus()}
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&document.body.classList.contains('menu-open'))menuSet(false)});
 function renderTabs(){
- if(!S.invOn&&S.tab==='stock')S.tab='today';{const kk=$('kStock'),kp=kk&&kk.closest('.kpi');if(kp)kp.style.display=S.invOn?'':'none'}
+ document.body.classList.toggle('stockoff',STOCKOFF);if(!invOn()&&S.tab==='stock')S.tab='today';{const kk=$('kStock'),kp=kk&&kk.closest('.kpi');if(kp)kp.style.display=invOn()?'':'none'}
  if(S.role==='floor'&&FLOORHIDE.includes(S.tab))S.tab='today';
  const vt=visTabs();
  {const row=(t,big)=>`<button class="tab ${big?'bigtab ':''}${S.tab===t[0]?'on':''}" data-a="tab" data-v="${t[0]}"${S.tab===t[0]?' aria-current="page"':''}><span class="mr-ico" aria-hidden="true">${t[1]}</span><span class="mr-t">${t[2]}</span>${S.tab===t[0]?'<span class="mr-ok" aria-hidden="true">✓</span>':''}</button>`;
@@ -2232,6 +2234,7 @@ function act(a,el){const id=el.dataset.id,v=el.dataset.v,k=el.dataset.k;if(GUARD
  case'backup':$('backupBox').value=JSON.stringify(exportS());toast('Backup text ready');break;
  case'copyBackup':copyText(JSON.stringify(exportS()),'Backup copied');S.lastBackup=Date.now();bkBannerRender();break;
  case'undoDo':{if(!UNDO)return;try{const lk=S.lock;S=fixShape(Object.assign(defaults(),JSON.parse(UNDO)));S.lock=lk;renderAll();save();toast('Brought it back')}catch(e){toast('Could not undo')}UNDO=null;const ub=$('undoBar');if(ub)ub.style.display='none';return}
+ case'missOk':S.alarms.forEach(a=>{if(a.state==='missed')a.seen=true});save();missBar();break;
  case'staleOk':S.staleSnooze=todayISO();{const b=$('staleBar');if(b)b.remove()}break;
  case'nameEdit':{const r=$('nameRow'),i=$('nameIn');r.style.display='flex';i.value=appName();i.focus();i.select();break}
  case'nameSave':{let v=$('nameIn').value.replace(/\s+/g,' ').trim().slice(0,40);S.appName=(v===APPDEF)?'':v;save();$('nameRow').style.display='none';renderAppName();toast(v?'Name saved':'Original name is back');$('appName').focus();break}
@@ -2979,16 +2982,18 @@ function alUnlock(){try{alCtx=alCtx||new (window.AudioContext||window.webkitAudi
 ['touchend','pointerdown','click','keydown'].forEach(function(ev){document.addEventListener(ev,alUnlock,{passive:true})});
 function alBeep(){try{alCtx=alCtx||new (window.AudioContext||window.webkitAudioContext)();if(alCtx.state!=='running'&&alCtx.resume)alCtx.resume();const o=alCtx.createOscillator(),g=alCtx.createGain();o.connect(g);g.connect(alCtx.destination);o.frequency.value=880;g.gain.value=.25;o.start();o.stop(alCtx.currentTime+.25)}catch(e){}try{navigator.vibrate&&navigator.vibrate([200,100,200])}catch(e){}}
 function alStopSound(){if(!S.alarms.some(a=>a.state==='ring')&&alSnd){clearInterval(alSnd);alSnd=null}}
+function missBar(){const L=(S.alarms||[]).filter(a=>a.state==='missed'&&!a.seen),b=$('missBar');if(!L.length){if(b)b.remove();return}
+ const td=todayISO(),f=a=>(a.date===td?'':a.date+' ')+m12(t2m(a.time));
+ wbar('missBar','<b>&#9200; You missed:</b> '+L.slice(0,4).map(a=>esc(a.text)+' ('+f(a)+')').join(', ')+(L.length>4?' and '+(L.length-4)+' more':'')+'. <button class="btn sm" data-a="missOk">Got it</button>')}
 function alarmCheck(){
  const now=new Date();let ch=false;
  const mis=[];S.alarms.forEach(a=>{if(a.state!=='wait')return;const due=new Date(a.date+'T'+a.time);if(now<due)return;
   if(now-due>5*60000){a.state='missed';mis.push(a.text);ch=true;return}
   a.state='ring';ch=true;toast('⏰ '+a.text);
   try{if('Notification'in window&&Notification.permission==='granted')new Notification('Alarm',{body:a.text})}catch(e){}});
- if(mis.length)toast('Missed while the phone was asleep or the app was closed: '+mis.slice(0,3).join(', ')+(mis.length>3?' and '+(mis.length-3)+' more':''));
  if(ch){save();renderAlarms()}
  if(S.alarms.some(a=>a.state==='ring')){if(!alSnd){alBeep();alSnd=setInterval(alBeep,2000)}}else alStopSound();
- popSum();alRingOpen()}
+ popSum();alRingOpen();missBar()}
 setInterval(alarmCheck,5000);
 alInit();alarmCheck();
 /* ===== end alarms ===== */
