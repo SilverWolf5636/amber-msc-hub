@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-19",
+ "updated": "2026-11-20",
  "source": "https://www.mdsci.org/whats-happening/events/",
  "note": "Names, dates and times come from mdsci.org. Check before relying.",
  "events": [
@@ -55,28 +55,42 @@
    "title": "Snow Days",
    "url": "https://www.mdsci.org/events/snow-days/",
    "type": "Special",
-   "dates": "Dec. 24, 26, 27, 28",
+   "dates": "Dec. 24, 26, 27, 28, 29",
    "times": "",
    "first": "2026-12-24",
-   "last": "2026-12-28",
+   "last": "2026-12-29",
    "days": [
     "2026-12-24",
     "2026-12-26",
     "2026-12-27",
-    "2026-12-28"
+    "2026-12-28",
+    "2026-12-29"
    ]
   },
   {
    "title": "Liquid Nitrogen Frozen Cocoa",
    "url": "https://www.mdsci.org/events/frozen-cocoa/",
    "type": "Special",
-   "dates": "Dec. 27, 28",
+   "dates": "Dec. 27, 28, 29",
    "times": "12pm and 1pm",
    "first": "2026-12-27",
-   "last": "2026-12-28",
+   "last": "2026-12-29",
    "days": [
     "2026-12-27",
-    "2026-12-28"
+    "2026-12-28",
+    "2026-12-29"
+   ]
+  },
+  {
+   "title": "Grown Up Field Trip: Game On",
+   "url": "https://www.mdsci.org/events/grown-up-field-trip-game-on/",
+   "type": "Adult",
+   "dates": "Jan. 22",
+   "times": "7-10pm",
+   "first": "2027-01-22",
+   "last": "2027-01-22",
+   "days": [
+    "2027-01-22"
    ]
   }
  ]
