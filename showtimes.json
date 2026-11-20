@@ -1,35 +1,8 @@
 {
- "updated": "2026-11-19",
+ "updated": "2026-11-20",
  "source": "https://www.mdsci.org/whats-happening/events/",
  "note": "Start times come from mdsci.org. Runtimes come from outside film listings; rows marked est are estimates.",
  "days": {
-  "2026-11-19": [
-   {
-    "title": "One World One Sky: Big Bird\u2019s Adventure",
-    "venue": "Planetarium",
-    "start": "12:30",
-    "dur": 25
-   },
-   {
-    "title": "Coral Sea",
-    "venue": "IMAX",
-    "start": "13:30",
-    "dur": 40
-   },
-   {
-    "title": "Live Sky",
-    "venue": "Planetarium",
-    "start": "13:30",
-    "dur": 35,
-    "est": true
-   },
-   {
-    "title": "Wingsuit Flyers 3D",
-    "venue": "IMAX",
-    "start": "14:30",
-    "dur": 40
-   }
-  ],
   "2026-11-20": [
    {
     "title": "One World One Sky: Big Bird\u2019s Adventure",
@@ -241,6 +214,7 @@
     "start": "14:30",
     "dur": 40
    }
-  ]
+  ],
+  "2026-11-26": []
  }
 }
