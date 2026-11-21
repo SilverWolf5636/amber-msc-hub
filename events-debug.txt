@@ -1,10 +1,9 @@
-Events robot debug, 2026-11-20
-page bytes: 202979
+Events robot debug, 2026-11-21
+page bytes: 201871
 section markers: ['id="upcoming-adult-event"', 'id="upcoming-special-event"']
-event links: 23
-events kept: 7
+event links: 22
+events kept: 6
 --- parsed ---
-{"title": "Grown Up Field Trip: Clue", "url": "https://www.mdsci.org/events/grown-up-field-trip-clue/", "type": "Adult", "dates": "Nov. 20", "times": "7-10pm", "first": "2026-11-20", "last": "2026-11-20", "days": ["2026-11-20"]}
 {"title": "Music Under the Dome: Pink Floyd", "url": "https://www.mdsci.org/events/music-under-the-dome-pink-floyd/", "type": "Adult", "dates": "Dec. 11", "times": "7-10pm", "first": "2026-12-11", "last": "2026-12-11", "days": ["2026-12-11"]}
 {"title": "Glass Art: Sea Glass Tree", "url": "https://www.mdsci.org/events/glass-art-sea-glass-tree/", "type": "Special", "dates": "Dec. 13", "times": "1-4pm", "first": "2026-12-13", "last": "2026-12-13", "days": ["2026-12-13"]}
 {"title": "Toddler & Me: Cleaning Helpers", "url": "https://www.mdsci.org/events/toddlerandme-cleaning-helpers/", "type": "Special", "dates": "Dec. 13", "times": "10:15am-12:15pm", "first": "2026-12-13", "last": "2026-12-13", "days": ["2026-12-13"]}
@@ -30,8 +29,6 @@ ev | snow-days | Snow Days
 txt | Dec. 28 Next Previous Daily Programming Loading No Daily Programming Found Planetarium Showings Loading No Planetarium Showings Found IMAX Showings Additional C
 sec | Adult
 txt | Adult Events Cheers To Staying Curious Next Event Previous Event
-ev | grown-up-field-trip-clue | Grown Up Field Trip: Clue
-txt | Nov. 20 , 7-10pm
 ev | music-under-the-dome-pink-floyd | Music Under the Dome: Pink Floyd
 txt | Dec. 11 , 7-10pm
 ev | grown-up-field-trip-game-on | Grown Up Field Trip: Game On
