@@ -1,73 +1,8 @@
 {
- "updated": "2026-11-21",
+ "updated": "2026-11-22",
  "source": "https://www.mdsci.org/whats-happening/events/",
  "note": "Start times come from mdsci.org. Runtimes come from outside film listings; rows marked est are estimates.",
  "days": {
-  "2026-11-21": [
-   {
-    "title": "The Blue Angels 3D",
-    "venue": "IMAX",
-    "start": "11:30",
-    "dur": 46
-   },
-   {
-    "title": "Live Sky",
-    "venue": "Planetarium",
-    "start": "11:30",
-    "dur": 35,
-    "est": true
-   },
-   {
-    "title": "Penguins: A Love Story",
-    "venue": "IMAX",
-    "start": "12:30",
-    "dur": 40
-   },
-   {
-    "title": "One World One Sky: Big Bird\u2019s Adventure",
-    "venue": "Planetarium",
-    "start": "12:30",
-    "dur": 25
-   },
-   {
-    "title": "Coral Sea",
-    "venue": "IMAX",
-    "start": "13:30",
-    "dur": 40
-   },
-   {
-    "title": "Live Sky",
-    "venue": "Planetarium",
-    "start": "13:30",
-    "dur": 35,
-    "est": true
-   },
-   {
-    "title": "Wingsuit Flyers 3D",
-    "venue": "IMAX",
-    "start": "14:30",
-    "dur": 40
-   },
-   {
-    "title": "Two Small Pieces of Glass: The Amazing Telescope",
-    "venue": "Planetarium",
-    "start": "14:30",
-    "dur": 23
-   },
-   {
-    "title": "Deep Sky",
-    "venue": "IMAX",
-    "start": "15:30",
-    "dur": 40
-   },
-   {
-    "title": "Live Sky",
-    "venue": "Planetarium",
-    "start": "15:30",
-    "dur": 35,
-    "est": true
-   }
-  ],
   "2026-11-22": [
    {
     "title": "The Blue Angels 3D",
@@ -239,6 +174,71 @@
     "venue": "Planetarium",
     "start": "14:30",
     "dur": 23
+   }
+  ],
+  "2026-11-28": [
+   {
+    "title": "Deep Sky",
+    "venue": "IMAX",
+    "start": "11:30",
+    "dur": 40
+   },
+   {
+    "title": "Live Sky",
+    "venue": "Planetarium",
+    "start": "11:30",
+    "dur": 35,
+    "est": true
+   },
+   {
+    "title": "Coral Sea",
+    "venue": "IMAX",
+    "start": "12:30",
+    "dur": 40
+   },
+   {
+    "title": "One World One Sky: Big Bird\u2019s Adventure",
+    "venue": "Planetarium",
+    "start": "12:30",
+    "dur": 25
+   },
+   {
+    "title": "The Blue Angels 3D",
+    "venue": "IMAX",
+    "start": "13:30",
+    "dur": 46
+   },
+   {
+    "title": "Cruise the Cosmos",
+    "venue": "Planetarium",
+    "start": "13:30",
+    "dur": 35,
+    "est": true
+   },
+   {
+    "title": "Penguins: A Love Story",
+    "venue": "IMAX",
+    "start": "14:30",
+    "dur": 40
+   },
+   {
+    "title": "Two Small Pieces of Glass: The Amazing Telescope",
+    "venue": "Planetarium",
+    "start": "14:30",
+    "dur": 23
+   },
+   {
+    "title": "Wingsuit Flyers 3D",
+    "venue": "IMAX",
+    "start": "15:30",
+    "dur": 40
+   },
+   {
+    "title": "Live Sky",
+    "venue": "Planetarium",
+    "start": "15:30",
+    "dur": 35,
+    "est": true
    }
   ]
  }
