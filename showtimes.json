@@ -1,9 +1,8 @@
 {
- "updated": "2026-11-23",
+ "updated": "2026-11-24",
  "source": "https://www.mdsci.org/whats-happening/events/",
  "note": "Start times come from mdsci.org. Runtimes come from outside film listings; rows marked est are estimates.",
  "days": {
-  "2026-11-23": [],
   "2026-11-24": [
    {
     "title": "One World One Sky: Big Bird\u2019s Adventure",
@@ -240,6 +239,7 @@
     "dur": 35,
     "est": true
    }
-  ]
+  ],
+  "2026-11-30": []
  }
 }
