@@ -1,35 +1,8 @@
 {
- "updated": "2026-11-25",
+ "updated": "2026-11-26",
  "source": "https://www.mdsci.org/whats-happening/events/",
  "note": "Start times come from mdsci.org. Runtimes come from outside film listings; rows marked est are estimates.",
  "days": {
-  "2026-11-25": [
-   {
-    "title": "One World One Sky: Big Bird\u2019s Adventure",
-    "venue": "Planetarium",
-    "start": "12:30",
-    "dur": 25
-   },
-   {
-    "title": "The Blue Angels 3D",
-    "venue": "IMAX",
-    "start": "13:30",
-    "dur": 46
-   },
-   {
-    "title": "Live Sky",
-    "venue": "Planetarium",
-    "start": "13:30",
-    "dur": 35,
-    "est": true
-   },
-   {
-    "title": "Penguins: A Love Story",
-    "venue": "IMAX",
-    "start": "14:30",
-    "dur": 40
-   }
-  ],
   "2026-11-26": [],
   "2026-11-27": [
    {
@@ -215,6 +188,34 @@
   ],
   "2026-11-30": [],
   "2026-12-01": [
+   {
+    "title": "One World One Sky: Big Bird\u2019s Adventure",
+    "venue": "Planetarium",
+    "start": "12:30",
+    "dur": 25
+   },
+   {
+    "title": "Coral Sea",
+    "venue": "IMAX",
+    "start": "13:30",
+    "dur": 40
+   },
+   {
+    "title": "Live Sky",
+    "venue": "Planetarium",
+    "start": "13:30",
+    "dur": 35,
+    "est": true
+   },
+   {
+    "title": "Flight of the Butterflies 3D",
+    "venue": "IMAX",
+    "start": "14:30",
+    "dur": 45,
+    "est": true
+   }
+  ],
+  "2026-12-02": [
    {
     "title": "One World One Sky: Big Bird\u2019s Adventure",
     "venue": "Planetarium",
