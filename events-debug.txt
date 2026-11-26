@@ -1,5 +1,5 @@
-Events robot debug, 2026-11-25
-page bytes: 201872
+Events robot debug, 2026-11-26
+page bytes: 201897
 section markers: ['id="upcoming-adult-event"', 'id="upcoming-special-event"']
 event links: 22
 events kept: 6
